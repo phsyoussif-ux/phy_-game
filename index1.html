@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مهمة إنقاذ المختبر | النظام الدولي للوحدات SI</title>
+<style>
+/* ============================================================
+   هوية بصرية: "قراءة المختبر الرقمي" - نفس هوية الألعاب السابقة
+   خلفية كحلية داكنة + شبكة خفيفة + لون تركوازي مضيء #29e0c2
+   ============================================================ */
+:root{
+  --bg-deep:#080c16;
+  --bg-panel:#0f1626;
+  --bg-panel-2:#141d33;
+  --line:#1e2a44;
+  --accent:#29e0c2;
+  --accent-glow:rgba(41,224,194,.35);
+  --accent-dim:rgba(41,224,194,.12);
+  --text-light:#eaf4f3;
+  --text-dim:#8ea3bd;
+  --amber:#ffb454;
+  --amber-dim:rgba(255,180,84,.12);
+  --danger:#ff6b6b;
+  --success:#38e6b8;
+  --mono: 'Consolas','Courier New',monospace;
+  --font: 'Tahoma','Segoe UI',Arial,sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--font);
+  background:
+    radial-gradient(circle at 20% -10%, rgba(41,224,194,.08), transparent 40%),
+    radial-gradient(circle at 100% 110%, rgba(41,224,194,.06), transparent 45%),
+    var(--bg-deep);
+  color:var(--text-light);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* شبكة خلفية خفيفة */
+.grid-overlay{
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:38px 38px;
+  opacity:.35;
+}
+.app{ position:relative; z-index:1; max-width:980px; margin:0 auto; padding:18px 16px 40px; min-height:100vh; display:flex; flex-direction:column;}
+
+/* ===== شريط علوي ثابت (شارة اللعبة + عداد نقاط) ===== */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px; margin-bottom:18px;
+  background:var(--bg-panel); border:1px solid var(--line); border-radius:14px;
+}
+.topbar .brand{ display:flex; align-items:center; gap:10px; font-weight:700;}
+.topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent-glow); animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.topbar .score{ font-family:var(--mono); font-size:15px; color:var(--accent); background:var(--accent-dim); border:1px solid var(--accent-glow); padding:6px 12px; border-radius:8px;}
+.topbar .mute-btn{background:transparent;border:1px solid var(--line);color:var(--text-dim);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;}
+.topbar .mute-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ===== شريط التقدم العام (3 مراحل) ===== */
+.global-progress{ display:flex; gap:6px; margin-bottom:22px;}
+.global-progress .seg{flex:1; height:8px; border-radius:6px; background:var(--bg-panel-2); border:1px solid var(--line); overflow:hidden;}
+.global-progress .seg .fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#5ff5da); transition:width .6s ease; box-shadow:0 0 10px var(--accent-glow);}
+
+/* ===== شاشات (Screens) ===== */
+.screen{display:none; animation:fadeIn .5s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+.panel{
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+
+/* ===== شاشة البداية (مقدمة قصصية) ===== */
+.story-stage{
+  position:relative; min-height:420px; border-radius:16px; overflow:hidden;
+  background:linear-gradient(180deg, #05070d, #0c1220 60%, #0f1626);
+  border:1px solid var(--line);
+  padding:24px;
+}
+.story-title{ text-align:center; font-size:22px; font-weight:800; color:var(--accent); text-shadow:0 0 18px var(--accent-glow); margin-bottom:6px;}
+.story-sub{ text-align:center; color:var(--text-dim); font-size:14px; margin-bottom:20px;}
+.discover-counter{
+  position:absolute; top:16px; left:16px; font-family:var(--mono); font-size:13px;
+  background:var(--accent-dim); border:1px solid var(--accent-glow); color:var(--accent);
+  padding:5px 10px; border-radius:20px;
+}
+.items-field{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-top:10px;
+}
+@media(max-width:640px){ .items-field{grid-template-columns:repeat(3,1fr);} }
+.story-item{
+  position:relative;
+  background:var(--bg-panel-2); border:1px solid var(--line); border-radius:14px;
+  padding:18px 8px; text-align:center; cursor:pointer;
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  opacity:0; transform:translateY(14px) scale(.9);
+  animation:popIn .55s ease forwards;
+}
+@keyframes popIn{to{opacity:1; transform:translateY(0) scale(1);}}
+.story-item .icon{font-size:34px; display:block; margin-bottom:6px; filter:drop-shadow(0 0 6px rgba(255,255,255,.15));}
+.story-item:hover{ transform:translateY(-4px); border-color:var(--accent); box-shadow:0 10px 24px var(--accent-glow);}
+.story-item.opened{ border-color:var(--accent); box-shadow:0 0 16px var(--accent-glow); }
+.story-item.opened::after{
+  content:"✓"; position:absolute; top:-8px; left:-8px; width:22px; height:22px; border-radius:50%;
+  background:var(--accent); color:#052; font-size:13px; font-weight:900; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 10px var(--accent-glow);
+}
+.bubble{
+  margin-top:8px; font-size:12.5px; color:var(--text-light); background:var(--bg-deep);
+  border:1px solid var(--accent-glow); border-radius:10px; padding:8px; line-height:1.5;
+  animation:fadeIn .3s ease;
+}
+.story-continue{
+  margin-top:26px; text-align:center; display:none;
+}
+.story-continue.show{ display:block; animation:fadeIn .6s ease; }
+.story-continue p{ color:var(--text-light); line-height:2; font-size:15px; background:var(--accent-dim); border:1px solid var(--accent-glow); border-radius:12px; padding:14px 18px; margin-bottom:16px;}
+.story-hint{ text-align:center; margin-top:20px; font-size:13.5px; color:var(--text-dim);}
+.story-hint b{color:var(--accent);}
+
+/* ===== أزرار عامة ===== */
+.btn{
+  font-family:var(--font); font-size:16px; font-weight:700; color:#052; background:var(--accent);
+  border:none; border-radius:12px; padding:13px 26px; cursor:pointer;
+  box-shadow:0 8px 22px var(--accent-glow); transition:transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover{ transform:translateY(-2px); box-shadow:0 12px 28px var(--accent-glow);}
+.btn:active{ transform:translateY(0);}
+.btn.secondary{ background:transparent; color:var(--accent); border:1.5px solid var(--accent); box-shadow:none;}
+.btn.ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--line); box-shadow:none;}
+.btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none;}
+
+/* ===== شاشة البداية الرئيسية ===== */
+.start-hero{ text-align:center; padding:20px 10px 6px;}
+.start-hero .game-name{ font-size:30px; font-weight:900; color:var(--accent); text-shadow:0 0 22px var(--accent-glow); margin-bottom:6px;}
+.start-hero .game-sub{ color:var(--text-dim); font-size:15px; margin-bottom:22px;}
+.instructions{
+  text-align:right; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:14px;
+  padding:18px 20px; margin:0 auto 24px; max-width:640px; line-height:2; font-size:14.5px; color:var(--text-light);
+}
+.instructions b{color:var(--accent);}
+
+/* ===== بطاقات مرحلة (أسئلة) ===== */
+.stage-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+.stage-title{ font-size:19px; font-weight:800; color:var(--accent);}
+.stage-dots{ display:flex; gap:6px;}
+.stage-dots span{ width:9px; height:9px; border-radius:50%; background:var(--line); border:1px solid var(--line); transition:.3s;}
+.stage-dots span.done{ background:var(--accent); box-shadow:0 0 8px var(--accent-glow); border-color:var(--accent);}
+.stage-dots span.current{ border-color:var(--accent);}
+
+.qcard{ background:var(--bg-panel-2); border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:16px;}
+.qcard .statement{ font-size:19px; font-weight:700; text-align:center; margin-bottom:22px; line-height:1.8;}
+.qcard .statement .blank{ font-family:var(--mono); color:var(--accent); border-bottom:2px dashed var(--accent); padding:0 6px;}
+.options-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px;}
+.opt-btn{
+  font-family:var(--mono); font-size:17px; font-weight:700; color:var(--text-light);
+  background:var(--bg-panel); border:1.5px solid var(--line); border-radius:12px; padding:16px 10px; cursor:pointer;
+  transition:.2s;
+}
+.opt-btn:hover{ border-color:var(--accent); color:var(--accent);}
+.opt-btn.correct{ background:rgba(56,230,184,.15); border-color:var(--success); color:var(--success); animation:okPulse .4s ease;}
+.opt-btn.wrong{ background:rgba(255,107,107,.12); border-color:var(--danger); color:var(--danger); animation:shake .4s ease;}
+@keyframes okPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.mcq-list{ display:flex; flex-direction:column; gap:10px;}
+.mcq-opt{
+  text-align:right; font-size:15.5px; color:var(--text-light); background:var(--bg-panel); border:1.5px solid var(--line);
+  border-radius:12px; padding:14px 16px; cursor:pointer; transition:.2s; line-height:1.6;
+}
+.mcq-opt:hover{border-color:var(--accent);}
+.mcq-opt.correct{background:rgba(56,230,184,.15); border-color:var(--success); color:var(--success);}
+.mcq-opt.wrong{background:rgba(255,107,107,.12); border-color:var(--danger); color:var(--danger); animation:shake .4s ease;}
+
+.feedback-box{
+  margin-top:16px; border-radius:12px; padding:12px 16px; font-size:14.5px; line-height:1.8; display:none;
+}
+.feedback-box.ok{ display:block; background:rgba(56,230,184,.12); border:1px solid var(--success); color:var(--success);}
+.feedback-box.hint{ display:block; background:var(--amber-dim); border:1px solid var(--amber); color:var(--amber);}
+.feedback-box .tool{ font-size:24px; margin-left:6px;}
+
+.stage-actions{ display:flex; justify-content:center; margin-top:18px;}
+
+/* ===== مرحلة 2: المطابقة ===== */
+.match-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+@media(max-width:640px){ .match-wrap{grid-template-columns:1fr; gap:14px;} }
+.match-col h4{ text-align:center; color:var(--text-dim); font-size:13px; margin-bottom:10px; letter-spacing:.5px;}
+.match-item{
+  background:var(--bg-panel); border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px;
+  cursor:grab; text-align:center; font-size:15px; font-weight:700; transition:.2s; user-select:none;
+}
+.match-item.unit{ font-family:var(--mono); font-size:18px;}
+.match-item:hover{border-color:var(--accent); color:var(--accent);}
+.match-item.selected{ border-color:var(--accent); box-shadow:0 0 12px var(--accent-glow); color:var(--accent);}
+.match-item.matched{ border-color:var(--success); background:rgba(56,230,184,.1); color:var(--success); cursor:default; opacity:.85;}
+.match-item.matched:hover{color:var(--success);}
+.match-item.dragover{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow) inset;}
+.match-item.wrong-flash{ animation:shake .4s ease; border-color:var(--danger);}
+
+/* ===== شاشة النهاية ===== */
+.end-score-ring{
+  width:150px; height:150px; margin:0 auto 18px; border-radius:50%;
+  background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--bg-panel-2) 0);
+  display:flex; align-items:center; justify-content:center; position:relative;
+  box-shadow:0 0 30px var(--accent-glow);
+}
+.end-score-ring::before{ content:""; position:absolute; inset:10px; border-radius:50%; background:var(--bg-panel);}
+.end-score-ring .pct{ position:relative; font-family:var(--mono); font-size:28px; font-weight:800; color:var(--accent);}
+.end-msg{ text-align:center; font-size:19px; font-weight:800; color:var(--text-light); margin-bottom:6px;}
+.end-sub{ text-align:center; color:var(--text-dim); font-size:14.5px; margin-bottom:24px;}
+.end-stats{ display:flex; justify-content:center; gap:14px; margin-bottom:26px; flex-wrap:wrap;}
+.end-stat{ background:var(--bg-panel-2); border:1px solid var(--line); border-radius:12px; padding:12px 20px; text-align:center; min-width:110px;}
+.end-stat .num{ font-family:var(--mono); font-size:22px; color:var(--accent); font-weight:800;}
+.end-stat .lbl{ font-size:12px; color:var(--text-dim); margin-top:4px;}
+.end-actions{ display:flex; justify-content:center; gap:12px; flex-wrap:wrap;}
+
+/* ===== نافذة بطاقة المعلم ===== */
+.modal-overlay{ position:fixed; inset:0; background:rgba(3,5,10,.75); backdrop-filter:blur(2px); display:none; align-items:center; justify-content:center; z-index:50; padding:16px;}
+.modal-overlay.show{ display:flex;}
+.modal-box{
+  background:var(--bg-panel); border:1px solid var(--accent-glow); border-radius:18px; padding:24px; max-width:600px; width:100%;
+  max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.modal-box h3{ color:var(--accent); margin-top:0; font-size:19px; border-bottom:1px solid var(--line); padding-bottom:10px;}
+.modal-box h4{ color:var(--text-light); font-size:14.5px; margin-top:18px; margin-bottom:8px;}
+.modal-box ul{ margin:0; padding-right:20px; line-height:2; font-size:14px; color:var(--text-dim);}
+.modal-box li b{color:var(--text-light);}
+.modal-close{ display:block; margin:20px auto 0;}
+
+/* عداد LCD صغير */
+.lcd{ font-family:var(--mono); background:var(--bg-deep); border:1px solid var(--accent-glow); color:var(--accent); padding:2px 8px; border-radius:6px; font-size:13px;}
+
+footer.credits{ text-align:center; color:var(--text-dim); font-size:12px; margin-top:26px; opacity:.6;}
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div class="app">
+
+  <!-- ===================== شريط علوي ===================== -->
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> مهمة إنقاذ المختبر</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="score">النقاط: <span id="scoreDisplay" class="lcd">0</span></div>
+      <button class="mute-btn" id="muteBtn" title="كتم/تشغيل الصوت">🔊</button>
+    </div>
+  </div>
+
+  <!-- شريط تقدم عام: 3 مراحل + المقدمة -->
+  <div class="global-progress" id="globalProgress">
+    <div class="seg"><div class="fill" id="segFill0"></div></div>
+    <div class="seg"><div class="fill" id="segFill1"></div></div>
+    <div class="seg"><div class="fill" id="segFill2"></div></div>
+    <div class="seg"><div class="fill" id="segFill3"></div></div>
+  </div>
+
+  <!-- ===================== شاشة المقدمة القصصية ===================== -->
+  <section class="screen active" id="screen-intro">
+    <div class="panel">
+      <div class="story-stage">
+        <div class="discover-counter">اكتُشِف: <span id="discoverCount">0</span> / 5</div>
+        <div class="story-title">أول خطوة إلى عالم الفيزياء</div>
+        <div class="story-sub">اضغطْ على الأشياء من حولك... ماذا يخطر ببالك عندما تراها؟</div>
+        <div class="items-field" id="itemsField"><!-- تُبنى ديناميكيًا بواسطة JS --></div>
+        <div class="story-hint" id="storyHint">اضغط على <b>3 أشياء على الأقل</b> لتظهر لك المتابعة ⬇️</div>
+
+        <div class="story-continue" id="storyContinue">
+          <p>
+            هذه ليست أسئلة عادية… إنها أسئلة الفيزياء.<br>
+            الفيزياء تساعدنا على فهم الحركة والطاقة والضوء والكهرباء وكل ما يحدث حولنا.<br>
+            لكن قبل أن نبدأ بالحل، نحتاج إلى لغة يفهمها جميع العلماء: لغة القياس والوحدات.
+          </p>
+          <button class="btn" onclick="goToScreen('start')">🔬 ادخل إلى المختبر</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== شاشة البداية ===================== -->
+  <section class="screen" id="screen-start">
+    <div class="panel start-hero">
+      <div class="game-name">🧪 مهمة إنقاذ المختبر</div>
+      <div class="game-sub">النظام الدولي للوحدات (SI) — الصف التاسع</div>
+      <div class="instructions">
+        حدث خللٌ غامض في مختبر الفيزياء، وانمحت وَحدات القياس عن جميع الأجهزة والبطاقات!
+        أنتَ عالِمُ المختبر المكلَّف بإصلاح الخلل عبر <b>3 مراحل</b>:
+        <br>1️⃣ الرقم الناقص — أعِد الوحدة المفقودة لكل قياس.
+        <br>2️⃣ صِل الجهاز بوحدته — طابق كل كمية أساسية مع وحدة قياسها.
+        <br>3️⃣ اختبار قائد المختبر — أثبِت جاهزيتك بخمسة أسئلة ختامية.
+        <br><br>لا تقلق من الخطأ، فكل خطأ يمنحك تلميحًا يساعدك على الإصلاح الصحيح 💡
+      </div>
+      <button class="btn" onclick="startStage(1)">🚀 ابدأ المهمة</button>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 1: الرقم الناقص ===================== -->
+  <section class="screen" id="screen-stage1">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 1 · الرقم الناقص</div>
+        <div class="stage-dots" id="dots-stage1"></div>
+      </div>
+      <div id="stage1-body"></div>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 2: صل الجهاز بوحدته ===================== -->
+  <section class="screen" id="screen-stage2">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 2 · صِل الجهاز بوحدته</div>
+        <div class="lcd" id="matchCounter">0 / 7</div>
+      </div>
+      <p style="color:var(--text-dim); font-size:14px; margin-top:-6px;">اسحب كل كمية إلى وحدتها الصحيحة، أو اضغط على الكمية ثم على الوحدة المطابقة لها.</p>
+      <div class="match-wrap">
+        <div class="match-col">
+          <h4>الكمّيّة الفيزيائيّة</h4>
+          <div id="matchQuantities"></div>
+        </div>
+        <div class="match-col">
+          <h4>وحدة القياس</h4>
+          <div id="matchUnits"></div>
+        </div>
+      </div>
+      <div class="feedback-box" id="stage2Feedback"></div>
+      <div class="stage-actions">
+        <button class="btn" id="stage2NextBtn" disabled onclick="startStage(3)">التالي إلى المرحلة 3 ⟵</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 3: اختبار قائد المختبر ===================== -->
+  <section class="screen" id="screen-stage3">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 3 · اختبار قائد المختبر</div>
+        <div class="stage-dots" id="dots-stage3"></div>
+      </div>
+      <div id="stage3-body"></div>
+    </div>
+  </section>
+
+  <!-- ===================== شاشة النهاية ===================== -->
+  <section class="screen" id="screen-end">
+    <div class="panel">
+      <div class="end-score-ring" id="scoreRing"><span class="pct" id="scorePct">0%</span></div>
+      <div class="end-msg" id="endMsg">أحسنت!</div>
+      <div class="end-sub" id="endSub">لقد أنقذت المختبر بنجاح.</div>
+      <div class="end-stats">
+        <div class="end-stat"><div class="num" id="endCorrect">0/15</div><div class="lbl">إجابات صحيحة</div></div>
+        <div class="end-stat"><div class="num" id="endPoints">0</div><div class="lbl">مجموع النقاط</div></div>
+      </div>
+      <div class="end-actions">
+        <button class="btn" onclick="restartGame()">🔁 أعِد المهمة</button>
+        <button class="btn secondary" onclick="openTeacherCard()">👩‍🏫 بطاقة المعلّم</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="credits">مهمة إنقاذ المختبر · النظام الدولي للوحدات SI · الدرس الأول - الصف التاسع</footer>
+</div>
+
+<!-- ===================== نافذة بطاقة المعلم ===================== -->
+<div class="modal-overlay" id="teacherModal">
+  <div class="modal-box">
+    <h3>👩‍🏫 بطاقة المعلّم</h3>
+    <h4>الأهداف التعليمية للعبة</h4>
+    <ul>
+      <li>يدرك الطالب أن الرقم وحده لا يكفي للتعبير عن كمية فيزيائية، وأنه لا بد من وحدة قياس مرافقة له.</li>
+      <li>يتعرّف الطالب إلى الكمّيّات الفيزيائية الأساسية السبع ووحدات قياسها في النظام الدولي (SI).</li>
+      <li>يميّز الطالب بين الوحدة الأساسية والوحدة المشتقّة من خلال مثال بسيط (الجول J).</li>
+    </ul>
+    <h4>الإجابات الصحيحة — المرحلة 1</h4>
+    <ul id="keyStage1"></ul>
+    <h4>الإجابات الصحيحة — المرحلة 2</h4>
+    <ul id="keyStage2"></ul>
+    <h4>الإجابات الصحيحة — المرحلة 3</h4>
+    <ul id="keyStage3"></ul>
+    <button class="btn ghost modal-close" onclick="closeTeacherCard()">إغلاق</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   منطقة البيانات — عدّل الأسئلة هنا فقط بأمان
+   ============================================================ */
+
+// عناصر المقدمة القصصية
+const INTRO_ITEMS = [
+  {id:'lamp',  icon:'💡', q:'كيف يتحول شيء لا نراه إلى ضوء؟'},
+  {id:'car',   icon:'🚗', q:'ما الذي يجعلها تتحرك وتتوقف؟'},
+  {id:'phone', icon:'📱', q:'كيف تصل الطاقة إلى هذا الجهاز؟'},
+  {id:'ball',  icon:'⚽', q:'لماذا تتحرك ثم تتوقف؟'},
+  {id:'scale', icon:'⚖️', q:'كيف نعرف أي جسم أثقل؟'}
+];
+
+// المرحلة 1: الرقم الناقص
+const STAGE1_QUESTIONS = [
+  { statement:'طول السبورة = 3 ___', options:['m','kg','s','K'], answer:'m',
+    hint:'الطول يُقاس بوحدة المتر، ورمزها m.' },
+  { statement:'كتلة الحقيبة = 4 ___', options:['kg','m','A','mol'], answer:'kg',
+    hint:'الكتلة تُقاس بوحدة الكيلوغرام، ورمزها kg.' },
+  { statement:'مدة الحصة = 45 ___', options:['min','K','cd','A'], answer:'min',
+    hint:'الزمن يُقاس بوحدات مثل الدقيقة (min) أو الثانية (s)، وهنا المقصود الدقيقة.' }
+];
+
+// المرحلة 2: صل الجهاز بوحدته (الكميات الأساسية السبع - الجدول (1) في الكتاب المدرسي)
+const STAGE2_PAIRS = [
+  {quantity:'الطول', unit:'m'},
+  {quantity:'الكتلة', unit:'kg'},
+  {quantity:'الزمن', unit:'s'},
+  {quantity:'درجة الحرارة', unit:'K'},
+  {quantity:'التيار الكهربائي', unit:'A'},
+  {quantity:'كمية المادة', unit:'mol'},
+  {quantity:'شدة الإضاءة', unit:'cd'}
+];
+
+// المرحلة 3: اختبار قائد المختبر
+const STAGE3_QUESTIONS = [
+  { q:'أي مما يأتي ليس من الوحدات الأساسية في النظام الدولي؟',
+    options:['m','kg','J','s'], answer:'J',
+    hint:'الجول (J) وحدة مشتقّة تُستخدم لقياس الشغل والطاقة، وليست من الوحدات الأساسية السبع.' },
+  { q:'ما وحدة قياس الكتلة؟',
+    options:['المتر (m)','الكيلوغرام (kg)','الثانية (s)','الكلفن (K)'], answer:'الكيلوغرام (kg)',
+    hint:'الكتلة تُقاس بوحدة الكيلوغرام (kg) في النظام الدولي.' },
+  { q:'ما رمز وحدة الزمن؟',
+    options:['m','s','A','mol'], answer:'s',
+    hint:'رمز وحدة الزمن (الثانية) هو s.' },
+  { q:'لماذا لا يكفي أن نقول: طول الطاولة 2؟',
+    options:['لأن الرقم يحتاج إلى وحدة قياس ليكون له معنى واضح','لأن الرقم كبير جدًا','لأن الطاولة لا تُقاس أصلًا','لأن الرقم 2 عدد زوجي'],
+    answer:'لأن الرقم يحتاج إلى وحدة قياس ليكون له معنى واضح',
+    hint:'الكمّية الفيزيائيّة = قيمة عددية + وحدة قياس، والرقم وحده غير كافٍ لتحديد المقصود.' },
+  { q:'اختر العبارة الصحيحة التي تحتوي كمّية ووحدة قياس معًا:',
+    options:['كتلة الكرة 2 kg','الكرة كبيرة الحجم','الوقت طويل جدًا','درجة الحرارة عالية اليوم'],
+    answer:'كتلة الكرة 2 kg',
+    hint:'العبارة الصحيحة يجب أن تحتوي على رقم مقترن بوحدة قياس واضحة، مثل kg.' }
+];
+
+/* ============================================================
+   حالة اللعبة
+   ============================================================ */
+let score = 0;
+let correctCount = 0;
+const TOTAL_ITEMS = STAGE1_QUESTIONS.length + STAGE2_PAIRS.length + STAGE3_QUESTIONS.length; // 15
+let soundOn = true;
+
+let discoveredCount = 0;
+let stage1Index = 0;
+let stage1Correct = 0;
+let stage3Index = 0;
+let stage3Correct = 0;
+let matchSelected = null; // {type:'quantity'|'unit', el, value}
+let matchedCount = 0;
+
+/* ============================================================
+   أدوات عامة: تنقل بين الشاشات + صوت + نقاط
+   ============================================================ */
+function goToScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateGlobalProgress(segmentIndex, pct){
+  const el = document.getElementById('segFill'+segmentIndex);
+  if(el) el.style.width = pct+'%';
+}
+
+function addScore(points){
+  score += points;
+  document.getElementById('scoreDisplay').textContent = score;
+}
+
+// نغمات بسيطة عبر WebAudio (بدون أي ملفات خارجية)
+let audioCtx;
+function playTone(freq, dur){
+  if(!soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(.08, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+dur);
+  }catch(e){/* بيئات لا تدعم الصوت */}
+}
+function soundOk(){ playTone(880,.15); setTimeout(()=>playTone(1180,.18),120); }
+function soundHint(){ playTone(300,.2); }
+document.getElementById('muteBtn').addEventListener('click', function(){
+  soundOn = !soundOn;
+  this.textContent = soundOn ? '🔊' : '🔇';
+});
+
+/* ============================================================
+   1) المقدمة القصصية
+   ============================================================ */
+function buildIntro(){
+  const field = document.getElementById('itemsField');
+  INTRO_ITEMS.forEach((item, i)=>{
+    const card = document.createElement('div');
+    card.className='story-item';
+    card.style.animationDelay = (i*0.25)+'s';
+    card.innerHTML = `<span class="icon">${item.icon}</span>`;
+    card.addEventListener('click', ()=>openIntroItem(card, item));
+    field.appendChild(card);
+  });
+}
+function openIntroItem(card, item){
+  if(card.classList.contains('opened')) return;
+  card.classList.add('opened');
+  const bubble = document.createElement('div');
+  bubble.className='bubble';
+  bubble.textContent = item.q;
+  card.appendChild(bubble);
+  discoveredCount++;
+  document.getElementById('discoverCount').textContent = discoveredCount;
+  playTone(650,.12);
+  const hint = document.getElementById('storyHint');
+  const cont = document.getElementById('storyContinue');
+  if(discoveredCount>=3){
+    cont.classList.add('show');
+    if(hint) hint.style.display='none';
+  } else if(hint){
+    const remaining = 3 - discoveredCount;
+    const word = remaining===1 ? 'شيء واحد آخر' : (remaining===2 ? 'شيئين آخرين' : remaining+' أشياء أخرى');
+    hint.innerHTML = `اضغط على <b>${word}</b> على الأقل لتظهر لك المتابعة ⬇️`;
+  }
+}
+
+/* ============================================================
+   2) المرحلة 1: الرقم الناقص
+   ============================================================ */
+function renderDots(containerId, total, currentIndex, correctArr){
+  const c = document.getElementById(containerId);
+  c.innerHTML='';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('span');
+    if(i<currentIndex) d.classList.add('done');
+    if(i===currentIndex) d.classList.add('current');
+    c.appendChild(d);
+  }
+}
+
+function renderStage1(){
+  renderDots('dots-stage1', STAGE1_QUESTIONS.length, stage1Index);
+  const body = document.getElementById('stage1-body');
+  if(stage1Index >= STAGE1_QUESTIONS.length){
+    startStage(2);
+    return;
+  }
+  const item = STAGE1_QUESTIONS[stage1Index];
+  const parts = item.statement.split('___');
+  body.innerHTML = `
+    <div class="qcard">
+      <div class="statement">${parts[0]}<span class="blank">؟</span>${parts[1]||''}</div>
+      <div class="options-grid" id="s1-options"></div>
+      <div class="feedback-box" id="s1-feedback"></div>
+    </div>
+  `;
+  const optWrap = document.getElementById('s1-options');
+  item.options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className='opt-btn';
+    b.textContent = opt;
+    b.addEventListener('click', ()=>checkStage1Answer(b, opt, item));
+    optWrap.appendChild(b);
+  });
+}
+
+function checkStage1Answer(btn, chosen, item){
+  const fb = document.getElementById('s1-feedback');
+  const allBtns = document.querySelectorAll('#s1-options .opt-btn');
+  if(chosen === item.answer){
+    allBtns.forEach(b=>b.disabled=true);
+    btn.classList.add('correct');
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">🛠️✅</span> تم إصلاح الجهاز! الإجابة الصحيحة: <b>${item.answer}</b>`;
+    soundOk();
+    stage1Correct++;
+    addScore(10);
+    setTimeout(()=>{ stage1Index++; renderStage1(); updateGlobalProgress(1, Math.round((stage1Index/STAGE1_QUESTIONS.length)*100)); }, 1100);
+  } else {
+    btn.classList.add('wrong');
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> ${item.hint}`;
+    soundHint();
+    setTimeout(()=>btn.classList.remove('wrong'), 500);
+  }
+}
+
+/* ============================================================
+   3) المرحلة 2: صِل الجهاز بوحدته (سحب وإفلات + اختيار بالنقر)
+   ============================================================ */
+function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]); }
+
+function renderStage2(){
+  const qWrap = document.getElementById('matchQuantities');
+  const uWrap = document.getElementById('matchUnits');
+  qWrap.innerHTML=''; uWrap.innerHTML='';
+  matchedCount = 0;
+  matchSelected = null;
+  document.getElementById('matchCounter').textContent = '0 / '+STAGE2_PAIRS.length;
+  document.getElementById('stage2NextBtn').disabled = true;
+  document.getElementById('stage2Feedback').className='feedback-box';
+
+  const shuffledQuantities = shuffle(STAGE2_PAIRS.map(p=>p.quantity));
+  const shuffledUnits = shuffle(STAGE2_PAIRS.map(p=>p.unit));
+
+  shuffledQuantities.forEach(q=>{
+    const el = document.createElement('div');
+    el.className='match-item quantity';
+    el.textContent = q;
+    el.dataset.value = q;
+    el.setAttribute('draggable','true');
+    attachMatchEvents(el, 'quantity');
+    qWrap.appendChild(el);
+  });
+  shuffledUnits.forEach(u=>{
+    const el = document.createElement('div');
+    el.className='match-item unit';
+    el.textContent = u;
+    el.dataset.value = u;
+    el.setAttribute('draggable','true');
+    attachMatchEvents(el, 'unit');
+    uWrap.appendChild(el);
+  });
+}
+
+function attachMatchEvents(el, type){
+  // النقر للاختيار (يعمل على الحاسوب واللوحي)
+  el.addEventListener('click', ()=>handleMatchClick(el, type));
+  // السحب والإفلات (لمستخدمي الحاسوب)
+  el.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('text/plain', JSON.stringify({value:el.dataset.value, type}));
+  });
+  el.addEventListener('dragover', e=>{ if(!el.classList.contains('matched')){ e.preventDefault(); el.classList.add('dragover'); } });
+  el.addEventListener('dragleave', ()=> el.classList.remove('dragover'));
+  el.addEventListener('drop', e=>{
+    e.preventDefault();
+    el.classList.remove('dragover');
+    if(el.classList.contains('matched')) return;
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    if(data.type === type) return; // لا يمكن إفلات نفس النوع على نفسه
+    tryMatch(data.type, data.value, type, el.dataset.value, el);
+  });
+}
+
+function handleMatchClick(el, type){
+  if(el.classList.contains('matched')) return;
+  if(!matchSelected){
+    matchSelected = {type, el, value:el.dataset.value};
+    el.classList.add('selected');
+    return;
+  }
+  if(matchSelected.type === type){
+    // تغيير الاختيار ضمن نفس العمود
+    matchSelected.el.classList.remove('selected');
+    matchSelected = {type, el, value:el.dataset.value};
+    el.classList.add('selected');
+    return;
+  }
+  // اختيار من العمود الآخر: تحقق من التطابق
+  const other = matchSelected;
+  matchSelected.el.classList.remove('selected');
+  matchSelected = null;
+  tryMatch(other.type, other.value, type, el.dataset.value, el, other.el);
+}
+
+function tryMatch(typeA, valueA, typeB, valueB, elB, elA){
+  const quantityVal = typeA==='quantity' ? valueA : valueB;
+  const unitVal = typeA==='unit' ? valueA : valueB;
+  const pair = STAGE2_PAIRS.find(p=>p.quantity===quantityVal);
+  const fb = document.getElementById('stage2Feedback');
+  const elQuantity = typeA==='quantity' ? (elA||document.querySelector(`.match-item.quantity[data-value="${CSS.escape(valueA)}"]`)) : elB;
+  const elUnit = typeA==='unit' ? (elA||document.querySelector(`.match-item.unit[data-value="${CSS.escape(valueA)}"]`)) : elB;
+
+  if(pair && pair.unit === unitVal){
+    elQuantity.classList.add('matched');
+    elUnit.classList.add('matched');
+    matchedCount++;
+    document.getElementById('matchCounter').textContent = matchedCount+' / '+STAGE2_PAIRS.length;
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">🛠️✅</span> تم إصلاح الجهاز! <b>${quantityVal}</b> ← <b>${unitVal}</b>`;
+    soundOk();
+    addScore(10);
+    if(matchedCount === STAGE2_PAIRS.length){
+      document.getElementById('stage2NextBtn').disabled = false;
+      updateGlobalProgress(2, 100);
+      fb.innerHTML += '<br>🎉 اكتملت جميع المطابقات! اضغط "التالي" للمتابعة.';
+    } else {
+      updateGlobalProgress(2, Math.round((matchedCount/STAGE2_PAIRS.length)*100));
+    }
+  } else {
+    [elQuantity, elUnit].forEach(e=>{ if(e){ e.classList.add('wrong-flash'); setTimeout(()=>e.classList.remove('wrong-flash'),450);} });
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> ليست مطابقة صحيحة. راجع جدول الكمّيّات الأساسية وحاول مجددًا.`;
+    soundHint();
+  }
+}
+
+/* ============================================================
+   4) المرحلة 3: اختبار قائد المختبر
+   ============================================================ */
+function renderStage3(){
+  renderDots('dots-stage3', STAGE3_QUESTIONS.length, stage3Index);
+  const body = document.getElementById('stage3-body');
+  if(stage3Index >= STAGE3_QUESTIONS.length){
+    finishGame();
+    return;
+  }
+  const item = STAGE3_QUESTIONS[stage3Index];
+  body.innerHTML = `
+    <div class="qcard">
+      <div class="statement" style="text-align:right;">${item.q}</div>
+      <div class="mcq-list" id="s3-options"></div>
+      <div class="feedback-box" id="s3-feedback"></div>
+    </div>
+  `;
+  const wrap = document.getElementById('s3-options');
+  item.options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className='mcq-opt';
+    b.textContent = opt;
+    b.addEventListener('click', ()=>checkStage3Answer(b, opt, item));
+    wrap.appendChild(b);
+  });
+}
+
+function checkStage3Answer(btn, chosen, item){
+  const fb = document.getElementById('s3-feedback');
+  const allBtns = document.querySelectorAll('#s3-options .mcq-opt');
+  if(chosen === item.answer){
+    allBtns.forEach(b=>b.disabled=true);
+    btn.classList.add('correct');
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">✅</span> إجابة صحيحة! ${item.hint}`;
+    soundOk();
+    stage3Correct++;
+    addScore(10);
+    setTimeout(()=>{ stage3Index++; renderStage3(); updateGlobalProgress(3, Math.round((stage3Index/STAGE3_QUESTIONS.length)*100)); }, 1200);
+  } else {
+    btn.classList.add('wrong');
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> ${item.hint}`;
+    soundHint();
+    setTimeout(()=>btn.classList.remove('wrong'), 500);
+  }
+}
+
+/* ============================================================
+   تشغيل المراحل + شاشة النهاية
+   ============================================================ */
+function startStage(n){
+  if(n===1){ goToScreen('stage1'); renderStage1(); }
+  if(n===2){ goToScreen('stage2'); renderStage2(); }
+  if(n===3){ goToScreen('stage3'); renderStage3(); }
+}
+
+function finishGame(){
+  correctCount = stage1Correct + matchedCount + stage3Correct;
+  const pct = Math.round((correctCount/TOTAL_ITEMS)*100);
+  document.getElementById('scoreRing').style.setProperty('--pct', pct);
+  document.getElementById('scorePct').textContent = pct+'%';
+  document.getElementById('endCorrect').textContent = correctCount+'/'+TOTAL_ITEMS;
+  document.getElementById('endPoints').textContent = score;
+
+  let msg, sub;
+  if(pct>=90){ msg='🏆 عالِم المختبر الخبير!'; sub='أداء ممتاز! لقد أنقذت المختبر بجدارة وفهمت لغة القياس بامتياز.'; }
+  else if(pct>=70){ msg='👏 أحسنت! مهمة ناجحة'; sub='لقد أصلحت معظم أجهزة المختبر. راجع التلميحات لتصل إلى الإتقان الكامل.'; }
+  else if(pct>=50){ msg='💪 خطوة جيدة إلى الأمام'; sub='بداية جيدة! أعد المحاولة لتثبيت الكمّيّات الأساسية ووحداتها.'; }
+  else { msg='🔧 المختبر بحاجة لمزيد من العمل'; sub='لا بأس، كل عالِم يبدأ بالتجربة. أعد المهمة وراجع جدول الوحدات الأساسية.'; }
+  document.getElementById('endMsg').textContent = msg;
+  document.getElementById('endSub').textContent = sub;
+
+  goToScreen('end');
+  updateGlobalProgress(3, 100);
+}
+
+function restartGame(){
+  score=0; correctCount=0; discoveredCount=0;
+  stage1Index=0; stage1Correct=0; stage3Index=0; stage3Correct=0; matchedCount=0;
+  document.getElementById('scoreDisplay').textContent = 0;
+  document.getElementById('discoverCount').textContent = 0;
+  document.getElementById('storyContinue').classList.remove('show');
+  const hintReset = document.getElementById('storyHint');
+  if(hintReset){ hintReset.style.display='block'; hintReset.innerHTML = 'اضغط على <b>3 أشياء على الأقل</b> لتظهر لك المتابعة ⬇️'; }
+  document.querySelectorAll('.story-item').forEach(el=>{ el.classList.remove('opened'); el.querySelectorAll('.bubble').forEach(b=>b.remove()); });
+  [0,1,2,3].forEach(i=>updateGlobalProgress(i,0));
+  goToScreen('intro');
+}
+
+/* ============================================================
+   بطاقة المعلّم
+   ============================================================ */
+function openTeacherCard(){
+  document.getElementById('keyStage1').innerHTML = STAGE1_QUESTIONS.map(i=>`<li>${i.statement.replace('___','_____')} → <b>${i.answer}</b></li>`).join('');
+  document.getElementById('keyStage2').innerHTML = STAGE2_PAIRS.map(p=>`<li>${p.quantity} → <b>${p.unit}</b></li>`).join('');
+  document.getElementById('keyStage3').innerHTML = STAGE3_QUESTIONS.map(i=>`<li>${i.q} → <b>${i.answer}</b></li>`).join('');
+  document.getElementById('teacherModal').classList.add('show');
+}
+function closeTeacherCard(){ document.getElementById('teacherModal').classList.remove('show'); }
+document.getElementById('teacherModal').addEventListener('click', e=>{ if(e.target.id==='teacherModal') closeTeacherCard(); });
+
+/* ============================================================
+   تشغيل أولي
+   ============================================================ */
+buildIntro();
+</script>
+</body>
+</html>
