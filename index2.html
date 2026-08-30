@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>غرفة التحكم: هل المعادلة آمنة؟ | النظام الدولي للوحدات</title>
+<style>
+/* ============================================================
+   هوية بصرية: "قراءة المختبر الرقمي" - نفس هوية الألعاب السابقة
+   خلفية كحلية داكنة + شبكة خفيفة + لون تركوازي مضيء #29e0c2
+   ============================================================ */
+:root{
+  --bg-deep:#080c16;
+  --bg-panel:#0f1626;
+  --bg-panel-2:#141d33;
+  --line:#1e2a44;
+  --accent:#29e0c2;
+  --accent-glow:rgba(41,224,194,.35);
+  --accent-dim:rgba(41,224,194,.12);
+  --text-light:#eaf4f3;
+  --text-dim:#8ea3bd;
+  --amber:#ffb454;
+  --amber-dim:rgba(255,180,84,.12);
+  --danger:#ff6b6b;
+  --success:#38e6b8;
+  --mono: 'Consolas','Courier New',monospace;
+  --font: 'Tahoma','Segoe UI',Arial,sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--font);
+  background:
+    radial-gradient(circle at 20% -10%, rgba(41,224,194,.08), transparent 40%),
+    radial-gradient(circle at 100% 110%, rgba(41,224,194,.06), transparent 45%),
+    var(--bg-deep);
+  color:var(--text-light);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.grid-overlay{
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:38px 38px;
+  opacity:.35;
+}
+.app{ position:relative; z-index:1; max-width:980px; margin:0 auto; padding:18px 16px 40px; min-height:100vh; display:flex; flex-direction:column;}
+
+/* ===== شريط علوي ثابت ===== */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px; margin-bottom:18px;
+  background:var(--bg-panel); border:1px solid var(--line); border-radius:14px;
+}
+.topbar .brand{ display:flex; align-items:center; gap:10px; font-weight:700;}
+.topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent-glow); animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.topbar .score{ font-family:var(--mono); font-size:15px; color:var(--accent); background:var(--accent-dim); border:1px solid var(--accent-glow); padding:6px 12px; border-radius:8px;}
+.topbar .mute-btn{background:transparent;border:1px solid var(--line);color:var(--text-dim);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;}
+.topbar .mute-btn:hover{border-color:var(--accent); color:var(--accent);}
+
+/* ===== شريط تقدم عام (4 مراحل) ===== */
+.global-progress{ display:flex; gap:6px; margin-bottom:22px;}
+.global-progress .seg{flex:1; height:8px; border-radius:6px; background:var(--bg-panel-2); border:1px solid var(--line); overflow:hidden;}
+.global-progress .seg .fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#5ff5da); transition:width .6s ease; box-shadow:0 0 10px var(--accent-glow);}
+
+/* ===== شاشات ===== */
+.screen{display:none; animation:fadeIn .5s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+.panel{
+  background:var(--bg-panel); border:1px solid var(--line); border-radius:18px; padding:26px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+
+/* ===== شاشة البداية ===== */
+.start-hero{ text-align:center; padding:20px 10px 6px;}
+.start-hero .game-name{ font-size:27px; font-weight:900; color:var(--accent); text-shadow:0 0 22px var(--accent-glow); margin-bottom:6px;}
+.start-hero .game-sub{ color:var(--text-dim); font-size:15px; margin-bottom:22px;}
+.instructions{
+  text-align:right; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:14px;
+  padding:18px 20px; margin:0 auto 24px; max-width:660px; line-height:2; font-size:14.5px; color:var(--text-light);
+}
+.instructions b{color:var(--accent);}
+.factory-visual{
+  width:100%; max-width:520px; margin:0 auto 20px; padding:22px; border-radius:16px;
+  background:linear-gradient(180deg,#05070d,#0c1220 60%,#0f1626); border:1px solid var(--line);
+  font-size:50px; text-align:center; letter-spacing:14px;
+}
+.factory-visual.broken{ filter:grayscale(.6) opacity(.7); }
+.factory-visual.fixed{ filter:none; text-shadow:0 0 24px var(--accent-glow);}
+
+/* ===== أزرار عامة ===== */
+.btn{
+  font-family:var(--font); font-size:16px; font-weight:700; color:#052; background:var(--accent);
+  border:none; border-radius:12px; padding:13px 26px; cursor:pointer;
+  box-shadow:0 8px 22px var(--accent-glow); transition:transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover{ transform:translateY(-2px); box-shadow:0 12px 28px var(--accent-glow);}
+.btn:active{ transform:translateY(0);}
+.btn.secondary{ background:transparent; color:var(--accent); border:1.5px solid var(--accent); box-shadow:none;}
+.btn.ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--line); box-shadow:none;}
+.btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none;}
+
+/* ===== رأس المرحلة ===== */
+.stage-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:10px;}
+.stage-title{ font-size:19px; font-weight:800; color:var(--accent);}
+.stage-sub{ color:var(--text-dim); font-size:13.5px; margin-bottom:18px;}
+.stage-dots{ display:flex; gap:6px;}
+.stage-dots span{ width:9px; height:9px; border-radius:50%; background:var(--line); border:1px solid var(--line); transition:.3s;}
+.stage-dots span.done{ background:var(--accent); box-shadow:0 0 8px var(--accent-glow); border-color:var(--accent);}
+.stage-dots span.current{ border-color:var(--accent);}
+
+.qcard{ background:var(--bg-panel-2); border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:16px;}
+.qcard .statement{ font-size:19px; font-weight:700; text-align:center; margin-bottom:14px; line-height:1.8;}
+
+/* ===== مرحلة 1: التصنيف (سحب/نقر) ===== */
+.pool{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; min-height:52px; padding:10px; margin-bottom:18px;
+  background:var(--bg-panel); border:1px dashed var(--line); border-radius:12px;}
+.chip{
+  background:var(--bg-panel-2); border:1.5px solid var(--line); border-radius:10px; padding:10px 16px;
+  font-size:15px; font-weight:700; cursor:grab; transition:.2s; user-select:none;
+}
+.chip:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-2px);}
+.chip.selected{ border-color:var(--accent); box-shadow:0 0 12px var(--accent-glow); color:var(--accent);}
+.chip.wrong-flash{ animation:shake .4s ease; border-color:var(--danger);}
+.classify-zones{ display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media(max-width:640px){ .classify-zones{grid-template-columns:1fr;} }
+.zone{
+  min-height:150px; border:2px dashed var(--line); border-radius:14px; padding:14px;
+  background:var(--bg-panel); transition:.2s;
+}
+.zone h4{ margin:0 0 10px; text-align:center; font-size:14px; color:var(--text-dim); letter-spacing:.5px;}
+.zone.dragover{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow) inset;}
+.zone .chip{ cursor:default; margin:5px; display:inline-block;}
+.zone .chip.correct-in{ border-color:var(--success); background:rgba(56,230,184,.12); color:var(--success);}
+.zone-items{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
+.summary-box{
+  margin-top:18px; text-align:center; display:none; background:var(--accent-dim); border:1px solid var(--accent-glow);
+  border-radius:12px; padding:16px; font-size:14.5px; line-height:1.9;
+}
+.summary-box.show{display:block; animation:fadeIn .5s ease;}
+
+/* ===== مرحلة 2 و 4: تركيب/اختيار وحدة (بطاقة + قطع) ===== */
+.equation-line{
+  font-family:var(--mono); font-size:22px; text-align:center; margin-bottom:18px; letter-spacing:1px;
+  display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
+}
+.blank-slot{
+  display:inline-flex; align-items:center; justify-content:center; min-width:74px; height:46px;
+  border:2px dashed var(--accent); border-radius:10px; background:var(--bg-panel); color:var(--accent);
+  font-family:var(--mono); font-size:20px; transition:.2s;
+}
+.blank-slot.filled{ border-style:solid; background:rgba(41,224,194,.12);}
+.blank-slot.dragover{ box-shadow:0 0 0 3px var(--accent-glow) inset;}
+.blank-slot.wrong-flash{ animation:shake .4s ease; border-color:var(--danger); color:var(--danger);}
+.tile-tray{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:6px;}
+.tile{
+  font-family:var(--mono); font-size:18px; font-weight:700; color:var(--text-light);
+  background:var(--bg-panel); border:1.5px solid var(--line); border-radius:10px; padding:12px 18px; cursor:grab;
+  transition:.2s; user-select:none;
+}
+.tile:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-2px);}
+.tile.selected{ border-color:var(--accent); box-shadow:0 0 12px var(--accent-glow); color:var(--accent);}
+.tile.used{ opacity:.3; pointer-events:none;}
+
+.mcq-list{ display:flex; flex-direction:column; gap:10px;}
+.mcq-opt{
+  text-align:right; font-size:15.5px; color:var(--text-light); background:var(--bg-panel); border:1.5px solid var(--line);
+  border-radius:12px; padding:14px 16px; cursor:pointer; transition:.2s; line-height:1.6;
+}
+.mcq-opt:hover{border-color:var(--accent);}
+.mcq-opt.correct{background:rgba(56,230,184,.15); border-color:var(--success); color:var(--success);}
+.mcq-opt.wrong{background:rgba(255,107,107,.12); border-color:var(--danger); color:var(--danger); animation:shake .4s ease;}
+
+/* أزرار مسموح/غير مسموح ومتجانسة/غير متجانسة */
+.choice-pair{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:8px;}
+.choice-btn{
+  font-size:16px; font-weight:800; padding:16px 30px; border-radius:14px; cursor:pointer; transition:.2s;
+  background:var(--bg-panel); border:2px solid var(--line); color:var(--text-light); min-width:150px;
+}
+.choice-btn.allow{ color:var(--success);}
+.choice-btn.deny{ color:var(--danger);}
+.choice-btn:hover{ transform:translateY(-2px);}
+.choice-btn.allow:hover{ border-color:var(--success); box-shadow:0 8px 20px rgba(56,230,184,.25);}
+.choice-btn.deny:hover{ border-color:var(--danger); box-shadow:0 8px 20px rgba(255,107,107,.2);}
+.choice-btn.correct{ border-color:var(--success); background:rgba(56,230,184,.15);}
+.choice-btn.wrong{ border-color:var(--danger); background:rgba(255,107,107,.12); animation:shake .4s ease;}
+.choice-btn:disabled{ opacity:.5; cursor:default;}
+
+@keyframes okPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.feedback-box{ margin-top:16px; border-radius:12px; padding:12px 16px; font-size:14.5px; line-height:1.8; display:none;}
+.feedback-box.ok{ display:block; background:rgba(56,230,184,.12); border:1px solid var(--success); color:var(--success);}
+.feedback-box.hint{ display:block; background:var(--amber-dim); border:1px solid var(--amber); color:var(--amber);}
+.feedback-box .tool{ font-size:24px; margin-left:6px;}
+.stage-actions{ display:flex; justify-content:center; margin-top:18px;}
+
+/* ===== مرحلة 4: بطاقة معطيات المتغيرات ===== */
+.vars-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:16px;}
+.var-chip{ font-family:var(--mono); background:var(--bg-panel); border:1px solid var(--line); border-radius:10px; padding:8px 14px; font-size:14.5px; color:var(--text-dim);}
+.var-chip b{ color:var(--accent);}
+
+/* ===== شاشة النهاية ===== */
+.end-score-ring{
+  width:150px; height:150px; margin:0 auto 18px; border-radius:50%;
+  background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--bg-panel-2) 0);
+  display:flex; align-items:center; justify-content:center; position:relative;
+  box-shadow:0 0 30px var(--accent-glow);
+}
+.end-score-ring::before{ content:""; position:absolute; inset:10px; border-radius:50%; background:var(--bg-panel);}
+.end-score-ring .pct{ position:relative; font-family:var(--mono); font-size:28px; font-weight:800; color:var(--accent);}
+.end-msg{ text-align:center; font-size:19px; font-weight:800; color:var(--text-light); margin-bottom:6px;}
+.end-sub{ text-align:center; color:var(--text-dim); font-size:14.5px; margin-bottom:14px;}
+.end-badge{
+  display:block; width:fit-content; margin:0 auto 22px; padding:10px 22px; border-radius:30px;
+  background:var(--accent-dim); border:1px solid var(--accent-glow); color:var(--accent); font-weight:800; font-size:15px;
+}
+.end-stats{ display:flex; justify-content:center; gap:14px; margin-bottom:26px; flex-wrap:wrap;}
+.end-stat{ background:var(--bg-panel-2); border:1px solid var(--line); border-radius:12px; padding:12px 20px; text-align:center; min-width:110px;}
+.end-stat .num{ font-family:var(--mono); font-size:22px; color:var(--accent); font-weight:800;}
+.end-stat .lbl{ font-size:12px; color:var(--text-dim); margin-top:4px;}
+.end-actions{ display:flex; justify-content:center; gap:12px; flex-wrap:wrap;}
+
+/* ===== نافذة بطاقة المعلم ===== */
+.modal-overlay{ position:fixed; inset:0; background:rgba(3,5,10,.75); backdrop-filter:blur(2px); display:none; align-items:center; justify-content:center; z-index:50; padding:16px;}
+.modal-overlay.show{ display:flex;}
+.modal-box{
+  background:var(--bg-panel); border:1px solid var(--accent-glow); border-radius:18px; padding:24px; max-width:640px; width:100%;
+  max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.modal-box h3{ color:var(--accent); margin-top:0; font-size:19px; border-bottom:1px solid var(--line); padding-bottom:10px;}
+.modal-box h4{ color:var(--text-light); font-size:14.5px; margin-top:18px; margin-bottom:8px;}
+.modal-box ul{ margin:0; padding-right:20px; line-height:2; font-size:14px; color:var(--text-dim);}
+.modal-box li b{color:var(--text-light);}
+.modal-close{ display:block; margin:20px auto 0;}
+
+.lcd{ font-family:var(--mono); background:var(--bg-deep); border:1px solid var(--accent-glow); color:var(--accent); padding:2px 8px; border-radius:6px; font-size:13px;}
+
+footer.credits{ text-align:center; color:var(--text-dim); font-size:12px; margin-top:26px; opacity:.6;}
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div class="app">
+
+  <!-- ===================== شريط علوي ===================== -->
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> غرفة التحكم: هل المعادلة آمنة؟</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="score">النقاط: <span id="scoreDisplay" class="lcd">0</span></div>
+      <button class="mute-btn" id="muteBtn" title="كتم/تشغيل الصوت">🔊</button>
+    </div>
+  </div>
+
+  <!-- شريط تقدم عام: 4 مراحل -->
+  <div class="global-progress" id="globalProgress">
+    <div class="seg"><div class="fill" id="segFill0"></div></div>
+    <div class="seg"><div class="fill" id="segFill1"></div></div>
+    <div class="seg"><div class="fill" id="segFill2"></div></div>
+    <div class="seg"><div class="fill" id="segFill3"></div></div>
+  </div>
+
+  <!-- ===================== شاشة البداية ===================== -->
+  <section class="screen active" id="screen-start">
+    <div class="panel start-hero">
+      <div class="factory-visual broken" id="factoryVisual">⚙️🔧⚙️</div>
+      <div class="game-name">🏭 غرفة التحكم: هل المعادلة آمنة؟</div>
+      <div class="game-sub">النظام الدولي للوحدات — الكمّيّات والمعادلات المتجانسة</div>
+      <div class="instructions">
+        أنتم فريق طوارئ داخل مصنع ذكي. توقّفت آلة التعبئة بسبب اختلاط وحدات القياس داخل النظام،
+        ولن تعمل من جديد إلا بعد إصلاح المعادلات والوحدات عبر <b>4 مراحل</b>:
+        <br>1️⃣ تفعيل الحسّاسات — صنّف الكمّيّات إلى أساسية ومشتقّة.
+        <br>2️⃣ مختبر تركيب الوحدات — كوّن وحدة القياس الصحيحة.
+        <br>3️⃣ بوابة الجمع الذكية — قرّر: هل الجمع مسموح؟
+        <br>4️⃣ ماسح التجانس — تحقّق من تجانس المعادلات.
+        <br><br>كل خطأ يمنحك تلميحًا فقط، ويمكنك المحاولة دائمًا 💡
+      </div>
+      <button class="btn" onclick="startStage(1)">🚨 ابدأ المهمة</button>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 1: تفعيل الحساسات ===================== -->
+  <section class="screen" id="screen-stage1">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 1 · تفعيل الحسّاسات</div>
+        <div class="lcd" id="classifyCounter">0 / 14</div>
+      </div>
+      <div class="stage-sub">اسحب كل بطاقة كمّية إلى الصندوق المناسب، أو اضغط عليها ثم اضغط على الصندوق.</div>
+
+      <div class="pool" id="classifyPool"></div>
+
+      <div class="classify-zones">
+        <div class="zone" id="zoneBase" data-zone="base">
+          <h4>🔹 كمّية أساسية</h4>
+          <div class="zone-items" id="zoneBaseItems"></div>
+        </div>
+        <div class="zone" id="zoneDerived" data-zone="derived">
+          <h4>🔸 كمّية مشتقّة</h4>
+          <div class="zone-items" id="zoneDerivedItems"></div>
+        </div>
+      </div>
+
+      <div class="feedback-box" id="stage1Feedback"></div>
+
+      <div class="summary-box" id="stage1Summary">
+        الكمّية الأساسية لا نعبّر عنها بدلالة كمّيّات أساسية أخرى، أما المشتقّة فتُبنى من كمّيّات أساسية.
+      </div>
+
+      <div class="stage-actions">
+        <button class="btn" id="stage1NextBtn" disabled onclick="startStage(2)">التالي إلى المرحلة 2 ⟵</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 2: مختبر تركيب الوحدات ===================== -->
+  <section class="screen" id="screen-stage2">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 2 · مختبر تركيب الوحدات</div>
+        <div class="stage-dots" id="dots-stage2"></div>
+      </div>
+      <div class="stage-sub">اسحب القطعة المناسبة إلى الفراغ لتكوين وحدة القياس الصحيحة.</div>
+      <div id="stage2-body"></div>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 3: بوابة الجمع الذكية ===================== -->
+  <section class="screen" id="screen-stage3">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 3 · بوابة الجمع الذكية</div>
+        <div class="stage-dots" id="dots-stage3"></div>
+      </div>
+      <div class="stage-sub">هل يمكن جمع/طرح هاتين الكمّيّتين؟ اختر ثم اقرأ السبب.</div>
+      <div id="stage3-body"></div>
+    </div>
+  </section>
+
+  <!-- ===================== المرحلة 4: ماسح التجانس ===================== -->
+  <section class="screen" id="screen-stage4">
+    <div class="panel">
+      <div class="stage-header">
+        <div class="stage-title">المرحلة 4 · ماسح التجانس</div>
+        <div class="stage-dots" id="dots-stage4"></div>
+      </div>
+      <div class="stage-sub">ابنِ وحدة الطرف الأيمن من المعادلة، ثم قرّر: هل المعادلة متجانسة؟</div>
+      <div id="stage4-body"></div>
+    </div>
+  </section>
+
+  <!-- ===================== شاشة النهاية ===================== -->
+  <section class="screen" id="screen-end">
+    <div class="panel">
+      <div class="factory-visual fixed" style="max-width:400px;">⚙️✨⚙️</div>
+      <div class="end-score-ring" id="scoreRing"><span class="pct" id="scorePct">0%</span></div>
+      <div class="end-msg">أحسنتم يا مهندسي الفيزياء!</div>
+      <div class="end-sub">أصبحت المعادلات آمنة لأن وحداتها متجانسة، وعادت آلة التعبئة للعمل.</div>
+      <div class="end-badge" id="endBadge">🔍 مفتش وحدات مبتدئ</div>
+      <div class="end-stats">
+        <div class="end-stat"><div class="num" id="endCorrect">0/28</div><div class="lbl">إجابات صحيحة</div></div>
+        <div class="end-stat"><div class="num" id="endPoints">0</div><div class="lbl">مجموع النقاط</div></div>
+      </div>
+      <div class="end-actions">
+        <button class="btn" onclick="restartGame()">🔁 أعِد المهمة</button>
+        <button class="btn secondary" onclick="openTeacherCard()">👩‍🏫 بطاقة المعلّم</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="credits">غرفة التحكم: هل المعادلة آمنة؟ · النظام الدولي للوحدات · الصف التاسع</footer>
+</div>
+
+<!-- ===================== نافذة بطاقة المعلم ===================== -->
+<div class="modal-overlay" id="teacherModal">
+  <div class="modal-box">
+    <h3>👩‍🏫 بطاقة المعلّم</h3>
+    <h4>الأهداف التعليمية للعبة</h4>
+    <ul>
+      <li>يميّز الطالب بين الكمّيّات الأساسية والمشتقّة.</li>
+      <li>يفهم كيفية تكوين الوحدات المركّبة باستخدام الضرب والقسمة والأسس.</li>
+      <li>يدرك أنه لا يجوز جمع أو طرح كمّيّات ذات وحدات مختلفة.</li>
+      <li>يتحقّق من تجانس وحدات طرفي المعادلة الفيزيائية.</li>
+      <li>يشتقّ وحدة الحجم (m³) من أبعاد الجسم الثلاثة.</li>
+    </ul>
+    <h4>الإجابات — المرحلة 1 (تصنيف الكمّيّات)</h4>
+    <ul id="keyStage1"></ul>
+    <h4>الإجابات — المرحلة 2 (تركيب الوحدات)</h4>
+    <ul id="keyStage2"></ul>
+    <h4>الإجابات — المرحلة 3 (بوابة الجمع)</h4>
+    <ul id="keyStage3"></ul>
+    <h4>الإجابات — المرحلة 4 (التجانس)</h4>
+    <ul id="keyStage4"></ul>
+    <button class="btn ghost modal-close" onclick="closeTeacherCard()">إغلاق</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   منطقة البيانات — عدّل الأسئلة هنا فقط بأمان
+   ============================================================ */
+
+// المرحلة 1: تصنيف الكمّيّات (أساسية / مشتقّة)
+const STAGE1_ITEMS = [
+  {name:'الطول', type:'base'},
+  {name:'الكتلة', type:'base'},
+  {name:'الزمن', type:'base'},
+  {name:'درجة الحرارة', type:'base'},
+  {name:'التيار الكهربائي', type:'base'},
+  {name:'كمّية المادة', type:'base'},
+  {name:'شدة الإضاءة', type:'base'},
+  {name:'السرعة', type:'derived'},
+  {name:'التسارع', type:'derived'},
+  {name:'القوّة', type:'derived'},
+  {name:'الشغل', type:'derived'},
+  {name:'الضغط', type:'derived'},
+  {name:'الحجم', type:'derived'},
+  {name:'المساحة', type:'derived'}
+];
+
+// المرحلة 2: تركيب الوحدات — كل سؤال: معادلة فيها فراغ واحد + قطع اختيار
+const STAGE2_QUESTIONS = [
+  { label:'المساحة', prefix:'m × m =', answer:'m²', tiles:['m²','m³','m/s','N'],
+    hint:'ضرب طول × طول يعطي وحدة المساحة m² (متر مربّع).' },
+  { label:'الحجم', prefix:'m × m × m =', answer:'m³', tiles:['m³','m²','N','J'],
+    hint:'ضرب ثلاثة أبعاد (طول × عرض × ارتفاع) يعطي وحدة الحجم m³ (متر مكعّب).' },
+  { label:'السرعة', prefix:'m ÷ s =', answer:'m/s', tiles:['m/s','m/s²','m²','kg/m'],
+    hint:'السرعة = المسافة ÷ الزمن، لذلك وحدتها m/s (متر/ثانية).' },
+  { label:'التسارع', prefix:'(m/s) ÷ s =', answer:'m/s²', tiles:['m/s²','m/s','m³','N'],
+    hint:'التسارع = تغيّر السرعة ÷ الزمن، لذلك وحدته m/s² (متر/ثانية مربّعة).' },
+  { label:'القوّة', prefix:'kg × m/s² =', answer:'N', tiles:['N','J','Pa','m³'],
+    hint:'القوّة = الكتلة × التسارع (kg × m/s²)، ووحدتها الناتجة اسمها نيوتن N.' },
+  { label:'الشغل', prefix:'N × m =', answer:'J', tiles:['J','N','Pa','m²'],
+    hint:'الشغل = القوّة × الإزاحة (N × m)، ووحدته الناتجة اسمها جول J.' }
+];
+
+// المرحلة 3: بوابة الجمع الذكية
+const STAGE3_STATEMENTS = [
+  { text:'5 m + 6 m = 11 m', allowed:true,
+    reason:'مسموح ✅ لأن الكمّيّتين لهما الوحدة نفسها (m)، فيمكن جمعهما مباشرة.' },
+  { text:'5 m + 6 kg', allowed:false,
+    reason:'غير مسموح 🚫 لأن الوحدتين مختلفتان (m و kg)، ولا يجوز جمع كمّيّات بوحدات مختلفة.' },
+  { text:'3 s + 7 s = 10 s', allowed:true,
+    reason:'مسموح ✅ لأن الكمّيّتين من وحدة الزمن نفسها (s).' },
+  { text:'2 m² + 3 m', allowed:false,
+    reason:'غير مسموح 🚫 لأن الأولى مساحة (m²) والثانية طول (m)، وهما وحدتان مختلفتان.' },
+  { text:'4 kg - 1 kg = 3 kg', allowed:true,
+    reason:'مسموح ✅ لأن الكتلتين بالوحدة نفسها (kg)، والطرح مثل الجمع يحتاج وحدات متماثلة.' }
+];
+
+// المرحلة 4: ماسح التجانس
+const STAGE4_QUESTIONS = [
+  { equation:'V = l × w × h', vars:[{name:'l',unit:'m'},{name:'w',unit:'m'},{name:'h',unit:'m'}],
+    buildAnswer:'m³', tiles:['m³','m²','m','N'], homogeneous:true,
+    explain:'l × w × h ⇐ m × m × m = m³، وهذه هي وحدة الحجم نفسها V، فالمعادلة متجانسة.' },
+  { equation:'V = πr²h', vars:[{name:'r',unit:'m'},{name:'h',unit:'m'},{name:'π',unit:'بلا وحدة'}],
+    buildAnswer:'m³', tiles:['m³','m²','m','s'], homogeneous:true,
+    explain:'r² × h ⇐ m² × m = m³، وهذه هي وحدة الحجم نفسها V، فالمعادلة متجانسة.' },
+  { equation:'A = l × w', vars:[{name:'l',unit:'m'},{name:'w',unit:'m'}],
+    buildAnswer:'m²', tiles:['m²','m³','m','kg'], homogeneous:true,
+    explain:'l × w ⇐ m × m = m²، وهذه هي وحدة المساحة نفسها A، فالمعادلة متجانسة.' }
+];
+
+/* ============================================================
+   حالة اللعبة
+   ============================================================ */
+let score = 0;
+const TOTAL_ITEMS = STAGE1_ITEMS.length + STAGE2_QUESTIONS.length + STAGE3_STATEMENTS.length + STAGE4_QUESTIONS.length; // 28
+let soundOn = true;
+
+let classifyDone = 0;      // عدد بطاقات المرحلة1 المصنّفة بشكل صحيح
+let selectedChip = null;   // بطاقة الكمّية المختارة بالنقر (مرحلة1)
+
+let stage2Index = 0;
+let stage2Correct = 0;
+let selectedTile = null;   // القطعة المختارة بالنقر (مرحلة2 و4)
+
+let stage3Index = 0;
+let stage3Correct = 0;
+
+let stage4Index = 0;
+let stage4Correct = 0;
+let stage4BuildDone = false; // هل بُنيت الوحدة بشكل صحيح لهذا السؤال؟
+
+/* ============================================================
+   أدوات عامة
+   ============================================================ */
+function goToScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function updateGlobalProgress(segmentIndex, pct){
+  const el = document.getElementById('segFill'+segmentIndex);
+  if(el) el.style.width = pct+'%';
+}
+function addScore(points){
+  score += points;
+  document.getElementById('scoreDisplay').textContent = score;
+}
+function renderDots(containerId, total, currentIndex){
+  const c = document.getElementById(containerId);
+  c.innerHTML='';
+  for(let i=0;i<total;i++){
+    const d = document.createElement('span');
+    if(i<currentIndex) d.classList.add('done');
+    if(i===currentIndex) d.classList.add('current');
+    c.appendChild(d);
+  }
+}
+
+// نغمات بسيطة عبر WebAudio (بدون أي ملفات خارجية)
+let audioCtx;
+function playTone(freq, dur){
+  if(!soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(.08, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+dur);
+  }catch(e){/* بيئات لا تدعم الصوت */}
+}
+function soundOk(){ playTone(880,.15); setTimeout(()=>playTone(1180,.18),120); }
+function soundHint(){ playTone(300,.2); }
+document.getElementById('muteBtn').addEventListener('click', function(){
+  soundOn = !soundOn;
+  this.textContent = soundOn ? '🔊' : '🔇';
+});
+
+function startStage(n){
+  if(n===1){ goToScreen('stage1'); renderStage1(); }
+  if(n===2){ goToScreen('stage2'); renderStage2(); }
+  if(n===3){ goToScreen('stage3'); renderStage3(); }
+  if(n===4){ goToScreen('stage4'); renderStage4(); }
+}
+
+function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]); }
+
+/* ============================================================
+   المرحلة 1: تفعيل الحسّاسات (تصنيف بالسحب/النقر)
+   ============================================================ */
+function renderStage1(){
+  classifyDone = 0; selectedChip = null;
+  document.getElementById('classifyCounter').textContent = '0 / '+STAGE1_ITEMS.length;
+  document.getElementById('stage1NextBtn').disabled = true;
+  document.getElementById('stage1Summary').classList.remove('show');
+  document.getElementById('stage1Feedback').className='feedback-box';
+  document.getElementById('zoneBaseItems').innerHTML='';
+  document.getElementById('zoneDerivedItems').innerHTML='';
+
+  const pool = document.getElementById('classifyPool');
+  pool.innerHTML='';
+  shuffle(STAGE1_ITEMS).forEach(item=>{
+    const chip = document.createElement('div');
+    chip.className='chip';
+    chip.textContent = item.name;
+    chip.dataset.name = item.name;
+    chip.dataset.type = item.type;
+    chip.setAttribute('draggable','true');
+    attachChipEvents(chip);
+    pool.appendChild(chip);
+  });
+
+  ['zoneBase','zoneDerived'].forEach(id=>{
+    const zone = document.getElementById(id);
+    zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', ()=> zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e=>{
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      const name = e.dataTransfer.getData('text/plain');
+      const chip = document.querySelector(`.pool .chip[data-name="${CSS.escape(name)}"]`);
+      if(chip) placeChip(chip, zone.dataset.zone);
+    });
+    zone.addEventListener('click', ()=>{
+      if(selectedChip) placeChip(selectedChip, zone.dataset.zone);
+    });
+  });
+}
+
+function attachChipEvents(chip){
+  chip.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('text/plain', chip.dataset.name);
+  });
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.pool .chip.selected').forEach(c=>c.classList.remove('selected'));
+    selectedChip = chip;
+    chip.classList.add('selected');
+  });
+}
+
+function placeChip(chip, zoneName){
+  const correct = chip.dataset.type === zoneName;
+  const fb = document.getElementById('stage1Feedback');
+  if(correct){
+    chip.classList.add('correct-in');
+    chip.classList.remove('selected');
+    chip.setAttribute('draggable','false');
+    chip.style.cursor='default';
+    const target = document.getElementById(zoneName==='base' ? 'zoneBaseItems' : 'zoneDerivedItems');
+    target.appendChild(chip);
+    classifyDone++;
+    document.getElementById('classifyCounter').textContent = classifyDone+' / '+STAGE1_ITEMS.length;
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">🛠️✅</span> تم إصلاح الجهاز! <b>${chip.dataset.name}</b> كمّية ${zoneName==='base'?'أساسية':'مشتقّة'}.`;
+    soundOk();
+    addScore(10);
+    selectedChip = null;
+    if(classifyDone === STAGE1_ITEMS.length){
+      document.getElementById('stage1NextBtn').disabled = false;
+      document.getElementById('stage1Summary').classList.add('show');
+      updateGlobalProgress(0, 100);
+    } else {
+      updateGlobalProgress(0, Math.round((classifyDone/STAGE1_ITEMS.length)*100));
+    }
+  } else {
+    chip.classList.add('wrong-flash');
+    setTimeout(()=>chip.classList.remove('wrong-flash'), 450);
+    fb.className='feedback-box hint';
+    const correctZoneAr = chip.dataset.type==='base' ? 'كمّية أساسية' : 'كمّية مشتقّة';
+    fb.innerHTML = `<span class="tool">💡</span> ${chip.dataset.name} في الحقيقة ${correctZoneAr}. حاول وضعها في الصندوق الصحيح.`;
+    soundHint();
+    selectedChip = null;
+    document.querySelectorAll('.pool .chip.selected').forEach(c=>c.classList.remove('selected'));
+  }
+}
+
+/* ============================================================
+   المرحلة 2: مختبر تركيب الوحدات (سحب/نقر قطعة إلى فراغ)
+   ============================================================ */
+function renderStage2(){
+  renderDots('dots-stage2', STAGE2_QUESTIONS.length, stage2Index);
+  const body = document.getElementById('stage2-body');
+  if(stage2Index >= STAGE2_QUESTIONS.length){
+    startStage(3);
+    return;
+  }
+  selectedTile = null;
+  const item = STAGE2_QUESTIONS[stage2Index];
+  body.innerHTML = `
+    <div class="qcard">
+      <div class="statement">${item.label}</div>
+      <div class="equation-line">
+        <span>${item.prefix}</span>
+        <span class="blank-slot" id="s2-blank">؟</span>
+      </div>
+      <div class="tile-tray" id="s2-tray"></div>
+      <div class="feedback-box" id="s2-feedback"></div>
+    </div>
+  `;
+  const tray = document.getElementById('s2-tray');
+  const blank = document.getElementById('s2-blank');
+
+  shuffle(item.tiles).forEach(val=>{
+    const t = document.createElement('div');
+    t.className='tile';
+    t.textContent = val;
+    t.dataset.value = val;
+    t.setAttribute('draggable','true');
+    t.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', val));
+    t.addEventListener('click', ()=>{
+      document.querySelectorAll('#s2-tray .tile.selected').forEach(el=>el.classList.remove('selected'));
+      selectedTile = t;
+      t.classList.add('selected');
+    });
+    tray.appendChild(t);
+  });
+
+  blank.addEventListener('dragover', e=>{ e.preventDefault(); blank.classList.add('dragover'); });
+  blank.addEventListener('dragleave', ()=> blank.classList.remove('dragover'));
+  blank.addEventListener('drop', e=>{
+    e.preventDefault(); blank.classList.remove('dragover');
+    const val = e.dataTransfer.getData('text/plain');
+    checkStage2Answer(val, item);
+  });
+  blank.addEventListener('click', ()=>{
+    if(selectedTile) checkStage2Answer(selectedTile.dataset.value, item);
+  });
+}
+
+function checkStage2Answer(val, item){
+  const blank = document.getElementById('s2-blank');
+  const fb = document.getElementById('s2-feedback');
+  if(val === item.answer){
+    blank.textContent = val;
+    blank.classList.add('filled');
+    document.querySelectorAll('#s2-tray .tile').forEach(t=>t.classList.add('used'));
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">🛠️✅</span> تم إصلاح الجهاز! ${item.hint}`;
+    soundOk();
+    stage2Correct++;
+    addScore(10);
+    setTimeout(()=>{ stage2Index++; renderStage2(); updateGlobalProgress(1, Math.round((stage2Index/STAGE2_QUESTIONS.length)*100)); }, 1300);
+  } else {
+    blank.classList.add('wrong-flash');
+    setTimeout(()=>blank.classList.remove('wrong-flash'), 450);
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> ${item.hint}`;
+    soundHint();
+    selectedTile = null;
+    document.querySelectorAll('#s2-tray .tile.selected').forEach(el=>el.classList.remove('selected'));
+  }
+}
+
+/* ============================================================
+   المرحلة 3: بوابة الجمع الذكية
+   ============================================================ */
+function renderStage3(){
+  renderDots('dots-stage3', STAGE3_STATEMENTS.length, stage3Index);
+  const body = document.getElementById('stage3-body');
+  if(stage3Index >= STAGE3_STATEMENTS.length){
+    startStage(4);
+    return;
+  }
+  const item = STAGE3_STATEMENTS[stage3Index];
+  body.innerHTML = `
+    <div class="qcard">
+      <div class="statement" style="font-family:var(--mono);">${item.text}</div>
+      <div class="choice-pair" id="s3-choices">
+        <button class="choice-btn allow" data-val="true">✅ مسموح</button>
+        <button class="choice-btn deny" data-val="false">🚫 غير مسموح</button>
+      </div>
+      <div class="feedback-box" id="s3-feedback"></div>
+    </div>
+  `;
+  document.querySelectorAll('#s3-choices .choice-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>checkStage3Answer(btn, btn.dataset.val==='true', item));
+  });
+}
+
+function checkStage3Answer(btn, chosen, item){
+  const fb = document.getElementById('s3-feedback');
+  const allBtns = document.querySelectorAll('#s3-choices .choice-btn');
+  if(chosen === item.allowed){
+    allBtns.forEach(b=>b.disabled=true);
+    btn.classList.add('correct');
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">✅</span> ${item.reason}`;
+    soundOk();
+    stage3Correct++;
+    addScore(10);
+    setTimeout(()=>{ stage3Index++; renderStage3(); updateGlobalProgress(2, Math.round((stage3Index/STAGE3_STATEMENTS.length)*100)); }, 1300);
+  } else {
+    btn.classList.add('wrong');
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> ${item.reason}`;
+    soundHint();
+    setTimeout(()=>btn.classList.remove('wrong'), 500);
+  }
+}
+
+/* ============================================================
+   المرحلة 4: ماسح التجانس (بناء الوحدة ثم الحكم على التجانس)
+   ============================================================ */
+function renderStage4(){
+  renderDots('dots-stage4', STAGE4_QUESTIONS.length, stage4Index);
+  const body = document.getElementById('stage4-body');
+  if(stage4Index >= STAGE4_QUESTIONS.length){
+    finishGame();
+    return;
+  }
+  selectedTile = null;
+  stage4BuildDone = false;
+  const item = STAGE4_QUESTIONS[stage4Index];
+
+  const varsHtml = item.vars.map(v=>`<div class="var-chip">${v.name} = <b>${v.unit}</b></div>`).join('');
+
+  body.innerHTML = `
+    <div class="qcard">
+      <div class="statement" style="font-family:var(--mono);">${item.equation}</div>
+      <div class="vars-row">${varsHtml}</div>
+      <div class="equation-line">
+        <span>وحدة الطرف الأيمن =</span>
+        <span class="blank-slot" id="s4-blank">؟</span>
+      </div>
+      <div class="tile-tray" id="s4-tray"></div>
+      <div class="feedback-box" id="s4-build-feedback"></div>
+      <div id="s4-choice-wrap" style="display:none; margin-top:20px; text-align:center;">
+        <p style="color:var(--text-dim); font-size:14.5px; margin-bottom:10px;">هل المعادلة متجانسة؟</p>
+        <div class="choice-pair" id="s4-choices">
+          <button class="choice-btn allow" data-val="true">✅ متجانسة</button>
+          <button class="choice-btn deny" data-val="false">🚫 غير متجانسة</button>
+        </div>
+        <div class="feedback-box" id="s4-final-feedback"></div>
+      </div>
+    </div>
+  `;
+
+  const tray = document.getElementById('s4-tray');
+  const blank = document.getElementById('s4-blank');
+  shuffle(item.tiles).forEach(val=>{
+    const t = document.createElement('div');
+    t.className='tile';
+    t.textContent = val;
+    t.dataset.value = val;
+    t.setAttribute('draggable','true');
+    t.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', val));
+    t.addEventListener('click', ()=>{
+      document.querySelectorAll('#s4-tray .tile.selected').forEach(el=>el.classList.remove('selected'));
+      selectedTile = t;
+      t.classList.add('selected');
+    });
+    tray.appendChild(t);
+  });
+  blank.addEventListener('dragover', e=>{ e.preventDefault(); blank.classList.add('dragover'); });
+  blank.addEventListener('dragleave', ()=> blank.classList.remove('dragover'));
+  blank.addEventListener('drop', e=>{
+    e.preventDefault(); blank.classList.remove('dragover');
+    const val = e.dataTransfer.getData('text/plain');
+    checkStage4Build(val, item);
+  });
+  blank.addEventListener('click', ()=>{
+    if(selectedTile) checkStage4Build(selectedTile.dataset.value, item);
+  });
+}
+
+function checkStage4Build(val, item){
+  if(stage4BuildDone) return;
+  const blank = document.getElementById('s4-blank');
+  const fb = document.getElementById('s4-build-feedback');
+  if(val === item.buildAnswer){
+    stage4BuildDone = true;
+    blank.textContent = val;
+    blank.classList.add('filled');
+    document.querySelectorAll('#s4-tray .tile').forEach(t=>t.classList.add('used'));
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">🛠️✅</span> تم بناء الوحدة بنجاح: <b>${val}</b>`;
+    soundOk();
+    const choiceWrap = document.getElementById('s4-choice-wrap');
+    choiceWrap.style.display='block';
+    document.querySelectorAll('#s4-choices .choice-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>checkStage4Final(btn, btn.dataset.val==='true', item));
+    });
+  } else {
+    blank.classList.add('wrong-flash');
+    setTimeout(()=>blank.classList.remove('wrong-flash'), 450);
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> راجع وحدات المتغيّرات في المعادلة وحاول تركيبها مجددًا.`;
+    soundHint();
+    selectedTile = null;
+    document.querySelectorAll('#s4-tray .tile.selected').forEach(el=>el.classList.remove('selected'));
+  }
+}
+
+function checkStage4Final(btn, chosen, item){
+  const fb = document.getElementById('s4-final-feedback');
+  const allBtns = document.querySelectorAll('#s4-choices .choice-btn');
+  if(chosen === item.homogeneous){
+    allBtns.forEach(b=>b.disabled=true);
+    btn.classList.add('correct');
+    fb.className='feedback-box ok';
+    fb.innerHTML = `<span class="tool">✅</span> ${item.explain}`;
+    soundOk();
+    stage4Correct++;
+    addScore(10);
+    setTimeout(()=>{ stage4Index++; renderStage4(); updateGlobalProgress(3, Math.round((stage4Index/STAGE4_QUESTIONS.length)*100)); }, 1400);
+  } else {
+    btn.classList.add('wrong');
+    fb.className='feedback-box hint';
+    fb.innerHTML = `<span class="tool">💡</span> ${item.explain}`;
+    soundHint();
+    setTimeout(()=>btn.classList.remove('wrong'), 500);
+  }
+}
+
+/* ============================================================
+   شاشة النهاية
+   ============================================================ */
+function finishGame(){
+  const correctCount = classifyDone + stage2Correct + stage3Correct + stage4Correct;
+  const pct = Math.round((correctCount/TOTAL_ITEMS)*100);
+  document.getElementById('scoreRing').style.setProperty('--pct', pct);
+  document.getElementById('scorePct').textContent = pct+'%';
+  document.getElementById('endCorrect').textContent = correctCount+'/'+TOTAL_ITEMS;
+  document.getElementById('endPoints').textContent = score;
+
+  let badge;
+  if(pct>=90) badge='🏆 قائد غرفة التحكم';
+  else if(pct>=70) badge='🛠️ مهندس وحدات';
+  else badge='🔍 مفتش وحدات مبتدئ';
+  document.getElementById('endBadge').textContent = badge;
+
+  goToScreen('end');
+  updateGlobalProgress(3, 100);
+}
+
+function restartGame(){
+  score=0;
+  classifyDone=0; selectedChip=null;
+  stage2Index=0; stage2Correct=0; selectedTile=null;
+  stage3Index=0; stage3Correct=0;
+  stage4Index=0; stage4Correct=0; stage4BuildDone=false;
+  document.getElementById('scoreDisplay').textContent = 0;
+  [0,1,2,3].forEach(i=>updateGlobalProgress(i,0));
+  goToScreen('start');
+}
+
+/* ============================================================
+   بطاقة المعلّم
+   ============================================================ */
+function openTeacherCard(){
+  document.getElementById('keyStage1').innerHTML = STAGE1_ITEMS.map(i=>`<li>${i.name} → <b>${i.type==='base'?'كمّية أساسية':'كمّية مشتقّة'}</b></li>`).join('');
+  document.getElementById('keyStage2').innerHTML = STAGE2_QUESTIONS.map(i=>`<li>${i.label}: ${i.prefix} → <b>${i.answer}</b></li>`).join('');
+  document.getElementById('keyStage3').innerHTML = STAGE3_STATEMENTS.map(i=>`<li>${i.text} → <b>${i.allowed?'مسموح':'غير مسموح'}</b></li>`).join('');
+  document.getElementById('keyStage4').innerHTML = STAGE4_QUESTIONS.map(i=>`<li>${i.equation} → <b>${i.homogeneous?'متجانسة':'غير متجانسة'}</b> (${i.buildAnswer})</li>`).join('');
+  document.getElementById('teacherModal').classList.add('show');
+}
+function closeTeacherCard(){ document.getElementById('teacherModal').classList.remove('show'); }
+document.getElementById('teacherModal').addEventListener('click', e=>{ if(e.target.id==='teacherModal') closeTeacherCard(); });
+</script>
+</body>
+</html>
