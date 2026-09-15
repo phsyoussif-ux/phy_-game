@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIG-FIG LAB | مختبر تحليل القياسات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#070b10;
+  --bg-panel:#101720;
+  --bg-panel-2:#151f2a;
+  --line-grid:#1c2732;
+  --text-primary:#e7edf3;
+  --text-dim:#7f8fa0;
+  --accent-scan:#33e0c0;
+  --accent-scan-dim:#1b7a68;
+  --accent-alert:#ff6a49;
+  --accent-gold:#e8b34a;
+  --radius-panel: 4px;
+  --font-ar: 'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --font-num: 'Space Mono', 'Courier New', monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-ar);
+  background:
+    radial-gradient(1200px 700px at 80% -10%, rgba(51,224,192,.06), transparent 60%),
+    radial-gradient(900px 600px at 10% 110%, rgba(232,179,74,.05), transparent 60%),
+    repeating-linear-gradient(0deg, var(--line-grid) 0 1px, transparent 1px 42px),
+    repeating-linear-gradient(90deg, var(--line-grid) 0 1px, transparent 1px 42px),
+    var(--bg-deep);
+  color:var(--text-primary);
+  min-height:100vh;
+  overflow-x:hidden;
+  direction:rtl;
+}
+.app{max-width:1180px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative;}
+
+/* ===== top instrument bar ===== */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 22px; border-bottom:1px solid var(--line-grid);
+  background:linear-gradient(180deg, rgba(16,23,32,.9), rgba(16,23,32,.4));
+  backdrop-filter:blur(4px);
+  position:sticky; top:0; z-index:40;
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{
+  width:30px;height:30px;border:2px solid var(--accent-scan);border-radius:50%;
+  position:relative; flex:none;
+}
+.brand-mark::after{content:"";position:absolute;inset:6px;border:1px solid var(--accent-scan);border-radius:50%;opacity:.5;}
+.brand-text{font-size:14px; letter-spacing:.5px; color:var(--text-dim);}
+.brand-text b{color:var(--text-primary); font-weight:700;}
+.hud{display:flex; align-items:center; gap:18px; font-family:var(--font-num);}
+.hud-item{display:flex; flex-direction:column; align-items:center; min-width:64px;}
+.hud-label{font-family:var(--font-ar); font-size:10px; color:var(--text-dim);}
+.hud-value{font-size:18px; font-weight:700; color:var(--accent-scan);}
+.hud-value.alert{color:var(--accent-alert);}
+.hud-value.gold{color:var(--accent-gold);}
+.icon-btn{
+  background:transparent; border:1px solid var(--line-grid); color:var(--text-dim);
+  width:34px;height:34px;border-radius:50%; cursor:pointer; display:flex;align-items:center;justify-content:center;
+  transition:.15s;
+}
+.icon-btn:hover{border-color:var(--accent-scan); color:var(--accent-scan);}
+
+/* ===== screens ===== */
+.screen{display:none; flex:1; flex-direction:column; padding:26px 22px 60px;}
+.screen.active{display:flex;}
+.stage-frame{
+  flex:1; display:flex; flex-direction:column; gap:18px; max-width:820px; width:100%; margin:0 auto;
+}
+
+/* ===== start screen ===== */
+#screen-start{align-items:center; justify-content:center; text-align:center; gap:0;}
+.start-wrap{max-width:640px; display:flex; flex-direction:column; align-items:center; gap:26px;}
+.scan-ring{
+  width:120px;height:120px;border-radius:50%;
+  border:1px solid var(--line-grid);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.scan-ring::before{
+  content:"";position:absolute;inset:-1px;border-radius:50%;
+  border:2px solid transparent; border-top-color:var(--accent-scan); border-left-color:var(--accent-scan);
+  animation:spin 3.2s linear infinite;
+}
+.scan-ring svg{width:56px;height:56px;stroke:var(--accent-scan);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.title-block h1{
+  font-size:clamp(34px,6vw,54px); letter-spacing:2px; font-weight:900;
+  color:var(--text-primary);
+}
+.title-block h1 span{color:var(--accent-scan);}
+.title-block p.sub{color:var(--text-dim); font-size:15px; margin-top:6px;}
+.title-block p.tagline{color:var(--text-primary); font-size:17px; margin-top:18px; max-width:480px; line-height:1.9;}
+.menu-col{display:flex; flex-direction:column; gap:12px; width:100%; max-width:340px; margin-top:8px;}
+.btn{
+  font-family:var(--font-ar); font-size:15px; font-weight:700; color:var(--text-primary);
+  background:var(--bg-panel-2); border:1px solid var(--line-grid); border-radius:var(--radius-panel);
+  padding:14px 18px; cursor:pointer; transition:.15s; letter-spacing:.3px;
+}
+.btn:hover{border-color:var(--accent-scan); color:var(--accent-scan); transform:translateY(-1px);}
+.btn.primary{background:linear-gradient(90deg, rgba(51,224,192,.16), rgba(51,224,192,.05)); border-color:var(--accent-scan-dim); color:var(--accent-scan);}
+.btn.primary:hover{background:rgba(51,224,192,.24);}
+.btn.ghost{background:transparent;}
+.btn.wide{width:100%;}
+.btn:disabled{opacity:.35; cursor:not-allowed;}
+.btn.small{padding:8px 12px; font-size:13px;}
+.btn.danger{border-color:#5c2a22; color:var(--accent-alert);}
+.btn.danger:hover{border-color:var(--accent-alert);}
+
+/* ===== panel / card ===== */
+.panel{
+  background:var(--bg-panel); border:1px solid var(--line-grid); border-radius:var(--radius-panel);
+  padding:22px;
+}
+.panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.panel-head .lvl{font-family:var(--font-num); font-size:12px; color:var(--accent-scan); letter-spacing:1px;}
+.panel-head .lvl-name{font-size:13px; color:var(--text-dim);}
+
+/* ===== measurement readout ===== */
+.readout{
+  background:#05080b; border:1px solid var(--line-grid); border-radius:var(--radius-panel);
+  padding:34px 20px; text-align:center; margin:6px 0 18px; position:relative; overflow:hidden;
+}
+.readout::before{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, transparent 0%, rgba(51,224,192,.05) 50%, transparent 100%);
+}
+.readout-value{
+  font-family:var(--font-num); font-size:clamp(38px,8vw,64px); font-weight:700; letter-spacing:2px;
+  color:var(--text-primary); position:relative; direction:ltr; display:inline-block;
+}
+.readout-value .digit{position:relative; display:inline-block;}
+.readout-value .digit.zero-flag{color:var(--accent-alert);}
+.readout-value .digit.sig-flag{color:var(--accent-scan);}
+.readout-unit{font-family:var(--font-num); font-size:16px; color:var(--text-dim); margin-right:8px;}
+.readout-caption{margin-top:10px; font-size:13px; color:var(--text-dim);}
+.scan-sweep{
+  position:absolute; top:0; bottom:0; width:3px; background:linear-gradient(180deg, transparent, var(--accent-scan), transparent);
+  opacity:0; left:0;
+}
+.scan-sweep.run{animation:sweep 1.1s ease-out; opacity:1;}
+@keyframes sweep{from{left:0;}to{left:100%;}}
+
+.question-text{font-size:18px; line-height:1.8; margin-bottom:16px; font-weight:500;}
+
+.options-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.options-grid.single{grid-template-columns:1fr;}
+.opt-btn{
+  font-family:var(--font-ar); text-align:right; background:var(--bg-panel-2); border:1px solid var(--line-grid);
+  color:var(--text-primary); padding:14px 16px; border-radius:var(--radius-panel); cursor:pointer; font-size:14.5px;
+  transition:.12s; line-height:1.6;
+}
+.opt-btn:hover{border-color:var(--accent-scan);}
+.opt-btn .k{font-family:var(--font-num); color:var(--accent-scan); margin-left:8px;}
+.opt-btn.correct{border-color:var(--accent-scan); background:rgba(51,224,192,.12); color:var(--accent-scan);}
+.opt-btn.wrong{border-color:var(--accent-alert); background:rgba(255,106,73,.1); color:var(--accent-alert);}
+.opt-btn.disabled{pointer-events:none; opacity:.55;}
+
+.numpad{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+.numpad button{
+  font-family:var(--font-num); font-size:22px; font-weight:700; width:64px;height:64px; border-radius:50%;
+  background:var(--bg-panel-2); border:1px solid var(--line-grid); color:var(--text-primary); cursor:pointer; transition:.12s;
+}
+.numpad button:hover{border-color:var(--accent-scan); color:var(--accent-scan);}
+.numpad button.correct{border-color:var(--accent-scan); background:rgba(51,224,192,.15); color:var(--accent-scan);}
+.numpad button.wrong{border-color:var(--accent-alert); background:rgba(255,106,73,.1); color:var(--accent-alert);}
+
+.zero-choice{display:flex; gap:14px; justify-content:center; margin-top:6px;}
+.zero-choice button{
+  flex:1; max-width:220px; padding:18px; border-radius:var(--radius-panel); cursor:pointer; font-family:var(--font-ar);
+  font-size:16px; font-weight:700; border:1px solid var(--line-grid); background:var(--bg-panel-2); color:var(--text-primary);
+  transition:.12s;
+}
+.zc-yes:hover{border-color:var(--accent-scan); color:var(--accent-scan);}
+.zc-no:hover{border-color:var(--accent-alert); color:var(--accent-alert);}
+.zero-choice button.correct{border-color:var(--accent-scan); background:rgba(51,224,192,.15); color:var(--accent-scan);}
+.zero-choice button.wrong{border-color:var(--accent-alert); background:rgba(255,106,73,.1); color:var(--accent-alert);}
+
+.feedback{
+  margin-top:16px; padding:14px 16px; border-radius:var(--radius-panel); font-size:14px; line-height:1.8;
+  display:none; border:1px solid var(--line-grid);
+}
+.feedback.show{display:block;}
+.feedback.ok{border-color:var(--accent-scan-dim); background:rgba(51,224,192,.08);}
+.feedback.no{border-color:#5c2a22; background:rgba(255,106,73,.08);}
+.feedback .fk{font-weight:700; font-family:var(--font-num); margin-left:8px;}
+.feedback.ok .fk{color:var(--accent-scan);}
+.feedback.no .fk{color:var(--accent-alert);}
+.actions-row{display:flex; justify-content:flex-start; margin-top:16px;}
+
+.progress-track{height:4px; background:var(--line-grid); border-radius:2px; overflow:hidden; margin-bottom:20px;}
+.progress-fill{height:100%; background:var(--accent-scan); width:0%; transition:width .3s;}
+
+.combo-pop{
+  position:fixed; top:90px; left:50%; transform:translateX(-50%) scale(.7); opacity:0;
+  font-family:var(--font-num); font-size:30px; font-weight:700; color:var(--accent-gold);
+  pointer-events:none; z-index:100; transition:.25s;
+}
+.combo-pop.show{opacity:1; transform:translateX(-50%) scale(1);}
+
+/* stage 4 matching */
+.match-wrap{display:flex; gap:26px; justify-content:space-between; flex-wrap:wrap;}
+.match-col{flex:1; min-width:220px; display:flex; flex-direction:column; gap:10px;}
+.match-col h4{font-size:12px; color:var(--text-dim); letter-spacing:1px; margin-bottom:4px;}
+.match-card{
+  font-family:var(--font-num); direction:ltr; text-align:center; padding:14px; border-radius:var(--radius-panel);
+  background:var(--bg-panel-2); border:1px solid var(--line-grid); cursor:pointer; font-size:16px; transition:.12s;
+}
+.match-card.label{font-family:var(--font-ar); direction:rtl; font-size:14px;}
+.match-card:hover{border-color:var(--accent-scan);}
+.match-card.selected{border-color:var(--accent-gold); color:var(--accent-gold);}
+.match-card.locked{border-color:var(--accent-scan); background:rgba(51,224,192,.1); color:var(--accent-scan); pointer-events:none;}
+.match-card.shake{animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* timer */
+.timer-wrap{display:flex; align-items:center; gap:10px;}
+.timer-bar{flex:1; height:8px; background:var(--line-grid); border-radius:4px; overflow:hidden;}
+.timer-fill{height:100%; background:var(--accent-gold); width:100%; transition:width 1s linear;}
+.timer-num{font-family:var(--font-num); font-size:16px; min-width:34px; text-align:center;}
+
+/* wager */
+.wager-grid{display:flex; gap:12px; justify-content:center;}
+.wager-btn{
+  font-family:var(--font-num); font-size:20px; font-weight:700; padding:16px 22px; border-radius:var(--radius-panel);
+  background:var(--bg-panel-2); border:1px solid var(--line-grid); color:var(--accent-gold); cursor:pointer; transition:.12s;
+}
+.wager-btn:hover{border-color:var(--accent-gold); background:rgba(232,179,74,.12);}
+.wager-btn.chosen{border-color:var(--accent-gold); background:rgba(232,179,74,.2);}
+
+/* rules screen */
+.rule-list{display:flex; flex-direction:column; gap:12px;}
+.rule-item{display:flex; gap:14px; align-items:flex-start; padding:14px 16px; background:var(--bg-panel); border:1px solid var(--line-grid); border-radius:var(--radius-panel);}
+.rule-num{font-family:var(--font-num); color:var(--accent-scan); font-weight:700; font-size:15px; flex:none; width:26px;}
+.rule-item p{font-size:14.5px; line-height:1.85;}
+.rule-item .ex{font-family:var(--font-num); direction:ltr; display:inline-block; color:var(--accent-gold); margin-inline-start:6px;}
+
+/* report screen */
+.report-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0;}
+.report-cell{background:var(--bg-panel); border:1px solid var(--line-grid); border-radius:var(--radius-panel); padding:18px; text-align:center;}
+.report-cell .val{font-family:var(--font-num); font-size:30px; font-weight:700; color:var(--accent-scan);}
+.report-cell .lbl{font-size:12px; color:var(--text-dim); margin-top:6px;}
+.rank-badge{
+  text-align:center; padding:16px; border:1px dashed var(--accent-gold); border-radius:var(--radius-panel);
+  color:var(--accent-gold); font-weight:700; font-size:18px; margin-bottom:6px;
+}
+.reveal-stage{display:flex; flex-direction:column; align-items:center; gap:10px; margin:26px 0;}
+.reveal-num{font-family:var(--font-num); font-size:40px; font-weight:700; opacity:0; transform:translateY(10px); transition:.5s;}
+.reveal-num.show{opacity:1; transform:translateY(0);}
+.reveal-line{font-size:16px; line-height:2; text-align:center; opacity:0; transition:.6s; max-width:460px;}
+.reveal-line.show{opacity:1;}
+
+/* challenge mode */
+.scoreboard{display:flex; gap:16px; margin-bottom:22px;}
+.team-card{flex:1; background:var(--bg-panel); border:1px solid var(--line-grid); border-radius:var(--radius-panel); padding:20px; text-align:center;}
+.team-card h3{font-size:13px; color:var(--text-dim); letter-spacing:1px; margin-bottom:8px;}
+.team-card .score{font-family:var(--font-num); font-size:44px; font-weight:700; color:var(--accent-scan);}
+.team-card.b .score{color:var(--accent-gold);}
+.team-adjust{display:flex; justify-content:center; gap:8px; margin-top:10px;}
+.mini-btn{width:30px;height:30px;border-radius:50%; background:var(--bg-panel-2); border:1px solid var(--line-grid); color:var(--text-primary); cursor:pointer;}
+.mini-btn:hover{border-color:var(--accent-scan);}
+.award-row{display:flex; gap:10px; margin-top:16px;}
+.award-row .btn{flex:1;}
+
+/* settings drawer */
+.drawer-overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:200;}
+.drawer-overlay.show{display:flex;}
+.drawer{width:92%; max-width:420px; background:var(--bg-panel); border:1px solid var(--line-grid); border-radius:var(--radius-panel); padding:22px; max-height:88vh; overflow:auto;}
+.drawer h3{font-size:16px; margin-bottom:16px; color:var(--accent-scan);}
+.set-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line-grid); gap:10px;}
+.set-row:last-child{border-bottom:none;}
+.set-row label{font-size:13.5px; color:var(--text-primary);}
+.switch{position:relative; width:44px; height:24px; flex:none;}
+.switch input{opacity:0; width:0; height:0;}
+.slider-tog{position:absolute; inset:0; background:var(--line-grid); border-radius:24px; cursor:pointer; transition:.2s;}
+.slider-tog::before{content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; background:var(--text-dim); border-radius:50%; transition:.2s;}
+.switch input:checked + .slider-tog{background:rgba(51,224,192,.3);}
+.switch input:checked + .slider-tog::before{transform:translateX(-20px); background:var(--accent-scan);}
+select, input[type=number]{
+  background:var(--bg-panel-2); border:1px solid var(--line-grid); color:var(--text-primary); padding:6px 10px;
+  border-radius:4px; font-family:var(--font-ar); font-size:13px;
+}
+.drawer-actions{display:flex; gap:10px; margin-top:18px;}
+
+footer.credit{text-align:center; color:var(--text-dim); font-size:11px; padding:14px; opacity:.5;}
+
+@media (max-width:640px){
+  .options-grid{grid-template-columns:1fr;}
+  .hud{gap:10px;}
+  .hud-item{min-width:44px;}
+  .match-wrap{flex-direction:column;}
+  .report-grid{grid-template-columns:1fr;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar" id="topbar" style="display:none;">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text"><b>SIG-FIG LAB</b> — مختبر تحليل القياسات</div>
+    </div>
+    <div class="hud">
+      <div class="hud-item"><span class="hud-label">النقاط</span><span class="hud-value" id="hud-score">0</span></div>
+      <div class="hud-item"><span class="hud-label">Combo</span><span class="hud-value gold" id="hud-combo">×1</span></div>
+      <div class="hud-item"><span class="hud-label">الدقة</span><span class="hud-value" id="hud-acc">0%</span></div>
+    </div>
+    <button class="icon-btn" onclick="openSettings()" title="إعدادات المعلم">⚙</button>
+  </div>
+
+  <!-- START SCREEN -->
+  <section class="screen active" id="screen-start">
+    <div class="start-wrap">
+      <div class="scan-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      </div>
+      <div class="title-block">
+        <h1>SIG-FIG <span>LAB</span></h1>
+        <p class="sub">مختبر تحليل القياسات — فيزياء الصف التاسع</p>
+        <p class="tagline">هل تستطيع معرفة الرقم الذي يخفي الدقة؟</p>
+      </div>
+      <div class="menu-col">
+        <button class="btn primary wide" onclick="startInvestigation()">ابدأ التحقيق</button>
+        <button class="btn wide" onclick="goTo('screen-challenge-setup')">وضع التحدي</button>
+        <button class="btn wide" onclick="goTo('screen-rules')">تعلم القواعد</button>
+        <button class="btn ghost wide" onclick="openSettings()">إعدادات</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RULES SCREEN -->
+  <section class="screen" id="screen-rules">
+    <div class="stage-frame">
+      <div class="panel-head">
+        <span class="lvl-name">مرجع سريع</span>
+        <button class="btn small" onclick="goTo('screen-start')">رجوع</button>
+      </div>
+      <div class="rule-list">
+        <div class="rule-item"><span class="rule-num">1</span><p>كل الأرقام غير الصفرية معنوية دائمًا. <span class="ex">1.475 → 4 أرقام معنوية</span></p></div>
+        <div class="rule-item"><span class="rule-num">2</span><p>الصفر الواقع بين رقمين غير صفريين معنوي. <span class="ex">205 → 3 أرقام معنوية</span></p></div>
+        <div class="rule-item"><span class="rule-num">3</span><p>الأصفار التي تسبق أول رقم غير صفري (على يسار العدد) ليست معنوية؛ فهي تحدد موضع الفاصلة فقط. <span class="ex">0.0035 → 2 أرقام معنوية</span></p></div>
+        <div class="rule-item"><span class="rule-num">4</span><p>الأصفار الواقعة بعد الفاصلة العشرية في نهاية العدد معنوية؛ لأنها تدل على دقة الأداة. <span class="ex">14.0 → 3 أرقام معنوية</span></p></div>
+        <div class="rule-item"><span class="rule-num">5</span><p>الأعداد الصحيحة المنتهية بأصفار دون فاصلة عشرية غامضة — لا يمكن الجزم بعدد أرقامها المعنوية من الشكل وحده. <span class="ex">3000 → غير محدد</span></p></div>
+        <div class="rule-item"><span class="rule-num">6</span><p>الصيغة العلمية تُزيل الغموض؛ فكل رقم قبل القوة العشرية يُعد معنويًا عمدًا. <span class="ex">3.00×10³ → 3 أرقام معنوية</span></p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INVESTIGATION FLOW: stage container -->
+  <section class="screen" id="screen-game">
+    <div class="stage-frame">
+      <div class="progress-track"><div class="progress-fill" id="stage-progress"></div></div>
+      <div class="panel" id="stage-panel"><!-- injected per stage --></div>
+    </div>
+  </section>
+
+  <!-- CHALLENGE SETUP -->
+  <section class="screen" id="screen-challenge-setup">
+    <div class="stage-frame">
+      <div class="panel-head">
+        <span class="lvl-name">إعداد وضع التحدي</span>
+        <button class="btn small" onclick="goTo('screen-start')">رجوع</button>
+      </div>
+      <div class="panel">
+        <p style="margin-bottom:14px; line-height:1.8; font-size:14.5px; color:var(--text-dim);">يقسّم المعلم الطلاب إلى فريقين. تُعرض المسألة على الشاشة، والفريق الذي يرفع يده أولًا يجيب. اضغط المعلم على الفريق الفائز لمنحه النقاط.</p>
+        <button class="btn primary wide" onclick="startChallenge()">بدء وضع التحدي</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHALLENGE MODE -->
+  <section class="screen" id="screen-challenge">
+    <div class="stage-frame">
+      <div class="scoreboard">
+        <div class="team-card a">
+          <h3>TEAM A — الفريق أ</h3>
+          <div class="score" id="score-a">0</div>
+          <div class="team-adjust">
+            <button class="mini-btn" onclick="adjustTeam('a',-50)">−</button>
+            <button class="mini-btn" onclick="adjustTeam('a',50)">+</button>
+          </div>
+        </div>
+        <div class="team-card b">
+          <h3>TEAM B — الفريق ب</h3>
+          <div class="score" id="score-b">0</div>
+          <div class="team-adjust">
+            <button class="mini-btn" onclick="adjustTeam('b',-50)">−</button>
+            <button class="mini-btn" onclick="adjustTeam('b',50)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="lvl" id="ch-level">LEVEL</span><span class="lvl-name" id="ch-points">قيمة السؤال: 100</span></div>
+        <div id="ch-question-area"></div>
+        <div class="award-row" id="ch-award-row" style="display:none;">
+          <button class="btn primary" onclick="awardTeam('a')">النقطة لفريق A</button>
+          <button class="btn primary" onclick="awardTeam('b')">النقطة لفريق B</button>
+          <button class="btn ghost" onclick="awardTeam(null)">لا أحد أجاب</button>
+        </div>
+        <div class="actions-row">
+          <button class="btn" id="ch-reveal-btn" onclick="challengeReveal()">كشف الإجابة</button>
+          <button class="btn ghost" style="margin-inline-start:8px;" onclick="challengeNext()">السؤال التالي</button>
+          <button class="btn ghost" style="margin-inline-start:8px;" onclick="goTo('screen-start')">إنهاء</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPORT SCREEN -->
+  <section class="screen" id="screen-report">
+    <div class="stage-frame" id="report-frame"></div>
+  </section>
+
+  <footer class="credit">SIG-FIG LAB — أداة تعليمية لمادة الفيزياء، الصف التاسع</footer>
+</div>
+
+<div class="combo-pop" id="combo-pop">COMBO ×2</div>
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer-overlay" id="settings-overlay">
+  <div class="drawer">
+    <h3>لوحة المعلم — Teacher Mode</h3>
+    <div class="set-row">
+      <label>تفعيل المؤقت</label>
+      <label class="switch"><input type="checkbox" id="set-timer" checked onchange="saveSettings()"><span class="slider-tog"></span></label>
+    </div>
+    <div class="set-row">
+      <label>تفعيل الأصوات</label>
+      <label class="switch"><input type="checkbox" id="set-sound" checked onchange="saveSettings()"><span class="slider-tog"></span></label>
+    </div>
+    <div class="set-row">
+      <label>مدة الجولة (ثانية)</label>
+      <input type="number" id="set-duration" value="60" min="20" max="180" style="width:70px;" onchange="saveSettings()">
+    </div>
+    <div class="set-row">
+      <label>عدد أسئلة كل مرحلة</label>
+      <input type="number" id="set-qcount" value="6" min="4" max="10" style="width:70px;" onchange="saveSettings()">
+    </div>
+    <div class="set-row">
+      <label>مستوى الصعوبة</label>
+      <select id="set-difficulty" onchange="saveSettings()">
+        <option value="1">تمهيدي (LEVEL 1-2)</option>
+        <option value="2" selected>متوسط (LEVEL 1-3)</option>
+        <option value="3">متقدم (كل المستويات)</option>
+      </select>
+    </div>
+    <div class="set-row">
+      <label>تصفير كل النتائج</label>
+      <button class="btn small danger" onclick="resetAllScores()">تصفير</button>
+    </div>
+    <div class="drawer-actions">
+      <button class="btn primary wide" onclick="closeSettings()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   AUDIO — procedural beeps, no external files
+========================================================= */
+let audioCtx = null;
+function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function beep(freq, dur, type, vol){
+  if(!settings.sound) return;
+  ensureAudio(); if(!audioCtx) return;
+  const t0 = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime((vol||0.08), t0);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur);
+}
+function sndCorrect(){ beep(720,.12,'sine',.09); setTimeout(()=>beep(980,.14,'sine',.09),90); }
+function sndWrong(){ beep(180,.22,'sawtooth',.07); }
+function sndTick(){ beep(540,.05,'square',.03); }
+function sndCombo(){ beep(1100,.15,'triangle',.08); }
+function sndScan(){ beep(300,.25,'sine',.04); }
+
+/* =========================================================
+   QUESTION BANK
+========================================================= */
+// count-type items: [display value, unit, correct sig-fig count, explanation]
+const bankCount = [
+  {v:"3.45", u:"cm", n:3, ex:"جميع الأرقام غير صفرية، فكلها معنوية.", lvl:1, tag:"basic"},
+  {v:"205", u:"g", n:3, ex:"الصفر بين رقمين غير صفريين (2 و5) فهو معنوي.", lvl:1, tag:"zero-mid"},
+  {v:"1.475", u:"L", n:4, ex:"جميع الأرقام غير صفرية، فكلها معنوية.", lvl:1, tag:"basic"},
+  {v:"37.0", u:"mL", n:3, ex:"الصفر بعد الفاصلة العشرية في نهاية العدد معنوي.", lvl:1, tag:"zero-trail"},
+  {v:"45.6", u:"kg", n:3, ex:"جميع الأرقام غير صفرية، فكلها معنوية.", lvl:1, tag:"basic"},
+  {v:"7.00", u:"N", n:3, ex:"الصفران بعد الفاصلة في نهاية العدد معنويان.", lvl:1, tag:"zero-trail"},
+  {v:"9.81", u:"m/s²", n:3, ex:"جميع الأرقام غير صفرية، فكلها معنوية.", lvl:1, tag:"basic"},
+  {v:"56", u:"cm", n:2, ex:"رقمان غير صفريين، وكلاهما معنوي.", lvl:1, tag:"basic"},
+  {v:"0.0035", u:"m", n:2, ex:"الأصفار قبل أول رقم غير صفري (3) غير معنوية.", lvl:2, tag:"zero-lead"},
+  {v:"0.02", u:"A", n:1, ex:"الصفران قبل الرقم 2 غير معنويين؛ يحددان موضع الفاصلة فقط.", lvl:2, tag:"zero-lead"},
+  {v:"5.0308", u:"g", n:5, ex:"كل الأصفار هنا واقعة بين أرقام غير صفرية، فهي معنوية.", lvl:2, tag:"zero-mid"},
+  {v:"0.0200", u:"kg", n:3, ex:"الصفران الأولان غير معنويين، أما 2 والصفران بعده فمعنويان.", lvl:2, tag:"mixed"},
+  {v:"0.0045", u:"s", n:2, ex:"الأصفار قبل الرقم 4 غير معنوية.", lvl:2, tag:"zero-lead"},
+  {v:"14.0", u:"cm", n:3, ex:"الصفر بعد الفاصلة العشرية في نهاية العدد معنوي.", lvl:1, tag:"zero-trail"},
+  {v:"2.500", u:"mL", n:4, ex:"الأصفار الواقعة بعد الفاصلة في نهاية العدد معنوية جميعها.", lvl:2, tag:"zero-trail"},
+  {v:"100.0", u:"g", n:4, ex:"وجود الفاصلة العشرية يجعل كل الأصفار معنوية.", lvl:2, tag:"zero-trail"},
+  {v:"20.05", u:"cm", n:4, ex:"الصفر بين رقمين غير صفريين معنوي.", lvl:2, tag:"zero-mid"},
+  {v:"0.00600", u:"m", n:3, ex:"الأصفار الأولى غير معنوية، والصفران بعد 6 في النهاية معنويان.", lvl:3, tag:"mixed"},
+  {v:"3.070", u:"L", n:4, ex:"الصفر بين رقمين غير صفريين معنوي، وكذلك الصفر النهائي بعد الفاصلة.", lvl:3, tag:"mixed"},
+  {v:"60.0", u:"kg", n:3, ex:"الصفر بعد الفاصلة العشرية في نهاية العدد معنوي.", lvl:2, tag:"zero-trail"},
+  {v:"0.008", u:"m", n:1, ex:"جميع الأصفار قبل الرقم 8 غير معنوية.", lvl:2, tag:"zero-lead"},
+  {v:"7002", u:"m", n:4, ex:"كلا الصفرين بين رقمين غير صفريين، فهما معنويان.", lvl:2, tag:"zero-mid"},
+];
+
+// concept-type MCQs
+const bankConcept = [
+  {q:"العددان 2.0 و2.00 متساويان رياضيًا. ما الفرق الحقيقي بينهما في الفيزياء؟",
+   opts:["لا فرق إطلاقًا","2.00 أكبر من 2.0 عدديًا","2.00 يعبّر عن دقة قياس أعلى من 2.0","العددان غير قابلين للمقارنة"],
+   correct:2, ex:"القيمة الرياضية واحدة، لكن عدد الأرقام المعنوية يخبرنا عن دقة أداة القياس.", lvl:3, tag:"precision"},
+  {q:"أي القياسين يعبّر عن دقة أعلى في القياس؟",
+   opts:["2.0 cm","2.00 cm","كلاهما بنفس الدقة","لا يمكن معرفة ذلك"],
+   correct:1, ex:"وجود رقمين عشريين يدل على أداة قياس أدق تصل لجزء من مئة السنتيمتر.", lvl:3, tag:"precision"},
+  {q:"لماذا لا تُعد الأصفار التي تسبق أول رقم غير صفري معنوية؟",
+   opts:["لأنها أصفار وليست أرقامًا حقيقية","لأنها تحدد موضع الفاصلة العشرية فقط ولا تضيف دقة","لأن القاعدة تقول ذلك بلا سبب","لأنها تجعل العدد أصغر"],
+   correct:1, ex:"وظيفة هذه الأصفار هي تحديد مرتبة العدد، لا التعبير عن دقة القياس.", lvl:3, tag:"zero-lead"},
+  {q:"ما الذي يمنحه الرقم 3000 من معلومات عن دقة القياس؟",
+   opts:["دقة عالية جدًا","دقة منخفضة جدًا","معلومة غامضة غير محددة دون توضيح","لا علاقة له بالدقة"],
+   correct:2, ex:"شكل العدد وحده لا يوضح إن كانت الأصفار معنوية أم لا؛ الصيغة العلمية تحل هذا الغموض.", lvl:4, tag:"ambiguous"},
+  {q:"ما الهدف من استخدام الصيغة العلمية في التعبير عن القياسات؟",
+   opts:["لجعل الأعداد تبدو أكبر","لإزالة الغموض حول عدد الأرقام المعنوية","لتسهيل الجمع والطرح فقط","لا هدف علمي محدد"],
+   correct:1, ex:"الصيغة العلمية تحدد بدقة أي الأرقام معنوية دون لبس.", lvl:3, tag:"sci-notation"},
+  {q:"قياس طوله 12.00 cm مقارنة بقياس طوله 12 cm — أيهما ناتج عن أداة أدق؟",
+   opts:["12 cm","12.00 cm","الأداة نفسها في الحالتين","لا يمكن الجزم بذلك"],
+   correct:1, ex:"عدد الأرقام المعنوية الأكبر (12.00) يدل على أداة قياس تميّز أجزاء أدق من الوحدة.", lvl:1, tag:"precision"},
+  {q:"أي العبارات صحيحة عن الصفر الواقع بين رقمين غير صفريين؟",
+   opts:["غير معنوي دائمًا","معنوي دائمًا","يعتمد على موقعه في الجملة","معنوي فقط في الأعداد العشرية"],
+   correct:1, ex:"الصفر المحصور بين رقمين غير صفريين معنوي بغض النظر عن باقي شكل العدد.", lvl:2, tag:"zero-mid"},
+  {q:"العدد 20000 مكتوبًا بدون فاصلة عشرية — ماذا يمكن أن نقول عن أصفاره؟",
+   opts:["كلها معنوية بالتأكيد","لا شيء منها معنوي","عددها المعنوي غامض ويحتاج صيغة علمية لتوضيحه","العدد غير صالح للقياس"],
+   correct:2, ex:"الأعداد الصحيحة المنتهية بأصفار دون فاصلة عشرية غامضة الدقة، وتوضّح بالصيغة العلمية.", lvl:4, tag:"ambiguous"},
+];
+
+// ambiguous matching sets for stage 4 (drag/click matching)
+const ambiguousSets = [
+  { base:"3000",
+    left:[ {id:"n1", label:"3 × 10³"}, {id:"n2", label:"3.0 × 10³"}, {id:"n3", label:"3.00 × 10³"} ],
+    right:[ {id:"c1", label:"1 رقم معنوي", match:"n1"}, {id:"c2", label:"2 رقم معنوي", match:"n2"}, {id:"c3", label:"3 أرقام معنوية", match:"n3"} ] },
+  { base:"1500",
+    left:[ {id:"n1", label:"1.5 × 10³"}, {id:"n2", label:"1.50 × 10³"}, {id:"n3", label:"1.500 × 10³"} ],
+    right:[ {id:"c1", label:"2 رقم معنوي", match:"n1"}, {id:"c2", label:"3 أرقام معنوية", match:"n2"}, {id:"c3", label:"4 أرقام معنوية", match:"n3"} ] },
+];
+
+// stage3 "zero on trial" set — uniform zero verdict per number
+const zeroTrialSet = [
+  {v:"205", u:"g", verdict:true,  ex:"الصفر محصور بين رقمين غير صفريين (2 و5) → معنوي."},
+  {v:"0.0035", u:"m", verdict:false, ex:"الأصفار تسبق أول رقم غير صفري (3) → غير معنوية."},
+  {v:"14.0", u:"cm", verdict:true,  ex:"الصفر بعد الفاصلة العشرية في نهاية العدد → معنوي."},
+  {v:"3.0035", u:"L", verdict:true, ex:"الأصفار محصورة بين رقمين غير صفريين (3 و3) → معنوية."},
+  {v:"0.008", u:"A", verdict:false, ex:"كل الأصفار تسبق أول رقم غير صفري (8) → غير معنوية."},
+  {v:"500.0", u:"mL", verdict:true, ex:"وجود الفاصلة العشرية يجعل كل الأصفار حتى النهاية معنوية."},
+  {v:"7002", u:"km", verdict:true, ex:"الصفران محصوران بين رقمين غير صفريين → معنويان."},
+  {v:"0.06", u:"s", verdict:false, ex:"الأصفار تسبق أول رقم غير صفري (6) → غير معنوية."},
+];
+
+function shuffled(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* =========================================================
+   STATE
+========================================================= */
+let settings = { timer:true, sound:true, duration:60, qcount:6, difficulty:2 };
+
+let game = {
+  score:0, combo:1, correct:0, total:0,
+  skills:{}, // tag -> {right, wrong}
+  stage:1,
+};
+
+let teams = { a:0, b:0 };
+
+function trackSkill(tag, right){
+  if(!game.skills[tag]) game.skills[tag] = {right:0, wrong:0};
+  if(right) game.skills[tag].right++; else game.skills[tag].wrong++;
+}
+
+function addScore(pts){
+  game.score = Math.max(0, game.score + pts);
+  document.getElementById('hud-score').textContent = game.score;
+}
+function updateHudAcc(){
+  const acc = game.total ? Math.round(100*game.correct/game.total) : 0;
+  document.getElementById('hud-acc').textContent = acc + '%';
+}
+function popCombo(){
+  const el = document.getElementById('combo-pop');
+  el.textContent = 'COMBO ×' + game.combo;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 700);
+}
+function registerAnswer(isCorrect, tag, fast){
+  game.total++;
+  if(isCorrect){
+    game.correct++;
+    game.combo = Math.min(game.combo+1, 4);
+    let pts = 100;
+    if(fast) pts += 30;
+    if(game.combo>=2) pts = Math.round(pts * (1 + (game.combo-1)*0.15));
+    addScore(pts);
+    sndCorrect();
+    if(game.combo>=2){ popCombo(); sndCombo(); }
+  } else {
+    game.combo = 1;
+    addScore(-20);
+    sndWrong();
+  }
+  document.getElementById('hud-combo').textContent = '×'+game.combo;
+  updateHudAcc();
+  if(tag) trackSkill(tag, isCorrect);
+}
+
+/* =========================================================
+   NAV
+========================================================= */
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('topbar').style.display = (id==='screen-game') ? 'flex' : 'none';
+  window.scrollTo(0,0);
+}
+
+function openSettings(){ document.getElementById('settings-overlay').classList.add('show'); }
+function closeSettings(){ document.getElementById('settings-overlay').classList.remove('show'); }
+function saveSettings(){
+  settings.timer = document.getElementById('set-timer').checked;
+  settings.sound = document.getElementById('set-sound').checked;
+  settings.duration = parseInt(document.getElementById('set-duration').value)||60;
+  settings.qcount = parseInt(document.getElementById('set-qcount').value)||6;
+  settings.difficulty = parseInt(document.getElementById('set-difficulty').value)||2;
+}
+function resetAllScores(){
+  game = {score:0, combo:1, correct:0, total:0, skills:{}, stage:1};
+  teams = {a:0, b:0};
+  document.getElementById('hud-score').textContent='0';
+  document.getElementById('hud-combo').textContent='×1';
+  document.getElementById('hud-acc').textContent='0%';
+  document.getElementById('score-a').textContent='0';
+  document.getElementById('score-b').textContent='0';
+}
+
+/* =========================================================
+   INVESTIGATION FLOW
+========================================================= */
+function startInvestigation(){
+  game = {score:0, combo:1, correct:0, total:0, skills:{}, stage:1};
+  document.getElementById('hud-score').textContent='0';
+  document.getElementById('hud-combo').textContent='×1';
+  document.getElementById('hud-acc').textContent='0%';
+  goTo('screen-game');
+  runStage1();
+}
+function setProgress(pct){ document.getElementById('stage-progress').style.width = pct+'%'; }
+function panel(){ return document.getElementById('stage-panel'); }
+
+/* ---- STAGE 1 ---- */
+function runStage1(){
+  setProgress(5);
+  panel().innerHTML = `
+    <div class="panel-head"><span class="lvl">STAGE 1</span><span class="lvl-name">جهاز القياس</span></div>
+    <div class="readout">
+      <div class="readout-value" style="font-size:clamp(26px,5vw,38px);">12 cm &nbsp;&nbsp; 12.0 cm &nbsp;&nbsp; 12.00 cm</div>
+      <div class="readout-caption">ثلاث قراءات لطول العينة نفسها بأدوات مختلفة</div>
+    </div>
+    <p class="question-text">هل هذه القياسات الثلاثة متساوية في الفيزياء؟</p>
+    <div class="options-grid single" id="s1-opts">
+      <button class="opt-btn" data-i="0"><span class="k">A</span> نعم، لا يوجد فرق</button>
+      <button class="opt-btn" data-i="1"><span class="k">B</span> لا، القيمة الرياضية قد تكون متساوية لكن دقة القياس مختلفة</button>
+      <button class="opt-btn" data-i="2"><span class="k">C</span> 12.00 أكبر من 12.0</button>
+      <button class="opt-btn" data-i="3"><span class="k">D</span> لا يمكن مقارنة الأعداد</button>
+    </div>
+    <div class="feedback" id="s1-fb"></div>
+    <div class="actions-row"><button class="btn primary" id="s1-next" style="display:none;" onclick="runStage2(0)">التالي</button></div>
+  `;
+  const opts = document.querySelectorAll('#s1-opts .opt-btn');
+  const t0 = Date.now();
+  opts.forEach(b=>b.addEventListener('click', ()=>{
+    opts.forEach(o=>o.classList.add('disabled'));
+    const chosen = parseInt(b.dataset.i);
+    const isCorrect = chosen===1;
+    b.classList.add(isCorrect?'correct':'wrong');
+    if(!isCorrect) opts[1].classList.add('correct');
+    registerAnswer(isCorrect, 'precision', (Date.now()-t0)<6000);
+    const fb = document.getElementById('s1-fb');
+    fb.className = 'feedback show ' + (isCorrect?'ok':'no');
+    fb.innerHTML = (isCorrect? '<span class="fk">✓ صحيح</span>' : '<span class="fk">✗ غير دقيق</span>') +
+      'الدقة ليست في الرقم فقط… بل في المعلومات التي يخبرنا بها الرقم عن القياس.';
+    document.getElementById('s1-next').style.display='inline-block';
+  }, {once:true}));
+}
+
+/* ---- STAGE 2: sig-fig counting ---- */
+let s2list = [];
+function runStage2(i){
+  if(i===0){ s2list = shuffled(bankCount.filter(q=>q.lvl<=(settings.difficulty>=2?2:1))).slice(0, settings.qcount); }
+  setProgress(20 + (i/s2list.length)*20);
+  if(i>=s2list.length){ runStage3(0); return; }
+  const item = s2list[i];
+  panel().innerHTML = `
+    <div class="panel-head"><span class="lvl">STAGE 2</span><span class="lvl-name">بصمة الرقم — ${i+1}/${s2list.length}</span></div>
+    <div class="readout"><div class="scan-sweep run"></div>
+      <span class="readout-value">${item.v}</span><span class="readout-unit">${item.u}</span>
+      <div class="readout-caption">حلّل بصمة القياس</div>
+    </div>
+    <p class="question-text">كم رقمًا معنويًا في هذا القياس؟</p>
+    <div class="numpad" id="s2-pad">
+      ${[1,2,3,4,5].map(n=>`<button data-n="${n}">${n}</button>`).join('')}
+    </div>
+    <div class="feedback" id="s2-fb"></div>
+    <div class="actions-row"><button class="btn primary" id="s2-next" style="display:none;">التالي</button></div>
+  `;
+  sndScan();
+  const t0 = Date.now();
+  const pad = document.querySelectorAll('#s2-pad button');
+  pad.forEach(b=>b.addEventListener('click', ()=>{
+    pad.forEach(o=>o.disabled=true);
+    const chosen = parseInt(b.dataset.n);
+    const isCorrect = chosen===item.n;
+    b.classList.add(isCorrect?'correct':'wrong');
+    if(!isCorrect) pad.forEach(o=>{ if(parseInt(o.dataset.n)===item.n) o.classList.add('correct'); });
+    registerAnswer(isCorrect, item.tag, (Date.now()-t0)<5000);
+    const fb = document.getElementById('s2-fb');
+    fb.className = 'feedback show ' + (isCorrect?'ok':'no');
+    fb.innerHTML = (isCorrect? '<span class="fk">✓ صحيح</span>' : '<span class="fk">✗ غير دقيق</span>') + item.ex;
+    document.getElementById('s2-next').style.display='inline-block';
+    document.getElementById('s2-next').onclick = ()=>runStage2(i+1);
+  }, {once:true}));
+}
+
+/* ---- STAGE 3: zero on trial ---- */
+let s3list = [];
+function runStage3(i){
+  if(i===0){ s3list = shuffled(zeroTrialSet).slice(0, Math.min(settings.qcount, zeroTrialSet.length)); }
+  setProgress(45 + (i/s3list.length)*15);
+  if(i>=s3list.length){ runStage4(); return; }
+  const item = s3list[i];
+  panel().innerHTML = `
+    <div class="panel-head"><span class="lvl">STAGE 3</span><span class="lvl-name">قضية الصفر — ${i+1}/${s3list.length}</span></div>
+    <div class="readout"><div class="scan-sweep run"></div>
+      <span class="readout-value">${highlightZeros(item.v)}</span><span class="readout-unit">${item.u}</span>
+      <div class="readout-caption">الصفر متهم… هل هو رقم معنوي؟</div>
+    </div>
+    <div class="zero-choice" id="s3-choice">
+      <button class="zc-yes" data-v="1">🟢 معنوي</button>
+      <button class="zc-no" data-v="0">🔴 غير معنوي</button>
+    </div>
+    <div class="feedback" id="s3-fb"></div>
+    <div class="actions-row"><button class="btn primary" id="s3-next" style="display:none;">التالي</button></div>
+  `;
+  sndScan();
+  const t0 = Date.now();
+  const btns = document.querySelectorAll('#s3-choice button');
+  btns.forEach(b=>b.addEventListener('click', ()=>{
+    btns.forEach(o=>o.disabled=true);
+    const chosen = b.dataset.v==='1';
+    const isCorrect = chosen===item.verdict;
+    b.classList.add(isCorrect?'correct':'wrong');
+    if(!isCorrect) btns.forEach(o=>{ if((o.dataset.v==='1')===item.verdict) o.classList.add('correct'); });
+    registerAnswer(isCorrect, 'zero-judgment', (Date.now()-t0)<5000);
+    const fb = document.getElementById('s3-fb');
+    fb.className = 'feedback show ' + (isCorrect?'ok':'no');
+    fb.innerHTML = (isCorrect? '<span class="fk">✓ صحيح</span>' : '<span class="fk">✗ غير دقيق</span>') + item.ex;
+    document.getElementById('s3-next').style.display='inline-block';
+    document.getElementById('s3-next').onclick = ()=>runStage3(i+1);
+  }, {once:true}));
+}
+function highlightZeros(v){
+  return v.split('').map(ch => ch==='0' ? `<span class="digit zero-flag">0</span>` : `<span class="digit">${ch}</span>`).join('');
+}
+
+/* ---- STAGE 4: ambiguous number matching ---- */
+let s4setIndex = 0;
+let s4selectedLeft = null;
+let s4matched = 0;
+function runStage4(){
+  setProgress(65);
+  s4setIndex = 0;
+  showStage4Round();
+}
+function showStage4Round(){
+  if(s4setIndex >= ambiguousSets.length){ runStage5(0); return; }
+  const set = ambiguousSets[s4setIndex];
+  s4selectedLeft = null; s4matched = 0;
+  const leftHtml = shuffled(set.left).map(c=>`<div class="match-card" data-id="${c.id}" onclick="s4pickLeft('${c.id}')">${c.label}</div>`).join('');
+  const rightHtml = shuffled(set.right).map(c=>`<div class="match-card label" data-id="${c.id}" data-match="${c.match}" onclick="s4pickRight('${c.id}','${c.match}')">${c.label}</div>`).join('');
+  panel().innerHTML = `
+    <div class="panel-head"><span class="lvl">STAGE 4</span><span class="lvl-name">الرقم الغامض — ${set.base}</span></div>
+    <p class="question-text">العدد <b style="font-family:var(--font-num); color:var(--accent-alert);">${set.base}</b> غامض من حيث عدد أرقامه المعنوية. طابق كل صيغة علمية مع عدد أرقامها المعنوية الصحيح.</p>
+    <div class="match-wrap">
+      <div class="match-col"><h4>الصيغة العلمية</h4>${leftHtml}</div>
+      <div class="match-col"><h4>عدد الأرقام المعنوية</h4>${rightHtml}</div>
+    </div>
+    <div class="feedback" id="s4-fb"></div>
+    <div class="actions-row"><button class="btn primary" id="s4-next" style="display:none;" onclick="s4setIndex++; showStage4Round();">التالي</button></div>
+  `;
+}
+function s4pickLeft(id){
+  document.querySelectorAll('.match-col:first-child .match-card').forEach(c=>c.classList.remove('selected'));
+  const card = document.querySelector(`.match-card[data-id="${id}"]`);
+  if(card.classList.contains('locked')) return;
+  card.classList.add('selected');
+  s4selectedLeft = id;
+}
+function s4pickRight(id, match){
+  if(!s4selectedLeft) return;
+  const rightCard = document.querySelector(`.match-col:last-child .match-card[data-id="${id}"]`);
+  if(rightCard.classList.contains('locked')) return;
+  const leftCard = document.querySelector(`.match-col:first-child .match-card[data-id="${s4selectedLeft}"]`);
+  const isCorrect = s4selectedLeft === match;
+  if(isCorrect){
+    leftCard.classList.remove('selected'); leftCard.classList.add('locked');
+    rightCard.classList.add('locked');
+    s4matched++;
+    registerAnswer(true, 'ambiguous', true);
+    if(s4matched >= 3){
+      const fb = document.getElementById('s4-fb');
+      fb.className='feedback show ok';
+      fb.innerHTML = '<span class="fk">✓ تم فك الغموض</span> عدد الأصفار الظاهرة صراحة في الصيغة العلمية هو ما يحدد عدد الأرقام المعنوية — لا لبس بعد الآن.';
+      document.getElementById('s4-next').style.display='inline-block';
+    }
+  } else {
+    rightCard.classList.add('shake'); leftCard.classList.add('shake');
+    setTimeout(()=>{ rightCard.classList.remove('shake'); leftCard.classList.remove('shake'); }, 300);
+    registerAnswer(false, 'ambiguous', false);
+  }
+  s4selectedLeft = null;
+}
+
+/* ---- STAGE 5: timed expert quiz + wager ---- */
+let s5list = [];
+let s5timer = null; let s5timeLeft = 0;
+function runStage5(i){
+  if(i===0){
+    const pool = [...bankCount.map(q=>({type:'count', ...q})), ...bankConcept.map(q=>({type:'concept', ...q}))]
+      .filter(q => q.lvl <= (settings.difficulty===1?2:(settings.difficulty===2?3:4)));
+    s5list = shuffled(pool).slice(0, settings.qcount + 2);
+    s5timeLeft = settings.duration;
+  }
+  setProgress(80 + (i/s5list.length)*10);
+  if(i>=s5list.length){ clearInterval(s5timer); runWager(); return; }
+  const item = s5list[i];
+
+  let bodyHtml = '';
+  if(item.type==='count'){
+    bodyHtml = `
+      <div class="readout"><span class="readout-value">${item.v}</span><span class="readout-unit">${item.u}</span></div>
+      <p class="question-text">كم رقمًا معنويًا؟</p>
+      <div class="numpad" id="s5-pad">${[1,2,3,4,5].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div>
+    `;
+  } else {
+    bodyHtml = `
+      <p class="question-text">${item.q}</p>
+      <div class="options-grid single" id="s5-opts">
+        ${item.opts.map((o,idx)=>`<button class="opt-btn" data-i="${idx}"><span class="k">${['A','B','C','D'][idx]}</span> ${o}</button>`).join('')}
+      </div>
+    `;
+  }
+
+  panel().innerHTML = `
+    <div class="panel-head"><span class="lvl">STAGE 5</span><span class="lvl-name">اختبار الخبير — ${i+1}/${s5list.length}</span></div>
+    <div class="timer-wrap"><span class="timer-num" id="s5-clock">${s5timeLeft}</span><div class="timer-bar"><div class="timer-fill" id="s5-timerfill" style="width:100%;"></div></div></div>
+    ${bodyHtml}
+    <div class="feedback" id="s5-fb"></div>
+    <div class="actions-row"><button class="btn primary" id="s5-next" style="display:none;">التالي</button></div>
+  `;
+
+  if(settings.timer){
+    clearInterval(s5timer);
+    const totalT = settings.duration;
+    s5timer = setInterval(()=>{
+      s5timeLeft--;
+      document.getElementById('s5-clock').textContent = Math.max(0,s5timeLeft);
+      document.getElementById('s5-timerfill').style.width = Math.max(0,(s5timeLeft/totalT*100))+'%';
+      if(s5timeLeft<=10 && s5timeLeft>0) sndTick();
+      if(s5timeLeft<=0){ clearInterval(s5timer); finishStage5Answer(i, item, false, null); }
+    },1000);
+  }
+
+  const t0 = Date.now();
+  if(item.type==='count'){
+    document.querySelectorAll('#s5-pad button').forEach(b=>b.addEventListener('click', ()=>{
+      const chosen = parseInt(b.dataset.n);
+      finishStage5Answer(i, item, chosen===item.n, b, (Date.now()-t0)<4000);
+    }, {once:true}));
+  } else {
+    document.querySelectorAll('#s5-opts .opt-btn').forEach(b=>b.addEventListener('click', ()=>{
+      const chosen = parseInt(b.dataset.i);
+      finishStage5Answer(i, item, chosen===item.correct, b, (Date.now()-t0)<4000);
+    }, {once:true}));
+  }
+}
+function finishStage5Answer(i, item, isCorrect, btnEl, fast){
+  clearInterval(s5timer);
+  document.querySelectorAll('#s5-pad button, #s5-opts .opt-btn').forEach(b=>b.disabled=true);
+  if(btnEl) btnEl.classList.add(isCorrect?'correct':'wrong');
+  const tag = item.type==='count' ? item.tag : item.tag;
+  registerAnswer(isCorrect, tag, !!fast);
+  const fb = document.getElementById('s5-fb');
+  fb.className='feedback show ' + (isCorrect?'ok':'no');
+  fb.innerHTML = (isCorrect?'<span class="fk">✓ صحيح</span>':'<span class="fk">✗ غير دقيق</span>') + item.ex;
+  document.getElementById('s5-next').style.display='inline-block';
+  document.getElementById('s5-next').onclick = ()=>runStage5(i+1);
+}
+
+/* ---- WAGER ROUND ---- */
+let wagerAmount = 0;
+function runWager(){
+  setProgress(95);
+  const item = {v:"0.0200", u:"kg", n:3, ex:"الصفران الأولان غير معنويين، أما 2 والصفران بعده فمعنويان — لأن الفاصلة العشرية تجعلهما دالّين على الدقة."};
+  panel().innerHTML = `
+    <div class="panel-head"><span class="lvl">FINAL ROUND</span><span class="lvl-name">راهن بإجابتك</span></div>
+    <p class="question-text">هل أنت واثق؟ اختر عدد النقاط التي تراهن بها قبل رؤية السؤال.</p>
+    <div class="wager-grid" id="wager-grid">
+      <button class="wager-btn" data-w="50">50</button>
+      <button class="wager-btn" data-w="100">100</button>
+      <button class="wager-btn" data-w="200">200</button>
+    </div>
+    <div id="wager-question" style="margin-top:22px; display:none;">
+      <div class="readout"><span class="readout-value">${item.v}</span><span class="readout-unit">${item.u}</span></div>
+      <p class="question-text">كم رقمًا معنويًا؟</p>
+      <div class="numpad" id="wager-pad">${[1,2,3,4,5].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div>
+      <div class="feedback" id="wager-fb"></div>
+      <div class="actions-row"><button class="btn primary" id="wager-next" style="display:none;" onclick="showReport();">عرض تقرير المحقق</button></div>
+    </div>
+  `;
+  document.querySelectorAll('#wager-grid .wager-btn').forEach(b=>b.addEventListener('click', ()=>{
+    document.querySelectorAll('#wager-grid .wager-btn').forEach(o=>o.classList.remove('chosen'));
+    b.classList.add('chosen');
+    wagerAmount = parseInt(b.dataset.w);
+    document.getElementById('wager-question').style.display='block';
+    document.querySelectorAll('#wager-grid .wager-btn').forEach(o=>o.disabled=true);
+  }, {once:false}));
+  document.querySelectorAll('#wager-pad button').forEach(b=>b.addEventListener('click', ()=>{
+    document.querySelectorAll('#wager-pad button').forEach(o=>o.disabled=true);
+    const chosen = parseInt(b.dataset.n);
+    const isCorrect = chosen===item.n;
+    b.classList.add(isCorrect?'correct':'wrong');
+    if(!isCorrect) document.querySelectorAll('#wager-pad button').forEach(o=>{ if(parseInt(o.dataset.n)===item.n) o.classList.add('correct'); });
+    if(isCorrect){ addScore(wagerAmount); sndCorrect(); } else { addScore(-wagerAmount); sndWrong(); }
+    game.total++; if(isCorrect) game.correct++;
+    trackSkill('mixed', isCorrect);
+    updateHudAcc();
+    const fb = document.getElementById('wager-fb');
+    fb.className='feedback show '+(isCorrect?'ok':'no');
+    fb.innerHTML = (isCorrect?`<span class="fk">✓ ربحت الرهان (+${wagerAmount})</span>`:`<span class="fk">✗ خسرت الرهان (-${wagerAmount})</span>`) + item.ex;
+    document.getElementById('wager-next').style.display='inline-block';
+  }, {once:true}));
+}
+
+/* =========================================================
+   REPORT
+========================================================= */
+function bestWorstSkill(){
+  const labels = {
+    'basic':'تمييز الأرقام غير الصفرية', 'zero-mid':'الصفر بين رقمين', 'zero-lead':'الصفر في بداية العدد',
+    'zero-trail':'الصفر في نهاية العدد العشري', 'mixed':'الحالات المركّبة', 'precision':'مفهوم الدقة',
+    'ambiguous':'الأعداد الغامضة والصيغة العلمية', 'zero-judgment':'الحكم على الصفر', 'sci-notation':'الصيغة العلمية'
+  };
+  let best=null, bestRate=-1, worst=null, worstRate=2;
+  Object.keys(game.skills).forEach(k=>{
+    const s = game.skills[k]; const total = s.right+s.wrong;
+    if(total<1) return;
+    const rate = s.right/total;
+    if(rate>=bestRate){ bestRate=rate; best=k; }
+    if(rate<=worstRate){ worstRate=rate; worst=k; }
+  });
+  return { best: labels[best]||'—', worst: labels[worst]||'—' };
+}
+function rankFor(score, acc){
+  if(score>=900 && acc>=85) return 'Master of Measurement';
+  if(score>=600 && acc>=70) return 'خبير الأرقام المعنوية';
+  if(score>=300) return 'محقق قياسات';
+  return 'مبتدئ القياس';
+}
+function showReport(){
+  const acc = game.total? Math.round(100*game.correct/game.total):0;
+  const {best, worst} = bestWorstSkill();
+  const rank = rankFor(game.score, acc);
+  document.getElementById('report-frame').innerHTML = `
+    <div class="panel-head"><span class="lvl-name">تقرير المحقق</span></div>
+    <div class="rank-badge">${rank}</div>
+    <div class="report-grid">
+      <div class="report-cell"><div class="val">${game.score}</div><div class="lbl">النتيجة</div></div>
+      <div class="report-cell"><div class="val">${acc}%</div><div class="lbl">الدقة</div></div>
+      <div class="report-cell"><div class="val" style="font-size:16px;">${best}</div><div class="lbl">أقوى مهارة</div></div>
+      <div class="report-cell"><div class="val" style="font-size:16px; color:var(--accent-alert);">${worst}</div><div class="lbl">تحتاج مراجعة</div></div>
+    </div>
+    <div class="reveal-stage" id="reveal-stage">
+      <div style="font-size:20px; color:var(--accent-scan); margin-bottom:6px;">🔓 تم فك شفرة القياس</div>
+      <div class="reveal-num" id="rv1">2</div>
+      <div class="reveal-num" id="rv2">2.0</div>
+      <div class="reveal-num" id="rv3">2.00</div>
+      <div class="reveal-line" id="rvline1">القيمة الرياضية قد تكون واحدة… لكن القياس يخبرنا بقصة مختلفة.</div>
+      <div class="reveal-line" id="rvline2" style="color:var(--accent-gold); font-weight:700;">الأرقام المعنوية = معلومات عن دقة القياس</div>
+    </div>
+    <div class="menu-col" style="margin:0 auto;">
+      <button class="btn primary wide" onclick="startInvestigation()">إعادة التحقيق</button>
+      <button class="btn ghost wide" onclick="goTo('screen-start')">القائمة الرئيسية</button>
+    </div>
+  `;
+  goTo('screen-report');
+  setTimeout(()=>document.getElementById('rv1').classList.add('show'), 200);
+  setTimeout(()=>document.getElementById('rv2').classList.add('show'), 700);
+  setTimeout(()=>document.getElementById('rv3').classList.add('show'), 1200);
+  setTimeout(()=>document.getElementById('rvline1').classList.add('show'), 1800);
+  setTimeout(()=>document.getElementById('rvline2').classList.add('show'), 2600);
+}
+
+/* =========================================================
+   CHALLENGE MODE (teacher-controlled, team vs team)
+========================================================= */
+let chPool = []; let chIndex = -1; let chCurrent = null; let chAnswered = false;
+function startChallenge(){
+  teams = {a:0, b:0};
+  document.getElementById('score-a').textContent = '0';
+  document.getElementById('score-b').textContent = '0';
+  chPool = shuffled([...bankCount.map(q=>({type:'count',...q})), ...bankConcept.map(q=>({type:'concept',...q}))]);
+  chIndex = -1;
+  goTo('screen-challenge');
+  challengeNext();
+}
+function challengeNext(){
+  chIndex++;
+  if(chIndex>=chPool.length) chIndex = 0;
+  chCurrent = chPool[chIndex];
+  chAnswered = false;
+  document.getElementById('ch-level').textContent = 'LEVEL ' + chCurrent.lvl;
+  document.getElementById('ch-points').textContent = 'قيمة السؤال: 100';
+  document.getElementById('ch-award-row').style.display = 'none';
+  document.getElementById('ch-reveal-btn').disabled = false;
+  let html = '';
+  if(chCurrent.type==='count'){
+    html = `<div class="readout"><span class="readout-value">${chCurrent.v}</span><span class="readout-unit">${chCurrent.u}</span></div>
+            <p class="question-text">كم رقمًا معنويًا في هذا القياس؟</p>`;
+  } else {
+    html = `<p class="question-text">${chCurrent.q}</p>`;
+  }
+  document.getElementById('ch-question-area').innerHTML = html;
+}
+function challengeReveal(){
+  document.getElementById('ch-reveal-btn').disabled = true;
+  let answerText = '';
+  if(chCurrent.type==='count'){ answerText = `الإجابة: <b style="color:var(--accent-scan)">${chCurrent.n}</b> — ${chCurrent.ex}`; }
+  else { answerText = `الإجابة: <b style="color:var(--accent-scan)">${chCurrent.opts[chCurrent.correct]}</b> — ${chCurrent.ex}`; }
+  document.getElementById('ch-question-area').innerHTML += `<div class="feedback show ok" style="margin-top:14px;">${answerText}</div>`;
+  document.getElementById('ch-award-row').style.display = 'flex';
+  sndScan();
+}
+function awardTeam(team){
+  if(team==='a'){ teams.a += 100; document.getElementById('score-a').textContent = teams.a; sndCorrect(); }
+  if(team==='b'){ teams.b += 100; document.getElementById('score-b').textContent = teams.b; sndCorrect(); }
+  document.getElementById('ch-award-row').style.display = 'none';
+}
+function adjustTeam(team, delta){
+  teams[team] = Math.max(0, teams[team] + delta);
+  document.getElementById('score-'+team).textContent = teams[team];
+}
+</script>
+</body>
+</html>
