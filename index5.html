@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محقق القياس | أخطاء القياس — فيزياء الصف التاسع</title>
+<style>
+:root{
+  --bg-deep:#080b0f;
+  --bg-panel:#101815;
+  --bg-panel-2:#16211c;
+  --line:#243128;
+  --text:#eaf2ee;
+  --text-dim:#84958c;
+  --accent:#43d9b8;
+  --accent-dim:#1e5a4c;
+  --amber:#ffb454;
+  --amber-dim:#5a441e;
+  --good:#43d9b8;
+  --bad:#ff5c72;
+  --radius:4px;
+  --font-ar:'Segoe UI','Tahoma','Noto Sans Arabic',Arial,sans-serif;
+  --font-num:'Consolas','SFMono-Regular','Courier New',monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-ar);
+  background:
+    radial-gradient(1000px 600px at 85% -10%, rgba(67,217,184,.06), transparent 60%),
+    radial-gradient(900px 600px at 5% 105%, rgba(255,180,84,.05), transparent 60%),
+    repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 44px),
+    var(--bg-deep);
+  color:var(--text); min-height:100vh; direction:rtl; padding-bottom:96px;
+}
+.app{max-width:1080px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;}
+
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:12px 20px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(16,24,21,.92), rgba(16,24,21,.5));
+  backdrop-filter:blur(4px); position:sticky; top:0; z-index:50;
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{width:26px;height:26px;border-radius:50%; border:2px solid var(--accent); position:relative; flex:none;}
+.brand-mark::after{content:"";position:absolute; inset:6px; background:var(--accent); border-radius:50%; opacity:.5;}
+.brand-text{font-size:13px; color:var(--text-dim);}
+.brand-text b{color:var(--text); font-weight:700;}
+.section-pill{font-family:var(--font-num); font-size:11px; letter-spacing:1px; color:var(--accent); border:1px solid var(--accent-dim); padding:4px 10px; border-radius:20px; background:rgba(67,217,184,.08);}
+.counter{font-family:var(--font-num); font-size:12px; color:var(--text-dim);}
+.mute-btn{width:32px;height:32px;border-radius:50%; border:1px solid var(--line); background:var(--bg-panel-2); color:var(--text-dim); cursor:pointer;}
+.mute-btn.off{color:var(--bad); border-color:var(--bad);}
+
+.progress-track{height:3px; background:var(--line);}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--amber)); width:0%; transition:width .35s;}
+
+main{flex:1; display:flex; flex-direction:column; padding:30px 20px 20px; align-items:center;}
+.stage-wrap{max-width:740px; width:100%;}
+.card{background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px; animation:fadeIn .35s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+.eyebrow{font-family:var(--font-num); font-size:11px; letter-spacing:1.5px; color:var(--text-dim); margin-bottom:10px;}
+h2.title{font-size:19px; margin-bottom:14px; line-height:1.75;}
+p.lead{font-size:14.5px; line-height:1.9; color:var(--text-dim); margin-bottom:14px;}
+
+.numbers-block{background:#05090a; border:1px solid var(--line); border-radius:var(--radius); padding:24px 16px; text-align:center; margin-bottom:16px;}
+.numbers-block .expr{font-family:var(--font-num); direction:ltr; font-size:clamp(20px,4.6vw,30px); font-weight:700; letter-spacing:1px;}
+.numbers-block .capt{margin-top:8px; font-size:12px; color:var(--text-dim);}
+
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
+.opts.single{grid-template-columns:1fr;}
+.opt{font-family:var(--font-ar); text-align:right; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text); padding:14px 16px; border-radius:var(--radius); font-size:14px; line-height:1.7; cursor:pointer; transition:.15s;}
+.opt:hover{border-color:var(--accent);}
+.opt .k{font-family:var(--font-num); color:var(--accent); margin-left:8px;}
+.opt.correct{border-color:var(--good); background:rgba(67,217,184,.12); color:var(--good);}
+.opt.wrong{border-color:var(--bad); background:rgba(255,92,114,.1); color:var(--bad);}
+.opt.disabled{pointer-events:none;}
+
+.explain-box{margin-top:16px; padding:14px 16px; border-radius:var(--radius); font-size:13.5px; line-height:1.85; border:1px solid var(--line); background:rgba(67,217,184,.05); display:none;}
+.explain-box.show{display:block;}
+.explain-box b{color:var(--accent);}
+
+/* target board */
+.target-wrap{display:flex; gap:20px; align-items:center; flex-wrap:wrap; justify-content:center; margin-bottom:14px;}
+.target-svg{background:#05090a; border:1px solid var(--line); border-radius:8px;}
+.yn-block{display:flex; flex-direction:column; gap:12px; min-width:200px;}
+.yn-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.yn-row .ql{font-size:13.5px;}
+.yn-btns{display:flex; gap:6px;}
+.yn-btn{font-family:var(--font-ar); font-size:12.5px; padding:8px 14px; border-radius:20px; border:1px solid var(--line); background:var(--bg-panel-2); color:var(--text); cursor:pointer;}
+.yn-btn.sel{border-color:var(--amber); color:var(--amber);}
+.yn-btn.correct{border-color:var(--good); background:rgba(67,217,184,.15); color:var(--good);}
+.yn-btn.wrong{border-color:var(--bad); background:rgba(255,92,114,.1); color:var(--bad);}
+
+/* zero/parallax svg scenes */
+.scene-svg{display:block; margin:0 auto 16px; background:#05090a; border:1px solid var(--line); border-radius:8px;}
+
+/* formula box */
+.formula-box{font-family:var(--font-num); direction:ltr; text-align:center; background:rgba(255,180,84,.07); border:1px solid var(--amber-dim); border-radius:var(--radius); padding:14px; margin-bottom:16px; font-size:15px; color:var(--amber);}
+
+/* boss */
+.boss-q{border-right:2px solid var(--line); padding-right:14px; margin-bottom:14px; opacity:.3; transition:.3s;}
+.boss-q.active{opacity:1; border-color:var(--amber);}
+.boss-q .qn{font-size:13px; color:var(--text-dim); margin-bottom:4px;}
+.boss-q .qa{font-size:14.5px; font-weight:700; color:var(--amber); margin-top:4px; display:none; line-height:1.8;}
+.boss-q .qa.show{display:block;}
+
+/* summary */
+.summary-list{display:flex; flex-direction:column; gap:10px; margin:16px 0;}
+.summary-row{display:flex; gap:12px; align-items:center; background:var(--bg-panel-2); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px;}
+.summary-row .term{font-weight:700; color:var(--accent); min-width:110px; font-size:14px;}
+.summary-row .def{font-size:13.5px; color:var(--text); line-height:1.7;}
+
+.badge-final{text-align:center; padding:18px; border:1px dashed var(--amber); border-radius:var(--radius); color:var(--amber); font-weight:700; font-size:18px; margin-bottom:14px;}
+
+/* dock */
+.dock{position:fixed; bottom:0; left:0; right:0; z-index:60; background:linear-gradient(0deg, rgba(8,11,15,.98), rgba(8,11,15,.9)); border-top:1px solid var(--line); padding:10px 16px; backdrop-filter:blur(6px);}
+.dock-inner{max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;}
+.dbtn{font-family:var(--font-ar); font-size:13px; font-weight:700; padding:10px 16px; border-radius:var(--radius); background:var(--bg-panel-2); border:1px solid var(--line); color:var(--text); cursor:pointer; transition:.15s;}
+.dbtn:hover{border-color:var(--accent);}
+.dbtn.next{background:linear-gradient(90deg,var(--accent),#279b83); color:#04120e; border:none;}
+.dbtn:disabled{opacity:.3; cursor:not-allowed;}
+.dbtn.small{font-size:11.5px; padding:8px 12px; color:var(--text-dim);}
+
+.overlay{position:fixed; inset:0; background:rgba(4,8,7,.72); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
+.overlay.show{display:flex;}
+.overlay-card{max-width:480px; width:100%;}
+
+.flash-msg{position:fixed; top:70px; left:50%; transform:translateX(-50%); background:var(--bad); color:#1a0508; padding:8px 18px; border-radius:20px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.25s; z-index:120;}
+.flash-msg.show{opacity:1;}
+
+.start-screen{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:20px; min-height:80vh; padding:20px;}
+.start-screen h1{font-size:clamp(26px,5.5vw,42px); font-weight:900;}
+.start-screen h1 span{color:var(--amber);}
+.start-screen .op-line{color:var(--text-dim); font-size:14.5px; max-width:460px; line-height:1.9;}
+
+@media(max-width:640px){.opts{grid-template-columns:1fr;} .card{padding:18px;} .target-wrap{flex-direction:column;}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar" id="topbar" style="display:none;">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-text"><b>محقق القياس</b> — أخطاء القياس</div></div>
+    <div class="section-pill" id="section-pill">القسم 1</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span class="counter" id="counter">1 / 1</span>
+      <button class="mute-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+  <main>
+    <div class="stage-wrap" id="start-wrap">
+      <div class="start-screen">
+        <div class="brand-mark" style="width:44px;height:44px;"></div>
+        <h1>🔎 محقق <span>القياس</span></h1>
+        <div class="op-line">أخطاء القياس — فيزياء الصف التاسع<br>أداة تفاعلية لاستخدامها أثناء شرح الحصة، وليست اختبارًا نهائيًا.</div>
+        <button class="dbtn next" style="padding:16px 32px; font-size:15px;" onclick="beginDeck()">ابدأ التحقيق</button>
+      </div>
+    </div>
+    <div class="stage-wrap" id="slide-container" style="display:none;"></div>
+  </main>
+
+  <div class="dock" id="dock" style="display:none;">
+    <div class="dock-inner">
+      <button class="dbtn next" id="btn-next" onclick="doNext()">التالي</button>
+      <button class="dbtn" id="btn-reveal" onclick="doReveal()">إظهار الإجابة</button>
+      <button class="dbtn" id="btn-teacher" onclick="showTeacherOverlay()">شرح المعلم</button>
+      <button class="dbtn small" id="btn-retry" onclick="retrySlide()">إعادة المحاولة</button>
+      <button class="dbtn small" onclick="resetDeck()">البداية من جديد</button>
+    </div>
+  </div>
+</div>
+
+<div class="flash-msg" id="flash"></div>
+<div class="overlay" id="overlay"><div class="overlay-card card" id="overlay-body"></div></div>
+
+<script>
+document.getElementById('overlay').addEventListener('click', function(e){ if(e.target===this) closeOverlay(); });
+function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+function flash(msg){
+  const f = document.getElementById('flash'); f.textContent = msg;
+  f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
+  setTimeout(()=>f.classList.remove('show'), 1400);
+}
+
+/* ===== audio ===== */
+let audioCtx=null; let muted=false;
+function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function beep(freq,dur,type,vol){
+  if(muted) return; ensureAudio(); if(!audioCtx) return;
+  const t0=audioCtx.currentTime; const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain();
+  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+  gain.gain.setValueAtTime(vol||0.08,t0); gain.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t0); osc.stop(t0+dur);
+}
+function sndOk(){ beep(720,.12,'sine',.08); setTimeout(()=>beep(980,.13,'sine',.08),90); }
+function sndBad(){ beep(180,.22,'sawtooth',.06); }
+function toggleMute(){
+  muted=!muted;
+  const b=document.getElementById('mute-btn');
+  b.textContent = muted?'🔇':'🔊'; b.classList.toggle('off', muted);
+}
+
+/* =========================================================
+   SLIDE FACTORIES
+========================================================= */
+function slideMCQ(section, eyebrow, title, opts, correctIdx, explain, teacherNote, numbersBlock){
+  return {section, kind:'mcq', step:0, maxStep:1, data:{eyebrow,title,opts,correctIdx,explain,teacherNote,numbersBlock}};
+}
+function slideCompare(section, eyebrow, title, groupA, groupB, correctIdx, explain, teacherNote){
+  return {section, kind:'compare', step:0, maxStep:1, data:{eyebrow,title,groupA,groupB,correctIdx,explain,teacherNote}};
+}
+function slideZeroScene(section){
+  return {section, kind:'zero', step:0, maxStep:1, data:{
+    opts:["خطأ صفري","خطأ عشوائي","خطأ منتظم","خطأ زاوية النظر"], correctIdx:0,
+    explain:"الخطأ الصفري ينشأ عندما لا يبدأ مؤشر الأداة من نقطة الصفر أصلًا قبل البدء بالقياس، فتنزاح كل القراءات بالمقدار نفسه.",
+    teacherNote:"اسأل الطلاب: ماذا سيحدث لو استخدمنا هذه الأداة دون تصحيح؟ (كل النتائج ستكون زائدة بمقدار ثابت)."
+  }};
+}
+function slideParallaxScene(section){
+  return {section, kind:'parallax', step:0, maxStep:1, data:{
+    opts:["A — العين فوق مستوى القراءة","B — العين على مستوى القراءة تمامًا","C — العين أسفل مستوى القراءة"], correctIdx:1,
+    explain:"خطأ زاوية النظر ينتج عن عدم محاذاة العين عموديًا على مستوى القراءة؛ الوضع الصحيح هو أن تكون العين على المستوى نفسه للمؤشر أو سطح السائل.",
+    teacherNote:"وضّح للطلاب كيف تبدو القراءة مرتفعة أو منخفضة بشكل خادع عند النظر من زاوية غير مستقيمة."
+  }};
+}
+function slideTarget(section, eyebrow, dots, precise, accurate, note){
+  return {section, kind:'target', step:0, maxStep:1, sel:{p:null,a:null}, data:{eyebrow,dots,precise,accurate,note}};
+}
+function slideFormula(section, eyebrow, title, formula, opts, correctIdx, explain, teacherNote){
+  return {section, kind:'formula', step:0, maxStep:1, data:{eyebrow,title,formula,opts,correctIdx,explain,teacherNote}};
+}
+function slideBoss(){
+  const readings=[15.6,15.8,15.5,15.7,15.6];
+  const avg = readings.reduce((a,b)=>a+b,0)/readings.length;
+  const accepted = 15.0;
+  const absErr = Math.abs(avg-accepted);
+  const relErr = (absErr/accepted*100);
+  const sub=[
+    {q:"لاحظ تقارب القراءات الخمس من بعضها. ماذا يدل هذا على مستوى الضبط (Precision)؟", a:"القراءات متقاربة جدًا من بعضها ← ضبط عالٍ (خطأ عشوائي محدود)."},
+    {q:"الأداة تضيف 0.5 cm ثابتة في كل قراءة بسبب عيب في نقطة الصفر. ما نوع هذا الخطأ؟", a:"خطأ منتظم ناتج عن خطأ صفري في الأداة."},
+    {q:"هل القياسات دقيقة (Accuracy)، أي قريبة من القيمة المقبولة 15.0 cm؟", a:`متوسط القراءات ≈ ${avg.toFixed(2)} cm، وهو بعيد عن 15.0 cm بسبب الخطأ المنتظم ← دقة منخفضة رغم الضبط العالي.`},
+    {q:"ما الخطأ المطلق باستخدام متوسط القراءات؟", a:`|${avg.toFixed(2)} − 15.0| ≈ ${absErr.toFixed(2)} cm`},
+    {q:"ما الخطأ النسبي المئوي؟", a:`(${absErr.toFixed(2)} ÷ 15.0) × 100 ≈ ${relErr.toFixed(1)}%`}
+  ];
+  return {section:'FINAL', kind:'boss', step:0, maxStep:5, data:{readings, sub}};
+}
+function slideSummary(){
+  return {section:'FINAL', kind:'summary', step:0, maxStep:0, data:{}};
+}
+
+/* =========================================================
+   BUILD DECK
+========================================================= */
+let deck=[]; let curIndex=0;
+function buildDeck(){
+  deck=[];
+  // SECTION 1
+  deck.push(slideMCQ(1,'القسم 1 — ما المشكلة في القياس؟',
+    'قاس ثلاثة طلاب طول الطاولة نفسها بنفس المسطرة، فحصلوا على:\n100.2 cm — 100.5 cm — 100.3 cm\nلماذا لم يحصلوا على القيمة نفسها تمامًا؟',
+    ["القياس عملية لا تخلو من خطأ مهما بلغت دقة الأداة والمشاهد","أحدهم أخطأ في الحساب فقط ولا علاقة للقياس بذلك","المسطرة كانت تالفة بالضرورة","لا يوجد تفسير علمي لهذا الاختلاف"], 0,
+    "كل عملية قياس تحتوي على قدر من الخطأ مهما كانت الأداة والمشاهد دقيقين؛ وهذا ما يدرسه درس أخطاء القياس.",
+    "قدّم فكرة أن القياس المطلق التام غير موجود عمليًا، وأن فهم أنواع الأخطاء يساعدنا على التعامل معها وتقليل أثرها.",
+    null));
+
+  // SECTION 2
+  deck.push(slideMCQ(2,'القسم 2 — الخطأ العشوائي',
+    'ما نوع الخطأ أو السلوك الظاهر في هذه القياسات المتكررة لطول العينة نفسها؟',
+    ["خطأ عشوائي","خطأ منتظم","خطأ صفري","خطأ زاوية النظر"], 0,
+    "الخطأ العشوائي يتغير من قياس لآخر ولا يسلك اتجاهًا ثابتًا؛ فبعض القراءات أعلى وبعضها أقل من القيمة الحقيقية بلا نمط منتظم.",
+    "اسأل الطلاب عن أسباب محتملة: تغيّر ظروف القياس، حدود إحساس المشاهد، اهتزاز بسيط في الأداة... كلها تؤدي لخطأ عشوائي.",
+    {expr:"10.2 — 10.4 — 10.1 — 10.3", unit:"cm"}));
+
+  // SECTION 3
+  deck.push(slideCompare(3,'القسم 3 — الخطأ المنتظم',
+    'القيمة المقبولة لطول القطعة = 10.0 cm. أي المجموعتين التاليتين تمثل خطأً منتظمًا؟',
+    {label:"المجموعة A", vals:"9.0 — 11.0 — 8.5 — 11.5"},
+    {label:"المجموعة B", vals:"12.4 — 12.5 — 12.6 — 12.5"},
+    1,
+    "الخطأ المنتظم ينحاز بالمقدار والاتجاه نفسيهما في كل مرة؛ المجموعة B أعلى من القيمة المقبولة بمقدار شبه ثابت في كل القراءات، بعكس المجموعة A التي تتغير قيمها في الاتجاهين حول القيمة المقبولة (خطأ عشوائي).",
+    "وضّح الفرق: الخطأ العشوائي يتوزع حول القيمة الحقيقية، أما الخطأ المنتظم فينحرف عنها باتجاه واحد ثابت — وغالبًا سببه عيب في الأداة أو طريقة الاستخدام."));
+
+  // SECTION 4
+  deck.push(slideZeroScene(4));
+
+  // SECTION 5
+  deck.push(slideParallaxScene(5));
+
+  // SECTION 6 — accuracy & precision (4 targets)
+  deck.push(slideTarget(6,'القسم 6 — الدقة والضبط (1 من 4)',
+    [[0,-4],[3,2],[-2,3],[1,-2]], true, true,
+    "قياسات متقاربة من بعضها (ضبط عالٍ) وقريبة من المركز/القيمة المقبولة (دقة عالية)."));
+  deck.push(slideTarget(6,'القسم 6 — الدقة والضبط (2 من 4)',
+    [[38,40],[42,36],[40,44],[36,38]], true, false,
+    "قياسات متقاربة من بعضها (ضبط عالٍ) لكنها بعيدة عن المركز (دقة منخفضة) — نمط كلاسيكي للخطأ المنتظم."));
+  deck.push(slideTarget(6,'القسم 6 — الدقة والضبط (3 من 4)',
+    [[-30,20],[25,-28],[-20,-22],[28,26],[3,-30]], false, true,
+    "قياسات متفرقة حول المركز (ضبط منخفض) لكن متوسطها قريب من القيمة المقبولة (دقة مقبولة في المتوسط) — نمط الخطأ العشوائي."));
+  deck.push(slideTarget(6,'القسم 6 — الدقة والضبط (4 من 4)',
+    [[40,-35],[48,20],[20,45],[35,-15],[15,38]], false, false,
+    "قياسات متفرقة عن بعضها (ضبط منخفض) وبعيدة عن المركز (دقة منخفضة) — أسوأ الحالات، وقد يجتمع فيها خطأ عشوائي وخطأ منتظم معًا."));
+
+  // SECTION 7 — absolute error
+  deck.push(slideFormula(7,'القسم 7 — الخطأ المطلق',
+    'القيمة المقبولة = 10.0 cm\nالقيمة المقاسة = 9.7 cm\nاحسب الخطأ المطلق.',
+    "الخطأ المطلق = |القيمة المقاسة − القيمة المقبولة|",
+    ["0.3 cm","0.7 cm","9.7 cm","19.7 cm"], 0,
+    "الخطأ المطلق = |9.7 − 10.0| = 0.3 cm. لاحظ أن القيمة دائمًا موجبة لأنها فرق مطلق.",
+    "تأكد أن الطلاب يفهمون معنى الخطأ المطلق (مقدار الانحراف بالوحدات نفسها) قبل الانتقال للخطأ النسبي."));
+
+  // SECTION 8 — relative error
+  deck.push(slideFormula(8,'القسم 8 — الخطأ النسبي',
+    'باستخدام النتيجة السابقة:\nالخطأ المطلق = 0.3 cm ، القيمة المقبولة = 10.0 cm\nاحسب الخطأ النسبي المئوي.',
+    "الخطأ النسبي % = (الخطأ المطلق ÷ القيمة المقبولة) × 100",
+    ["3%","30%","0.3%","97%"], 0,
+    "الخطأ النسبي % = (0.3 ÷ 10.0) × 100 = 3%. الخطأ النسبي يقارن حجم الخطأ بحجم القيمة نفسها، لذلك هو أكثر دلالة من الخطأ المطلق وحده عند المقارنة بين قياسات مختلفة.",
+    "وضّح لماذا خطأ مطلق قدره 0.3 cm قد يكون كبيرًا في قياس صغير وصغيرًا جدًا في قياس ضخم — ومن هنا أهمية الخطأ النسبي."));
+
+  // FINAL CHALLENGE
+  deck.push(slideBoss());
+
+  // FINAL DETECTIVE QUIZ
+  deck.push(slideMCQ('Q','هل أصبحت محقق قياس؟ (1/5)','ماذا نسمي الخطأ الذي يتغير قيمة واتجاهًا من قياس لآخر بلا نمط ثابت؟',
+    ["الخطأ العشوائي","الخطأ المنتظم","الخطأ الصفري","خطأ زاوية النظر"],0,
+    "هذا تعريف الخطأ العشوائي بالضبط.", null, null));
+  deck.push(slideMCQ('Q','هل أصبحت محقق قياس؟ (2/5)','ماذا نسمي الخطأ الذي يتكرر بالمقدار والاتجاه نفسيهما في كل قياس؟',
+    ["الخطأ العشوائي","الخطأ المنتظم","خطأ زاوية النظر","لا يوجد اسم له"],1,
+    "هذا تعريف الخطأ المنتظم بالضبط.", null, null));
+  deck.push(slideMCQ('Q','هل أصبحت محقق قياس؟ (3/5)','إذا كانت القياسات متقاربة من بعضها، لكنها بعيدة عن القيمة المقبولة، فهي:',
+    ["دقيقة وغير مضبوطة","مضبوطة وغير دقيقة","دقيقة ومضبوطة معًا","غير دقيقة وغير مضبوطة"],1,
+    "التقارب بين القياسات نفسها = ضبط. القرب من القيمة المقبولة = دقة. هنا ضبط عالٍ ودقة منخفضة.", null, null));
+  deck.push(slideMCQ('Q','هل أصبحت محقق قياس؟ (4/5)','الفرق المطلق بين القيمة المقاسة والقيمة المقبولة يسمى:',
+    ["الخطأ النسبي","الخطأ المطلق","الضبط","الدقة"],1,
+    "هذا تعريف الخطأ المطلق.", null, null));
+  deck.push(slideMCQ('Q','هل أصبحت محقق قياس؟ (5/5)','عند مقارنة الخطأ المطلق بالقيمة المقبولة (غالبًا كنسبة مئوية) نحصل على:',
+    ["الخطأ النسبي","الخطأ المطلق","الضبط فقط","لا علاقة بينهما"],0,
+    "هذا تعريف الخطأ النسبي.", null, null));
+
+  deck.push(slideSummary());
+}
+
+/* =========================================================
+   RENDER
+========================================================= */
+function sectionLabel(s){
+  if(s==='FINAL') return 'التحدي الختامي';
+  if(s==='Q') return 'محقق القياس';
+  return 'القسم '+s;
+}
+function svgTargetHtml(dots, size){
+  size = size||140; const c=size/2, r=size/2-6;
+  let rings='';
+  for(let i=3;i>=1;i--){ rings += `<circle cx="${c}" cy="${c}" r="${r*i/3}" fill="none" stroke="#2a3a33" stroke-width="1"/>`; }
+  rings += `<circle cx="${c}" cy="${c}" r="3" fill="#ffb454"/>`;
+  let pts='';
+  dots.forEach(d=>{ pts += `<circle cx="${c+d[0]*(r/50)}" cy="${c+d[1]*(r/50)}" r="4.5" fill="#43d9b8" stroke="#05090a" stroke-width="1"/>`; });
+  return `<svg class="target-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${rings}${pts}</svg>`;
+}
+function svgZeroScene(){
+  return `<svg class="scene-svg" width="320" height="140" viewBox="0 0 320 140">
+    <rect x="20" y="60" width="280" height="10" fill="#16211c" stroke="#243128"/>
+    ${[0,1,2,3,4,5,6,7,8,9,10].map(i=>`<line x1="${20+i*28}" y1="55" x2="${20+i*28}" y2="70" stroke="#4a5c52" stroke-width="1"/>`).join('')}
+    ${[0,2,4,6,8,10].map(i=>`<text x="${20+i*28}" y="48" font-size="10" fill="#84958c" text-anchor="middle" font-family="Consolas,monospace">${i}</text>`).join('')}
+    <polygon points="76,72 66,90 86,90" fill="#ff5c72"/>
+    <text x="76" y="108" font-size="11" fill="#ff5c72" text-anchor="middle" font-family="Consolas,monospace">موضع المؤشر قبل القياس</text>
+    <text x="20" y="130" font-size="10" fill="#84958c" text-anchor="start">المفروض أن يبدأ المؤشر عند 0 — لكنه يبدأ عند 2</text>
+  </svg>`;
+}
+function svgParallaxScene(){
+  return `<svg class="scene-svg" width="320" height="170" viewBox="0 0 320 170">
+    <line x1="160" y1="20" x2="160" y2="150" stroke="#243128" stroke-width="10"/>
+    <line x1="140" y1="90" x2="180" y2="90" stroke="#ffb454" stroke-width="3"/>
+    <text x="190" y="94" font-size="10" fill="#ffb454" font-family="Consolas,monospace">مستوى القراءة</text>
+    <circle cx="60" cy="35" r="7" fill="#43d9b8"/><text x="60" y="20" font-size="11" fill="#43d9b8" text-anchor="middle">A</text>
+    <line x1="66" y1="40" x2="150" y2="88" stroke="#43d9b8" stroke-width="1" stroke-dasharray="3,3"/>
+    <circle cx="60" cy="90" r="7" fill="#43d9b8"/><text x="60" y="108" font-size="11" fill="#43d9b8" text-anchor="middle">B</text>
+    <line x1="67" y1="90" x2="140" y2="90" stroke="#43d9b8" stroke-width="1" stroke-dasharray="3,3"/>
+    <circle cx="60" cy="145" r="7" fill="#43d9b8"/><text x="60" y="163" font-size="11" fill="#43d9b8" text-anchor="middle">C</text>
+    <line x1="66" y1="140" x2="150" y2="92" stroke="#43d9b8" stroke-width="1" stroke-dasharray="3,3"/>
+  </svg>`;
+}
+
+function renderSlide(){
+  const s = deck[curIndex];
+  const el = document.getElementById('slide-container');
+  document.getElementById('section-pill').textContent = sectionLabel(s.section);
+  document.getElementById('counter').textContent = (curIndex+1)+' / '+deck.length;
+  document.getElementById('progress-fill').style.width = ((curIndex+1)/deck.length*100)+'%';
+  el.innerHTML = renderKind(s);
+  postRenderBind(s);
+  updateDockState(s);
+}
+
+function optsHtml(opts, correctIdx, step, prefix){
+  return `<div class="opts ${opts.length>2?'':'single'}" id="${prefix}-opts">
+    ${opts.map((o,i)=>`<div class="opt ${step>=1?(i===correctIdx?'correct':'disabled'):''}" data-i="${i}"><span class="k">${['A','B','C','D'][i]}</span>${o}</div>`).join('')}
+  </div>`;
+}
+
+function renderKind(s){
+  const d = s.data;
+  switch(s.kind){
+    case 'mcq': {
+      const nb = d.numbersBlock ? `<div class="numbers-block"><span class="expr">${d.numbersBlock.expr}</span> <span style="font-family:var(--font-num); color:var(--text-dim);">${d.numbersBlock.unit||''}</span></div>` : '';
+      return `<div class="card">
+        <div class="eyebrow">${d.eyebrow}</div>
+        <h2 class="title" style="white-space:pre-line;">${d.title}</h2>
+        ${nb}
+        ${optsHtml(d.opts, d.correctIdx, s.step, 'mcq')}
+        <div class="explain-box ${s.step>=1?'show':''}">${s.step>=1?('<b>✓ الإجابة</b> — '+d.explain):''}</div>
+      </div>`;
+    }
+    case 'compare': {
+      return `<div class="card">
+        <div class="eyebrow">${d.eyebrow}</div>
+        <h2 class="title">${d.title}</h2>
+        <div class="opts" id="cmp-opts">
+          <div class="opt ${s.step>=1?(d.correctIdx===0?'correct':'disabled'):''}" data-i="0"><span class="k">${d.groupA.label}</span><div class="numbers-block" style="margin:6px 0 0; padding:12px;"><span class="expr" style="font-size:16px;">${d.groupA.vals}</span></div></div>
+          <div class="opt ${s.step>=1?(d.correctIdx===1?'correct':'disabled'):''}" data-i="1"><span class="k">${d.groupB.label}</span><div class="numbers-block" style="margin:6px 0 0; padding:12px;"><span class="expr" style="font-size:16px;">${d.groupB.vals}</span></div></div>
+        </div>
+        <div class="explain-box ${s.step>=1?'show':''}">${s.step>=1?('<b>✓ الإجابة</b> — '+d.explain):''}</div>
+      </div>`;
+    }
+    case 'zero': {
+      return `<div class="card">
+        <div class="eyebrow">القسم 4 — الخطأ الصفري</div>
+        <h2 class="title">لاحظ أداة القياس التالية قبل استخدامها في أي قياس — ما المشكلة التي تلاحظها؟</h2>
+        ${svgZeroScene()}
+        ${optsHtml(d.opts, d.correctIdx, s.step, 'zero')}
+        <div class="explain-box ${s.step>=1?'show':''}">${s.step>=1?('<b>✓ الإجابة</b> — '+d.explain):''}</div>
+      </div>`;
+    }
+    case 'parallax': {
+      return `<div class="card">
+        <div class="eyebrow">القسم 5 — خطأ زاوية النظر</div>
+        <h2 class="title">ثلاثة طلاب قرأوا المستوى نفسه من زوايا مختلفة. أي وضع للعين يعطي القراءة الصحيحة؟</h2>
+        ${svgParallaxScene()}
+        ${optsHtml(d.opts, d.correctIdx, s.step, 'plx')}
+        <div class="explain-box ${s.step>=1?'show':''}">${s.step>=1?('<b>✓ الإجابة B</b> — '+d.explain):''}</div>
+      </div>`;
+    }
+    case 'target': {
+      return `<div class="card">
+        <div class="eyebrow">${d.eyebrow}</div>
+        <h2 class="title">تأمّل توزّع نقاط القياس حول القيمة المقبولة (المركز)، ثم أجب:</h2>
+        <div class="target-wrap">
+          ${svgTargetHtml(d.dots)}
+          <div class="yn-block">
+            <div class="yn-row"><span class="ql">هل القياسات مضبوطة (Precision)؟</span>
+              <div class="yn-btns" data-q="p">
+                <div class="yn-btn" data-v="1">نعم</div><div class="yn-btn" data-v="0">لا</div>
+              </div>
+            </div>
+            <div class="yn-row"><span class="ql">هل القياسات دقيقة (Accuracy)؟</span>
+              <div class="yn-btns" data-q="a">
+                <div class="yn-btn" data-v="1">نعم</div><div class="yn-btn" data-v="0">لا</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="explain-box ${s.step>=1?'show':''}">${s.step>=1?('<b>✓ التفسير</b> — '+d.note):''}</div>
+      </div>`;
+    }
+    case 'formula': {
+      return `<div class="card">
+        <div class="eyebrow">${d.eyebrow}</div>
+        <h2 class="title" style="white-space:pre-line;">${d.title}</h2>
+        <div class="formula-box">${d.formula}</div>
+        ${optsHtml(d.opts, d.correctIdx, s.step, 'fm')}
+        <div class="explain-box ${s.step>=1?'show':''}">${s.step>=1?('<b>✓ الإجابة</b> — '+d.explain):''}</div>
+      </div>`;
+    }
+    case 'boss': {
+      return `<div class="card">
+        <div class="eyebrow">التحدي الختامي — تحليل موقف مركّب</div>
+        <h2 class="title">مجموعة قاست طول قضيب معدني 5 مرات، باستخدام أداة معروف أنها تضيف 0.5 cm زيادة بسبب عيب في نقطة الصفر:</h2>
+        <div class="numbers-block"><span class="expr">${d.readings.join(' — ')}</span><div class="capt">cm — القيمة المقبولة لطول القضيب = 15.0 cm</div></div>
+        ${d.sub.map((q,i)=>`
+          <div class="boss-q ${s.step>i?'active':''}">
+            <div class="qn">${i+1}. ${q.q}</div>
+            <div class="qa ${s.step>i?'show':''}">${q.a}</div>
+          </div>`).join('')}
+      </div>`;
+    }
+    case 'summary': {
+      return `<div class="card">
+        <div class="badge-final">🔓 محقق قياس معتمد</div>
+        <h2 class="title" style="text-align:center;">لخّص الدرس معك:</h2>
+        <div class="summary-list">
+          <div class="summary-row"><span class="term">الدقة</span><span class="def">القرب من القيمة المقبولة (Accuracy)</span></div>
+          <div class="summary-row"><span class="term">الضبط</span><span class="def">تقارب القياسات المتكررة مع بعضها (Precision)</span></div>
+          <div class="summary-row"><span class="term">الخطأ المطلق</span><span class="def">الفرق بين القيمة المقاسة والقيمة المقبولة: |مقاسة − مقبولة|</span></div>
+          <div class="summary-row"><span class="term">الخطأ النسبي</span><span class="def">الخطأ المطلق مقارنةً بالقيمة المقبولة، وغالبًا كنسبة مئوية</span></div>
+        </div>
+        <button class="dbtn next" style="display:block; margin:10px auto 0;" onclick="resetDeck()">إعادة المحاولة من البداية</button>
+      </div>`;
+    }
+  }
+  return '';
+}
+
+function postRenderBind(s){
+  const d = s.data;
+  if(s.kind==='mcq'||s.kind==='zero'||s.kind==='parallax'||s.kind==='formula'){
+    document.querySelectorAll('.opts .opt').forEach(o=>o.addEventListener('click', ()=>{
+      if(s.step>=1) return;
+      const i = parseInt(o.dataset.i);
+      const correct = i===d.correctIdx;
+      correct? sndOk(): sndBad();
+      s.step=1; renderSlide();
+    }, {once:false}));
+  }
+  if(s.kind==='compare'){
+    document.querySelectorAll('#cmp-opts .opt').forEach(o=>o.addEventListener('click', ()=>{
+      if(s.step>=1) return;
+      const i = parseInt(o.dataset.i);
+      (i===d.correctIdx)? sndOk(): sndBad();
+      s.step=1; renderSlide();
+    }));
+  }
+  if(s.kind==='target' && s.step<1){
+    document.querySelectorAll('.yn-btn').forEach(b=>b.addEventListener('click', ()=>{
+      const group = b.parentElement.dataset.q;
+      const val = parseInt(b.dataset.v);
+      b.parentElement.querySelectorAll('.yn-btn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      if(group==='p') s.sel.p=val; else s.sel.a=val;
+    }));
+  }
+}
+
+/* =========================================================
+   DOCK / NAV
+========================================================= */
+function updateDockState(s){
+  const nextBtn=document.getElementById('btn-next');
+  const revealBtn=document.getElementById('btn-reveal');
+  const teacherBtn=document.getElementById('btn-teacher');
+  const retryBtn=document.getElementById('btn-retry');
+  teacherBtn.disabled = !s.data.teacherNote;
+  retryBtn.disabled = (s.step===0 && !(s.kind==='target'));
+  const atEnd = (curIndex===deck.length-1) && (s.step>=s.maxStep);
+  nextBtn.textContent = atEnd? 'انتهى التحقيق' : 'التالي';
+  nextBtn.disabled = atEnd;
+  revealBtn.disabled = s.step>=s.maxStep || s.kind==='summary';
+}
+function doNext(){
+  const s = deck[curIndex];
+  if(s.kind==='target' && s.step===0){
+    if(s.sel.p===null || s.sel.a===null){ flash('أجب عن السؤالين أولًا'); return; }
+    evalTarget(s);
+  }
+  if(s.step<s.maxStep){ s.step++; renderSlide(); return; }
+  if(curIndex<deck.length-1){ curIndex++; renderSlide(); }
+}
+function evalTarget(s){
+  const d = s.data;
+  document.querySelectorAll('.yn-btns[data-q="p"] .yn-btn').forEach(b=>{
+    const v=parseInt(b.dataset.v); const shouldBe = d.precise?1:0;
+    if(v===shouldBe) b.classList.add('correct'); else if(b.classList.contains('sel')) b.classList.add('wrong');
+  });
+  document.querySelectorAll('.yn-btns[data-q="a"] .yn-btn').forEach(b=>{
+    const v=parseInt(b.dataset.v); const shouldBe = d.accurate?1:0;
+    if(v===shouldBe) b.classList.add('correct'); else if(b.classList.contains('sel')) b.classList.add('wrong');
+  });
+  const okP = s.sel.p === (d.precise?1:0), okA = s.sel.a === (d.accurate?1:0);
+  (okP && okA)? sndOk(): sndBad();
+}
+function doReveal(){
+  const s = deck[curIndex];
+  if(s.kind==='target' && s.step===0){
+    if(s.sel.p===null) s.sel.p = d_default(s,'p');
+    if(s.sel.a===null) s.sel.a = d_default(s,'a');
+  }
+  s.step = s.maxStep; renderSlide();
+  if(s.kind==='target'){ setTimeout(()=>evalTargetForced(s),30); }
+}
+function d_default(s,which){ return which==='p'? (s.data.precise?1:0) : (s.data.accurate?1:0); }
+function evalTargetForced(s){
+  const d = s.data;
+  document.querySelectorAll('.yn-btns[data-q="p"] .yn-btn').forEach(b=>{ if(parseInt(b.dataset.v)===(d.precise?1:0)) b.classList.add('correct'); });
+  document.querySelectorAll('.yn-btns[data-q="a"] .yn-btn').forEach(b=>{ if(parseInt(b.dataset.v)===(d.accurate?1:0)) b.classList.add('correct'); });
+}
+function retrySlide(){
+  const s = deck[curIndex];
+  s.step=0;
+  if(s.kind==='target') s.sel={p:null,a:null};
+  renderSlide();
+  flash('حاول مرة أخرى');
+}
+function showTeacherOverlay(){
+  const s = deck[curIndex];
+  if(!s.data.teacherNote) return;
+  document.getElementById('overlay-body').innerHTML = `
+    <div class="eyebrow">شرح المعلم</div>
+    <p class="lead" style="color:var(--text);">${s.data.teacherNote}</p>
+    <button class="dbtn next" style="display:block; margin:14px auto 0;" onclick="closeOverlay()">متابعة</button>`;
+  document.getElementById('overlay').classList.add('show');
+}
+
+/* =========================================================
+   BOOT
+========================================================= */
+function beginDeck(){
+  buildDeck(); curIndex=0;
+  document.getElementById('start-wrap').style.display='none';
+  document.getElementById('slide-container').style.display='block';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('dock').style.display='block';
+  renderSlide();
+}
+function resetDeck(){
+  buildDeck(); curIndex=0; renderSlide();
+  document.getElementById('start-wrap').style.display='none';
+  document.getElementById('slide-container').style.display='block';
+  flash('تمت إعادة الضبط');
+}
+</script>
+</body>
+</html>
