@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مهمة نيوتن الكبرى ⚡ | تحدّي مراجعة الدرس</title>
+<style>
+:root{--bg:#0a1428;--card:#0f1e3a;--ac:#29e0c2;--tx:#e6f0ff;--mu:#8ba3c7;--bad:#ff6b6b;--ok:#3ddc97}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;
+background-image:linear-gradient(rgba(41,224,194,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(41,224,194,.06) 1px,transparent 1px);background-size:32px 32px}
+.w{max-width:900px;margin:0 auto;padding:14px}
+.top{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+h1{font-size:1.15rem;margin:0;color:var(--ac)}
+.lcd{font-family:'Courier New',monospace;background:#04101f;border:1px solid var(--ac);color:var(--ac);padding:4px 12px;border-radius:8px;font-size:1.2rem;text-shadow:0 0 8px var(--ac)}
+.bar{height:10px;background:#04101f;border-radius:6px;margin:10px 0;overflow:hidden;border:1px solid #1d3358}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#1aa58f,var(--ac));width:0;transition:width .5s}
+.dots{display:flex;gap:6px;justify-content:center;margin-bottom:8px}.dots b{width:30px;height:8px;border-radius:4px;background:#1d3358}.dots b.on{background:var(--ac)}.dots b.cur{box-shadow:0 0 8px var(--ac);background:#fff}
+.card{background:var(--card);border:1px solid #1f3a66;border-radius:14px;padding:16px;margin:10px 0;box-shadow:0 0 18px rgba(41,224,194,.08)}
+.src{border-right:5px solid var(--ac)}.tag{font-size:.8rem;color:var(--mu)}
+.qt{font-size:1.15rem;line-height:1.9;margin:6px 0}
+.pt{border-top:1px dashed #2a4a7a;margin-top:12px;padding-top:8px}.pt .qt{font-size:1.05rem}
+.it{background:#0b1830;border:1px solid #1d3358;border-radius:10px;padding:10px;margin:8px 0}.it.ok{border-color:var(--ok)}.it.sh{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(8px)}75%{transform:translateX(-8px)}}
+.op,.bt{font:inherit;color:var(--tx);background:#12274a;border:1px solid #2d4f86;border-radius:9px;padding:8px 12px;margin:4px;cursor:pointer}
+.op:hover,.bt:hover{border-color:var(--ac)}.op:disabled{opacity:.55;cursor:default}.op.g{background:#0d3d36;border-color:var(--ok)}
+.bt.p{background:var(--ac);color:#04101f;font-weight:bold;border:0}.bt:disabled{opacity:.4;cursor:default}
+input{font:inherit;background:#04101f;color:var(--ac);border:1px solid var(--ac);border-radius:8px;padding:7px;width:110px;text-align:center;direction:ltr}
+.msg{margin-top:6px;font-size:.95rem}.msg.b{color:var(--bad)}.msg.g{color:var(--ok)}.msg.h{color:#ffd166}
+.sol{margin-top:6px;padding:8px;border-radius:8px;background:#2a2308;border:1px solid #ffd166;color:#ffe9a8;font-size:.95rem}
+.nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+table{border-collapse:collapse;direction:ltr;margin:8px auto;text-align:center}td,th{border:2px solid #f39a1f;padding:6px 14px}th{background:#f39a1f;color:#04101f}
+svg{max-width:100%;height:auto;display:block;margin:8px auto;background:#07122a;border-radius:10px}
+.warn{background:#3a1d1d;border:1px solid var(--bad);padding:8px;border-radius:8px;font-size:.9rem}
+@media(max-width:600px){.qt{font-size:1rem}}
+@media print{.nav,.top{display:none}}
+</style></head><body><div class="w">
+<div class="top"><h1>مهمة نيوتن الكبرى ⚡ | تحدّي مراجعة الدرس</h1><div><span class="tag">النقاط</span> <span class="lcd" id="pts">000</span></div></div>
+<div class="bar"><i id="pb"></i></div><div class="dots" id="dots"></div>
+<div class="card" style="padding:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span id="stage"></span><span class="tag" id="meta"></span>
+<span><button class="bt" id="tm" onclick="tg()">🎓 وضع المعلم</button></span></div>
+<div id="main"></div>
+<div class="nav"><button class="bt" onclick="go(-1)" id="pv">▶ السابق</button><span><button class="bt" onclick="retry()">🔁 إعادة المحاولة</button><button class="bt" onclick="resetAll()">↺ ابدأ من جديد</button><button class="bt" onclick="beep(0)" id="mu">🔊</button></span><button class="bt p" onclick="go(1)" id="nx">التالي ◀</button></div>
+</div>
+<script>
+var PG=53,$=function(i){return document.getElementById(i)},S={i:0,T:0,mute:0},pts={},ok={},hu={},tr={};
+try{var z=JSON.parse(sessionStorage.getItem('nw')||'{}');if(z.pts){pts=z.pts;ok=z.ok;S.i=z.i||0}}catch(e){}
+function save(){try{sessionStorage.setItem('nw',JSON.stringify({pts:pts,ok:ok,i:S.i}))}catch(e){}}
+function beep(f){if(!f){S.mute=!S.mute;$('mu').textContent=S.mute?'🔇':'🔊';return}if(S.mute)return;try{var c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.12)}catch(e){}}
+function mc(q,c,a,h,w){return{k:'mc',q:q,c:c,a:a,h:h,w:w}}
+function nm(q,a,u,t,h,w){return{k:'n',q:q,a:a,u:u,t:t,h:h,w:w}}
+var DIR=['نحو اليمين','نحو اليسار'];
+var Q=[
+{n:1,st:'المرحلة 1: الحالة الحركية',t:'الفكرة الرئيسة: أصف الحالة الحركية للجسم عندما تكون القوة المحصلة المؤثرة فيه صفرًا، وعندما تؤثر فيه قوة محصلة.',p:[{it:[
+mc('عندما تكون القوة المحصلة صفرًا:',['يبقى ساكنًا أو يتحرك بسرعة ثابتة في خط مستقيم','يتسارع باتجاه حركته','يتباطأ تدريجيًا حتى يتوقف'],0,'تذكّر القانون الأول لنيوتن: لا تغيّر في السرعة (مقدارًا واتجاهًا).','لا يوجد تسارع، فالجسم الساكن يبقى ساكنًا والمتحرك يبقى بسرعة ثابتة في خط مستقيم.'),
+mc('عندما تؤثر فيه قوة محصلة:',['يتحرك بسرعة ثابتة','يتسارع باتجاه القوة المحصلة (تتغير سرعته مقدارًا أو اتجاهًا)','يتحرك عكس اتجاه القوة المحصلة'],1,'القانون الثاني: a = ΣF / m، واتجاه التسارع هو اتجاه المحصلة.','تتغير سرعة الجسم، فيتسارع باتجاه القوة المحصلة.')]}]},
+{n:2,st:'المرحلة 2: السرعة الثابتة',t:'أستخدم الأرقام: تركض فتاة بخط مستقيم بسرعة ثابتة، فتقطع (400 m) في زمن قدره (1 min) و (20 s). أحسب مقدار سرعتها.',p:[{it:[
+mc('العلاقة المناسبة:',['v = d / t','v = d × t','v = t / d'],0,'السرعة الثابتة = الإزاحة ÷ الزمن.','v = d / t'),
+nm('حوّل الزمن إلى وحدة (s):',80,'s',.01,'1 min = 60 s، فأضف إليها 20 s.','60 + 20 = 80 s'),
+nm('مقدار السرعة:',5,'m/s',.01,'قسّم 400 m على زمنك بالثواني.','v = 400 ÷ 80 = 5 m/s')]}]},
+{n:3,st:'المرحلة 3: القوى على الصندوق',t:'يبين الشكل صندوقًا ساكنًا موضوعًا على سطح طاولة أفقي:',f:3,p:[
+{l:'أ',t:'أرسم أسهمًا تعبر عن القوتين المؤثرتين في الصندوق، وأذكر اسم كل قوة.',it:[
+mc('القوة المؤثرة نحو الأسفل (ينبثق سهمها عند الإجابة):',['الوزن (قوة جذب الأرض)','القوة العمودية','قوة الاحتكاك'],0,'الأرض تجذب الصندوق نحو مركزها.','الوزن يؤثر رأسيًا نحو الأسفل.'),
+mc('القوة المؤثرة نحو الأعلى:',['الوزن','القوة العمودية (من سطح الطاولة)','قوة الدفع الأفقي'],1,'الطاولة تدعم الصندوق وتمنعه من السقوط.','القوة العمودية تؤثر عموديًا على السطح نحو الأعلى.')]},
+{l:'ب',t:'أصنف هاتين القوتين (تلامس أم تأثير عن بعد)؟',it:[
+mc('الوزن:',['تلامس','تأثير عن بعد'],1,'هل تلمس الأرض الصندوق؟','الأرض تجذبه دون تلامس.'),
+mc('القوة العمودية:',['تلامس','تأثير عن بعد'],0,'السطح يلامس الصندوق.','تنشأ عن تلامس الطاولة والصندوق.')]},
+{l:'جـ',t:'تفكير ناقد: هل يمكن أن نعد هاتين القوتين قوى فعل ورد فعل؟ أفسر إجابتي.',it:[
+mc('الإجابة:',['نعم، لأنهما متساويتان ومتعاكستان','لا، لأنهما تؤثران في الجسم نفسه (الصندوق)','نعم، لأن الصندوق ساكن'],1,'أين تؤثر قوتا الفعل ورد الفعل؟ في جسم واحد أم جسمين؟','قوتا الفعل ورد الفعل تؤثران في جسمين مختلفين؛ أما هاتان فتؤثران في الصندوق وحده، وتتوازنان لأن محصلتهما صفر.')]}]},
+{n:4,st:'المرحلة 4: التسارع من القانون الثاني',t:'أستخدم الأرقام: أحسب تسارع سيارة كتلتها (1200 kg) عندما تكون القوة المحصلة المؤثرة فيها بالاتجاه الأفقي (6000 N).',p:[{it:[
+mc('العلاقة المناسبة:',['a = F / m','a = F × m','a = m / F'],0,'القانون الثاني: ΣF = m a.','a = ΣF / m'),
+nm('مقدار التسارع:',5,'m/s²',.01,'6000 ÷ 1200','a = 6000 ÷ 1200 = 5 m/s²'),
+mc('اتجاه التسارع:',['اتجاه القوة المحصلة (الأفقي)','عكس اتجاه القوة المحصلة'],0,'التسارع يأخذ اتجاه المحصلة.','التسارع بالاتجاه الأفقي نفسه للقوة المحصلة.')]}]},
+{n:5,st:'المرحلة 5: القوة والتسارع (تجربة الطلبة)',t:'قامت مجموعة من الطلبة بدراسة تغير تسارع جسم نتيجة لتغير القوة المحصلة المؤثرة فيه. والجدول الآتي يبين النتائج التجريبية للتسارع الذي اكتسبه الجسم عندما تغيرت القوة المحصلة المؤثرة فيه:',f:5,p:[
+{l:'أ',t:'أضبط المتغيرات: أحدد المتغير المستقل، والمتغير التابع، ومتغيرًا تم ضبطه في التجربة.',it:[
+mc('المتغير المستقل:',['القوة المحصلة','التسارع','كتلة الجسم'],0,'ما الذي يغيّره الطلبة عمدًا؟','القوة المحصلة هي ما تم تغييره.'),
+mc('المتغير التابع:',['القوة المحصلة','التسارع','كتلة الجسم'],1,'ما الذي يُقاس نتيجة التغيير؟','التسارع يُقاس نتيجة تغيير القوة.'),
+mc('متغير تم ضبطه:',['كتلة الجسم','القوة المحصلة','التسارع'],0,'ما الذي يبقى ثابتًا ليكون الاختبار عادلًا؟','تبقى كتلة الجسم ثابتة.')]},
+{l:'ب',t:'أرسم أفضل خط مستقيم يمثل النتائج التجريبية، وأحسب ميله. ما الكمية الفيزيائية التي يمثلها الميل؟',it:[
+nm('الميل = Δa / ΔF (بوحدة m/s² لكل N، تقريبًا):',.2,'',.025,'خذ نقطتين على الخط: (7 N، 1.4) و(28 N، 5.5) ثم Δa ÷ ΔF.','الميل ≈ (5.5 − 1.4) ÷ (28 − 7) ≈ 0.2 (الخط المرسوم أعلاه هو الأفضل بالانحدار عبر نقطة الأصل).'),
+mc('الميل يمثل:',['كتلة الجسم m','مقلوب الكتلة (1/m)','القوة F'],1,'a = F/m أي a = (1/m)·F، قارنها بالمعادلة y = ميل · x.','الميل = a/F = 1/m، أي ≈ 0.2 kg⁻¹ فتكون الكتلة ≈ 5 kg.')]},
+{l:'جـ',t:'هل يمكن القول إن تسارع الجسم يتناسب طرديًا مع القوة المحصلة؟ أعطي دليلًا يدعم صحة إجابتي.',it:[
+mc('الإجابة:',['نعم: عند مضاعفة القوة (7 N → 14 N) يتضاعف التسارع تقريبًا (1.4 → 2.7 m/s²)، والنسبة a/F شبه ثابتة (≈ 0.2)','لا: لأن التسارع يزداد بمقدار ثابت دائمًا','لا: لأن الخط لا يمر بنقطة الأصل'],0,'ماذا يحدث للتسارع عند مضاعفة القوة؟','تناسب طردي: مضاعفة القوة تضاعف التسارع، والخط المستقيم يمر تقريبًا بنقطة الأصل.')]},
+{l:'د',t:'أستخدم الأرقام: تسارع الجسم عندما يكون مقدار القوة المحصلة (35 N)؟',it:[
+nm('التسارع عند 35 N (m/s²):',7,'m/s²',.3,'استخدم a ≈ 0.2 × F أو لاحظ زيادة التسارع مع كل 7 N.','a ≈ 0.2 × 35 ≈ 7 m/s² (قيمة تقريبية من الخط البياني).')]}]},
+{n:6,st:'المرحلة 6: ثلاث قوى',t:'أستخدم الأرقام: يتأثر جسم كتلته (8 kg) بثلاث قوى مقاديرها واتجاهاتها على نحو ما يبين الشكل المجاور.',f:6,p:[
+{l:'أ',t:'أحسب مقدار القوة المحصلة المؤثرة في الجسم، وأحدد اتجاهها.',it:[
+nm('مجموع القوتين نحو اليمين (N):',18,'N',.01,'10 N و8 N بالاتجاه نفسه.','10 + 8 = 18 N نحو اليمين'),
+nm('مقدار القوة المحصلة (N):',6,'N',.01,'اطرح القوة المعاكسة (12 N) من 18 N.','ΣF = 18 − 12 = 6 N'),
+mc('اتجاه المحصلة:',DIR,0,'أي الجهتين قوتها أكبر؟','نحو اليمين لأن 18 N أكبر من 12 N.')]},
+{l:'ب',t:'أحسب تسارع الجسم، وأحدد اتجاهه.',it:[
+nm('مقدار التسارع:',.75,'m/s²',.01,'a = ΣF / m = 6 ÷ 8','a = 6 ÷ 8 = 0.75 m/s²'),
+mc('اتجاه التسارع:',DIR,0,'اتجاه التسارع = اتجاه المحصلة.','نحو اليمين (اتجاه القوة المحصلة).')]}]}];
+Q.forEach(function(q){if(!q.p[0].l&&q.p.length==1)q.p[0].l=''});
+function key(a,b,c){return a+'.'+b+'.'+c}
+function get(k){var a=k.split('.');return Q[a[0]].p[a[1]].it[a[2]]}
+function done(i){var r=1;Q[i].p.forEach(function(p,b){p.it.forEach(function(x,c){if(!ok[key(i,b,c)])r=0})});return r}
+var OKM=['أحسنت!','تحليل ممتاز','رائع، استمر!'],ids=function(k){return k.replace(/\./g,'_')};
+function msg(k,t,c){var e=$('m'+ids(k));if(e){e.className='msg '+c;e.textContent=t}}
+function award(k){pts[k]=(hu[k]||tr[k])?5:10;ok[k]=1;beep(660);save();render();var e=$('m'+ids(k));if(e){e.className='msg g';e.textContent=OKM[Math.floor(Math.random()*3)]+' +'+pts[k]+' نقطة'}}
+function bad(k,t){tr[k]=(tr[k]||0)+1;beep(200);var e=$('i'+ids(k));e.className='it sh';msg(k,t,'b')}
+function pick(k,j){var it=get(k);if(j==it.a)award(k);else bad(k,'ليست الإجابة المناسبة بعد، راجع الفكرة: '+it.h)}
+function chk(k){var it=get(k),v=parseFloat($('n'+ids(k)).value);if(isNaN(v)){bad(k,'اكتب رقمًا أولًا');return}
+if(Math.abs(v-it.a)<=it.t)award(k);else bad(k,'راجع الحساب. تلميح: '+it.h)}
+function hint(k){hu[k]=1;msg(k,'💡 '+get(k).h,'h')}
+function sol(it){return it.k=='mc'?it.c[it.a]:it.a+' '+it.u}
+function item(i,b,c,it){var k=key(i,b,c),d=ok[k],h='<div class="it'+(d?' ok':'')+'" id="i'+ids(k)+'"><div>'+it.q+'</div>';
+if(it.k=='mc')it.c.forEach(function(x,j){h+='<button class="op'+(d&&j==it.a?' g':'')+'" '+(d?'disabled':'')+' onclick="pick(\''+k+'\','+j+')">'+x+'</button>'});
+else h+='<input type="number" step="any" id="n'+ids(k)+'" '+(d?'value="'+it.a+'" disabled':'')+'> '+it.u+' <button class="bt p" '+(d?'disabled':'')+' onclick="chk(\''+k+'\')">تحقق</button>';
+if(!d)h+=' <button class="bt" onclick="hint(\''+k+'\')">💡 تلميح</button>';
+h+='<div class="msg" id="m'+ids(k)+'"></div>';
+if(d)h+='<div class="msg g">✔ '+it.w+' <span class="tag">(+'+pts[k]+')</span></div>';
+else if(S.T)h+='<div class="sol">الحل النموذجي: '+sol(it)+' — '+it.w+'</div>';
+return h+'</div>'}
+function A(x1,y1,x2,y2,c,l,lx,ly){var dx=Math.sign(x2-x1),dy=Math.sign(y2-y1),p=dx?x2+','+y2+' '+(x2-dx*16)+','+(y2-9)+' '+(x2-dx*16)+','+(y2+9):x2+','+y2+' '+(x2-9)+','+(y2-dy*16)+' '+(x2+9)+','+(y2-dy*16);return'<line x1="'+x1+'" y1="'+y1+'" x2="'+(x2-dx*10)+'" y2="'+(y2-dy*10)+'" stroke="'+c+'" stroke-width="5"/><polygon points="'+p+'" fill="'+c+'"/><text x="'+lx+'" y="'+ly+'" fill="#fff" font-size="16" text-anchor="middle">'+l+'</text>'}
+function fig(n,i){
+if(n==3){var s='<svg viewBox="0 0 360 200"><rect x="40" y="150" width="280" height="22" fill="#b88a2a"/><rect x="140" y="90" width="80" height="60" rx="10" fill="#86a6dc"/>';
+if(ok['2.0.0'])s+=A(180,120,180,185,'#ff6b6b','الوزن',226,190);if(ok['2.0.1'])s+=A(180,118,180,30,'#3ddc97','القوة العمودية',180,22);return s+'</svg>'}
+if(n==5){var F=[7,14,21,28,35],a=['1.4','2.7','4.3','5.5','??'],t='<table><tr><th>القوّة (N)</th>';F.forEach(function(x){t+='<td>'+x+'</td>'});t+='</tr><tr><th>التسارع (m/s²)</th>';a.forEach(function(x){t+='<td>'+x+'</td>'});t+='</tr></table>';
+if(ok['4.1.0']){var X=function(f){return 40+8*f},Y=function(v){return 180-20*v},s='<svg viewBox="0 0 340 215"><line x1="40" y1="180" x2="320" y2="180" stroke="#8ba3c7"/><line x1="40" y1="180" x2="40" y2="15" stroke="#8ba3c7"/><line x1="40" y1="180" x2="'+X(35)+'" y2="'+Y(6.95)+'" stroke="#29e0c2" stroke-width="2"/>';
+[[7,1.4],[14,2.7],[21,4.3],[28,5.5]].forEach(function(p){s+='<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="5" fill="#ffd166"/>'});
+s+='<text x="180" y="205" fill="#8ba3c7" font-size="12" text-anchor="middle">F (N)</text><text x="22" y="20" fill="#8ba3c7" font-size="12">a</text><text x="200" y="40" fill="#29e0c2" font-size="12">الخط الأفضل (رسم اللعبة)</text></svg>';t+=s}return t}
+if(n==6){var s='<svg viewBox="0 0 400 130"><rect x="150" y="45" width="70" height="55" fill="#c2b296" stroke="#8a7a5a"/>'+A(150,75,50,75,'#6fbf4a','12 N',100,62)+A(220,58,330,58,'#ee3a2f','10 N',275,44)+A(220,88,300,88,'#f08a3c','8 N',260,116);return s+'</svg>'}return''}
+function render(){var q=Q[S.i],h='<div class="card src"><div class="tag">السؤال رقم '+q.n+' من الكتاب — صفحة '+PG+' (مراجعة الدرس) — الكتاب هو المرجع</div><div class="qt">'+q.n+' . '+q.t+'</div>'+(q.f?fig(q.f,S.i):'')+'</div>';
+q.p.forEach(function(p,b){h+='<div class="card">'+(p.l?'<div class="qt"><b>'+p.l+' .</b> '+p.t+'</div>':'');p.it.forEach(function(x,c){h+=item(S.i,b,c,x)});h+='</div>'});
+if(S.i==Q.length-1&&done(S.i))h+='<div class="card" style="text-align:center"><h2>🏁 اكتملت المهمة</h2><p>مجموع نقاطك: '+tot()+' من '+max()+'</p></div>';
+$('main').innerHTML=h;$('stage').textContent=q.st;$('meta').textContent='سؤال '+q.n+' من '+Q.length;$('pts').textContent=('000'+tot()).slice(-3);
+var c=0,d='';Q.forEach(function(x,i){var f=done(i);c+=f;d+='<b class="'+(f?'on ':'')+(i==S.i?'cur':'')+'"></b>'});$('dots').innerHTML=d;$('pb').style.width=(c/Q.length*100)+'%';
+$('pv').disabled=S.i==0;$('nx').disabled=!(S.T||done(S.i))||S.i==Q.length-1;$('tm').className='bt'+(S.T?' p':'')}
+function tot(){var s=0;for(var k in pts)s+=pts[k];return s}
+function max(){var m=0;Q.forEach(function(q){q.p.forEach(function(p){m+=p.it.length*10})});return m}
+function go(d){S.i=Math.max(0,Math.min(Q.length-1,S.i+d));save();render();window.scrollTo(0,0)}
+function tg(){S.T=!S.T;render()}
+function clr(i){Q[i].p.forEach(function(p,b){p.it.forEach(function(x,c){var k=key(i,b,c);delete ok[k];delete pts[k];delete hu[k];delete tr[k]})})}
+function retry(){clr(S.i);save();render()}
+function resetAll(){if(confirm('هل تريد البدء من جديد؟')){Q.forEach(function(q,i){clr(i)});S.i=0;save();render()}}
+render();
+</script></body></html>
