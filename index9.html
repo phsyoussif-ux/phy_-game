@@ -37,4 +37,122 @@ h1{margin:0 0 6px;font-size:clamp(1.6rem,4vw,2.3rem);color:var(--ac)}
 .ill{margin:6px 0 10px}.svg{width:100%;max-width:560px;display:block;margin:0 auto}
 .svg text{fill:#e8f0ff;font-size:14px;text-anchor:middle;font-family:inherit}
 table{width:100%;border-collapse:collapse;margin:6px 0}td,th{padding:8px;border:1px solid #20335f;text-align:center}th{background:#0d1733;color:var(--ac)}
-.
+.quote{background:#0d1733;border-right:5px solid var(--warn);border-radius:10px;padding:12px 16px;font-size:1.1rem}
+.hint{color:var(--mut);font-size:.9rem}
+@keyframes pop{50%{transform:scale(1.04)}}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* =====================================================
+   محقّق القوى: تحدّي مقاومة الهواء — لعبة فردية من 6 أسئلة
+   المرجع: كتاب الفيزياء للصف التاسع، الدرس 2، ص54–56
+   لتعديل الأسئلة: عدّل المصفوفة Q. الخيار الأول في o هو الصحيح،
+   ويُخلط الترتيب عند العرض. b = سؤال التفسير الإضافي (اختياري).
+   ===================================================== */
+var Q=[
+ {sk:"تحليل نتائج تجربة",ill:"t1",
+  t:"سجّلت سلمى نتيجتين: في (أ) أسقطت ورقة مسطحة وقطعة نقدية معًا فوصلت القطعة أولًا بفارق واضح. في (ب) كوّرت الورقة نفسها وأسقطتها مع القطعة فوصلتا في زمنين متقاربين جدًا. أي استنتاج تدعمه النتيجتان؟",
+  o:["تغيير شكل الورقة وحده غيّر زمن سقوطها، فللشكل ومساحة السطح المعرّضة للهواء أثر في تأثير مقاومة الهواء","الورقة صارت أثقل بعد التكوير فسقطت أسرع","القطعة النقدية لا يؤثر فيها الهواء إطلاقًا","الجاذبية تؤثر في الأجسام الكروية أكثر منها في الأجسام المسطحة"],
+  b:{t:"ما الذي يجعل المقارنة بين (أ) و(ب) دليلًا مقنعًا على أثر الشكل؟",o:["الورقة نفسها استُخدمت في الحالتين، فتغيّر شكلها فقط","القطعة النقدية استُخدمت في الحالتين","الحالتان أُجريتا في يوم واحد","وصلت الورقة المكوّرة قبل الورقة المسطحة في كل مرة"]},
+  ex:"كمية الورق لم تتغير، والشكل هو ما تغيّر، فنُسب الفرق في السقوط إلى تغيّر مساحة السطح المعرّضة للهواء ومقاومة الهواء. أما القطعة النقدية فمقاومة الهواء لها قليلة مقارنة بوزنها، فيمكن إهمالها تقريبًا لا نفيها تمامًا."},
+ {sk:"تصميم لهدف هندسي",ill:"t2",
+  t:"يريد مهندس اختيار نموذج لغطاء دراجة سباق يقلل مقاومة الهواء. للنموذجين المساحة الأمامية المواجهة للهواء نفسها تقريبًا. أيهما يختار؟",
+  o:["النموذج (ب) الانسيابي، لأن شكله يسمح للهواء بالمرور حوله بسهولة","النموذج (أ) ذو الواجهة المستوية، لأن الهواء ينزلق على السطح المستوي","لا فرق بينهما، لأن مقاومة الهواء تتحدد بالمساحة الأمامية وحدها","النموذج الأثقل، لأن الوزن الأكبر يقلل مقاومة الهواء"],
+  ex:"عند تساوي المساحة الأمامية يبقى للشكل أثر: الشكل الانسيابي يسمح بمرور الهواء حوله بسهولة فتقل مقاومة الهواء (الشكل 9 في الكتاب). فالمساحة وحدها لا تكفي للحكم."},
+ {sk:"تفسير أثر السرعة النسبية",ill:"t3",
+  t:"يقود عمر دراجته بسرعة ثابتة بالنسبة إلى الأرض في طريق مستقيم. في اليوم الأول كان الهواء ساكنًا، وفي اليوم الثاني هبّت رياح تعاكس اتجاه حركته. في أي اليومين تكون مقاومة الهواء المؤثرة فيه أكبر عمومًا؟",
+  o:["اليوم الثاني، لأن سرعته بالنسبة إلى الهواء أكبر","اليوم الأول، لأن الهواء الساكن يملأ مسار الدراجة","متساوية، لأن سرعة الدراجة بالنسبة إلى الأرض لم تتغير","لا تتأثر الدراجة بالرياح لأن مقاومة الهواء تعتمد على الشكل فقط"],
+  b:{t:"أي سرعة هي الأنسب لتفسير مقاومة الهواء؟",o:["سرعة الجسم بالنسبة إلى الهواء","سرعة الجسم بالنسبة إلى الأرض فقط","كتلة الجسم","لون سطح الجسم"]},
+  ex:"تزداد مقاومة الهواء عمومًا بازدياد سرعة الجسم بالنسبة إلى الهواء. الرياح المعاكسة تزيد هذه السرعة النسبية حتى لو بقيت سرعته على الأرض ثابتة."},
+ {sk:"اكتشاف خطأ في تفسير",ill:"t4",
+  t:"أي تصحيح لعبارة الطالب هو الصحيح علميًا؟",
+  o:["فتح المظلة لا يغيّر وزن المظلّي، بل يزيد مقاومة الهواء إلى الأعلى فيقل هبوطه","الخطأ أن مقاومة الهواء لا تؤثر في المظلة، والجاذبية وحدها تبطئ الهبوط","الخطأ أن مساحة المظلة لا تتغير عند فتحها، لكن كتلة المظلّي تقل","فتح المظلة يجعل مقاومة الهواء إلى الأسفل فيزداد الوزن"],
+  ex:"الجاذبية (الوزن) تبقى إلى الأسفل ولا تقل بفتح المظلة. المظلة الواسعة تزيد مساحة السطح المعرّضة للهواء فتزداد مقاومة الهواء إلى الأعلى ويقل تسارع الهبوط وتصبح سرعته مناسبة."},
+ {sk:"تقييم عدالة تجربة",ill:"t5",
+  t:"أرادت مجموعة معرفة أثر شكل الورقة في زمن سقوطها. أسقطت ورقة مسطحة من ارتفاع 2 m، ثم كرة من ورقة أصغر حجمًا من ارتفاع 1.5 m. ما التعديل الأفضل لجعل التجربة أكثر عدالة؟",
+  o:["استخدام ورقتين متماثلتين وإسقاطهما من الارتفاع نفسه في اللحظة نفسها، مع تغيير الشكل فقط","إسقاط الكرة من 2 m وبقاء الورقتين مختلفتين في الحجم","إجراء المحاولة مرة واحدة بمؤقت أدق دون تغيير الشروط","إسقاط الورقة المسطحة أولًا ثم الكرة بعدها بقليل"],
+  b:{t:"ما المتغيّر الذي يجب أن نغيّره عمدًا في هذه التجربة؟",o:["شكل الورقة","الارتفاع","كمية الورق","لحظة الإسقاط"]},
+  ex:"في التجربة العادلة يُغيَّر متغيّر واحد (الشكل) وتبقى الباقية ثابتة: الورق والارتفاع ولحظة الإسقاط. اختلاف الحجم والارتفاع يمنع نسبة الفرق إلى الشكل، وهو من مصادر الخطأ."},
+ {sk:"استنتاج في غياب الهواء",ill:"t6",
+  t:"أُسقطت ريشة وقطعة نقدية معًا من الارتفاع نفسه داخل وعاء مفرغ من الهواء، مع إهمال أي مؤثرات أخرى. ما الاستنتاج الصحيح؟",
+  o:["يسقطان بالتسارع نفسه ويصلان معًا، رغم اختلاف وزنيهما","تصل القطعة النقدية أولًا لأن وزنها أكبر","تنعدم الجاذبية في الفراغ فيبقيان معلّقين","تصل الريشة أولًا لأن الفراغ يدفعها"],
+  b:{t:"ما الذي تغيّر مقارنة بالسقوط في الهواء؟",o:["غابت مقاومة الهواء التي كانت تُبطئ الريشة أكثر","زادت قوة الجاذبية في الفراغ","صارت كتلتا الجسمين متساويتين","اختفى وزن الريشة"]},
+  ex:"في الفراغ لا توجد مقاومة هواء، فتؤثر الجاذبية وحدها وتسقط الأجسام جميعها بالتسارع نفسه، كما أثبت رائد الفضاء ديفيد سكوت على القمر عام 1971 بإسقاط مطرقة وريشة."}
+];
+var app=document.getElementById("app"),LET=["أ","ب","ج","د"],qi=0,pts=0,right=0,bon=0,S=null,hist=[];
+function sh(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function newS(){S={o:sh([0,1,2,3]),ob:sh([0,1,2,3]),a:null,ab:null}}
+
+/* رسوم توضيحية بسيطة */
+var AR='<defs><marker id="m1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#4da3ff"/></marker><marker id="m2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#ff6b7a"/></marker></defs>';
+function ill(k){
+ if(k=="t1")return '<table><tr><th>التجربة</th><th>الجسمان</th><th>النتيجة</th></tr><tr><td>(أ)</td><td>ورقة مسطحة + قطعة نقدية</td><td>وصلت القطعة أولًا بفارق واضح</td></tr><tr><td>(ب)</td><td>الورقة نفسها مكوّرة + قطعة نقدية</td><td>وصلتا في زمنين متقاربين جدًا</td></tr></table>';
+ if(k=="t2")return '<svg class="svg" viewBox="0 0 400 190">'+AR+'<line x1="10" y1="80" x2="60" y2="80" stroke="#4da3ff" stroke-width="3" marker-end="url(#m1)"/><line x1="10" y1="120" x2="60" y2="120" stroke="#4da3ff" stroke-width="3" marker-end="url(#m1)"/><rect x="70" y="70" width="40" height="60" fill="#8fa3c7"/><line x1="210" y1="80" x2="250" y2="80" stroke="#4da3ff" stroke-width="3" marker-end="url(#m1)"/><line x1="210" y1="120" x2="250" y2="120" stroke="#4da3ff" stroke-width="3" marker-end="url(#m1)"/><path d="M260,100 Q275,70 310,70 L380,100 L310,130 Q275,130 260,100Z" fill="#29e0c2"/><text x="90" y="160">النموذج (أ): واجهة مستوية</text><text x="310" y="160">النموذج (ب): انسيابي</text><text x="200" y="25">المساحة الأمامية متقاربة في النموذجين</text></svg>';
+ if(k=="t3"){var b=function(x,y){return '<circle cx="'+x+'" cy="'+(y+30)+'" r="14" fill="none" stroke="#e8f0ff" stroke-width="3"/><circle cx="'+(x+60)+'" cy="'+(y+30)+'" r="14" fill="none" stroke="#e8f0ff" stroke-width="3"/><path d="M'+x+','+(y+30)+' L'+(x+25)+','+y+' L'+(x+60)+','+(y+30)+'" stroke="#e8f0ff" stroke-width="3" fill="none"/>'};
+  return '<svg class="svg" viewBox="0 0 420 200">'+AR+b(70,40)+'<line x1="190" y1="70" x2="150" y2="70" stroke="#8fa3c7" stroke-width="3" marker-end="url(#m1)"/><text x="330" y="70">اليوم الأول: هواء ساكن</text>'+b(70,130)+'<line x1="190" y1="160" x2="150" y2="160" stroke="#8fa3c7" stroke-width="3" marker-end="url(#m1)"/><line x1="300" y1="150" x2="230" y2="150" stroke="#4da3ff" stroke-width="3" marker-end="url(#m1)"/><line x1="300" y1="172" x2="230" y2="172" stroke="#4da3ff" stroke-width="3" marker-end="url(#m1)"/><text x="370" y="162">اليوم الثاني: رياح معاكسة</text><text x="210" y="15" style="fill:#8fa3c7;font-size:12px">الأسهم الرمادية: حركة الدراجة (ثابتة)، الزرقاء: الرياح</text></svg>';}
+ if(k=="t4")return '<div class="quote">«تنفتح المظلة فتزداد مساحة سطحها، فتقل قوة الجاذبية المؤثرة في المظلّي، ولذلك يبطؤ هبوطه.» <div class="hint">— عبارة طالب (فيها خطأ علمي)</div></div>';
+ if(k=="t5")return '<table><tr><th>المحاولة</th><th>الجسم</th><th>الارتفاع</th></tr><tr><td>1</td><td>ورقة مسطحة كبيرة</td><td>2 m</td></tr><tr><td>2</td><td>كرة من ورقة أصغر</td><td>1.5 m</td></tr></table>';
+ if(k=="t6")return '<svg class="svg" viewBox="0 0 400 210"><rect x="110" y="20" width="180" height="170" rx="14" fill="none" stroke="#4da3ff" stroke-width="3" stroke-dasharray="7 5"/><text x="200" y="14">وعاء مفرغ من الهواء</text><path d="M135,50 Q165,25 195,40 Q175,62 135,50Z" fill="#9be7d8"/><ellipse cx="245" cy="48" rx="20" ry="7" fill="#cfd8e0"/><line x1="165" y1="75" x2="165" y2="150" stroke="#ff6b7a" stroke-width="3" marker-end="url(#m2)"/><line x1="245" y1="75" x2="245" y2="150" stroke="#ff6b7a" stroke-width="3" marker-end="url(#m2)"/>'+AR+'<line x1="115" y1="182" x2="285" y2="182" stroke="#5b6b8f" stroke-width="5"/></svg>';
+ return "";
+}
+
+/* بناء كتلة الخيارات */
+function qb(q,ord,ans,act){
+ return '<div class="ops">'+ord.map(function(oi,k){var c="opt";if(ans!==null)c+=oi===0?" ok":(oi===ans?" no":" dim");
+  return '<button class="'+c+'" data-act="'+act+'" data-i="'+oi+'"'+(ans!==null?" disabled":"")+'><b>'+LET[k]+'</b><span>'+q.o[oi]+'</span></button>'}).join("")+'</div>';
+}
+function head(){
+ return '<div class="card"><div class="top"><b style="color:var(--ac);font-size:1.25rem">🔍 محقّق القوى</b><div>النقاط: <span class="lcd">'+pts+'</span> <button class="btn" data-act="restart" style="padding:6px 12px">↺ إعادة المحاولة</button></div></div><div class="prog">'+Q.map(function(_,i){return '<i class="'+(i<qi||(i==qi&&S&&S.fin)?"done":i==qi?"act":"")+'"></i>'}).join("")+'</div><div class="hint">المرحلة '+(qi+1)+' من '+Q.length+'</div></div>';
+}
+function intro(){
+ app.innerHTML='<div class="card"><span class="tag">تحدّي فردي · الصف التاسع</span><h1>🔍 محقّق القوى: تحدّي مقاومة الهواء</h1><p style="font-size:1.15rem">ستة أسئلة تختبر التحليل والاستنتاج وتقييم التجارب (الدرس: تطبيقات على القوى، ص54–56). المدة المتوقعة 8–10 دقائق.</p><p>نقطة لكل إجابة صحيحة، ونقطة إضافية عند اختيار التفسير الصحيح في الأسئلة التي تحتوي على سؤال تفسير. لا يمكن تجاوز السؤال قبل الإجابة.</p><div style="margin-top:12px"><button class="btn pri" data-act="start">ابدأ التحدّي ◀</button></div></div>';
+}
+function render(){
+ var q=Q[qi],h=head(),a=S.a,hasB=!!q.b,fin=S.fin;
+ h+='<div class="card"><span class="tag">'+q.sk+'</span><div class="ill">'+ill(q.ill)+'</div><div class="qt">'+q.t+'</div>'+qb(q,S.o,a,"pick");
+ if(a!==null)h+='<div class="fb '+(a===0?"ok":"no")+'">'+(a===0?"✔ إجابة صحيحة (+1)":"✘ ليست الإجابة الصحيحة، والصحيحة مظلّلة بالأخضر.")+'</div>';
+ if(a!==null&&hasB){
+  h+='<div class="bonus"><span class="tag">نقطة إضافية · اختر التفسير</span><div class="qt">'+q.b.t+'</div>'+qb(q.b,S.ob,S.ab,"pickb");
+  if(S.ab!==null)h+='<div class="fb '+(S.ab===0?"ok":"no")+'">'+(S.ab===0?"✔ تفسير صحيح (+1)":"✘ تفسير غير صحيح، والصحيح مظلّل بالأخضر.")+'</div>';
+  h+='</div>';
+ }
+ if(fin)h+='<div class="ex"><b>💡 التفسير العلمي:</b> '+q.ex+'</div>';
+ h+='<div style="margin-top:12px"><button class="btn pri" data-act="next"'+(fin?"":" disabled")+'>'+(qi==Q.length-1?"عرض النتيجة ▶":"السؤال التالي ◀")+'</button> '+(fin?"":'<span class="hint">اختر إجابة للمتابعة</span>')+'</div></div>';
+ app.innerHTML=h;
+}
+function finish(){S.fin=1;render()}
+function pick(i){
+ if(S.a!==null)return;S.a=i;if(i===0){pts++;right++}
+ if(!Q[qi].b)S.fin=1;render();
+}
+function pickb(i){
+ if(S.a===null||S.ab!==null)return;S.ab=i;if(i===0){pts++;bon++}
+ S.fin=1;render();
+}
+function next(){
+ if(!S.fin)return;
+ if(qi==Q.length-1){result();return}
+ qi++;newS();render();window.scrollTo&&window.scrollTo(0,0);
+}
+function result(){
+ var max=Q.length+Q.filter(function(q){return q.b}).length,p=pts/max,m,tt;
+ if(p>=.9){tt="🏆 محقّق متميّز";m="فهمك عميق: تربط بين الشكل والمساحة والسرعة وتميّز بين مقاومة الهواء والجاذبية، وتقيّم التجارب بدقة."}
+ else if(p>=.7){tt="⭐ محقّق ماهر";m="أداؤك قوي. راجع الأسئلة التي أخطأت فيها، وركّز على ضبط المتغيرات وعلى الفرق بين الوزن (الجاذبية) ومقاومة الهواء."}
+ else if(p>=.5){tt="🔧 محقّق في طريقه للتميّز";m="لديك أساس جيد. أعد قراءة تجربة الورقة والقطعة النقدية (ص55) وأثر مساحة السطح والسرعة (ص56)، ثم حاول مرة أخرى."}
+ else{tt="📘 ابدأ من جديد";m="لا بأس! راجع صفحات 54–56: اتجاه مقاومة الهواء عكس الحركة، وتتأثر بالشكل والمساحة والسرعة، وفي الفراغ تسقط الأجسام بالتسارع نفسه. ثم أعد المحاولة."}
+ app.innerHTML='<div class="card"><span class="tag">النتيجة النهائية</span><h1>'+tt+'</h1><p style="font-size:1.3rem">مجموع نقاطك: <span class="lcd">'+pts+' / '+max+'</span></p><p>الإجابات الصحيحة: <b>'+right+' من '+Q.length+'</b> · التفسيرات الصحيحة: <b>'+bon+' من '+(max-Q.length)+'</b></p><div class="ex">'+m+'</div><button class="btn pri" data-act="restart">↺ إعادة المحاولة</button></div>';
+}
+function start(){qi=0;pts=0;right=0;bon=0;newS();render()}
+document.addEventListener("click",function(e){
+ var b=e.target.closest("[data-act]");if(!b)return;var a=b.dataset.act;
+ if(a=="start"||a=="restart")start();
+ else if(a=="pick")pick(+b.dataset.i);
+ else if(a=="pickb")pickb(+b.dataset.i);
+ else if(a=="next")next();
+});
+intro();
+</script>
+</body>
+</html>
