@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مختبر النوابض: مهندس القوة</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0a1226;color:#e6edf7;font-family:"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh;line-height:1.7;background-image:linear-gradient(rgba(41,224,194,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(41,224,194,.06) 1px,transparent 1px);background-size:32px 32px}
+.wrap{max-width:780px;margin:auto;padding:14px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+h1{font-size:1.25rem;margin:0;color:#29e0c2}
+.sub{font-size:.8rem;color:#8fa3c4}
+.ctl{display:flex;gap:8px;align-items:center}
+.lcd{font-family:Consolas,"Courier New",monospace;background:#06101f;border:1px solid #29e0c2;color:#29e0c2;border-radius:8px;padding:3px 10px;letter-spacing:2px;text-shadow:0 0 8px rgba(41,224,194,.7);direction:ltr;display:inline-block}
+.btn{font:inherit;font-weight:700;background:#29e0c2;color:#06101f;border:0;border-radius:10px;padding:10px 20px;cursor:pointer}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.sec{background:transparent;color:#29e0c2;border:1px solid #29e0c2}
+.btn.sm{padding:5px 12px;font-size:.8rem}
+.bar{height:8px;background:#13213f;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#29e0c2;box-shadow:0 0 10px #29e0c2;transition:width .4s}
+.dots{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;font-size:.8rem;color:#8fa3c4}
+.dots span.d{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #2a3d6b;margin-inline-end:6px}
+.d.cur{border-color:#29e0c2;box-shadow:0 0 8px #29e0c2}.d.g{background:#29e0c2;border-color:#29e0c2}.d.b{background:#ff5d73;border-color:#ff5d73}
+.card{background:linear-gradient(180deg,#101d3c,#0d1830);border:1px solid rgba(41,224,194,.35);border-radius:14px;padding:16px;box-shadow:0 0 24px rgba(41,224,194,.12)}
+.qh{display:flex;justify-content:space-between;font-size:.8rem}
+.tag{color:#ffb347;font-weight:700}.ref{color:#8fa3c4}
+h2{margin:6px 0;font-size:1.2rem}
+.pp{color:#c8d5ec;margin:6px 0}
+.qq{margin:12px 0 4px}
+.n{direction:ltr;unicode-bidi:isolate;font-family:Consolas,"Courier New",monospace;color:#29e0c2;white-space:nowrap}
+.figbox{background:#08122a;border:1px solid #223660;border-radius:10px;padding:8px;margin:10px 0;overflow-x:auto}
+.fig{width:100%;max-width:420px;height:auto;display:block;margin:auto}
+table{border-collapse:collapse;margin:8px auto;width:100%;font-size:.9rem}
+th,td{border:1px solid #2a3d6b;padding:5px 8px;text-align:center}
+th{background:#13264d;color:#29e0c2}
+td{font-family:Consolas,"Courier New",monospace;direction:ltr}
+.opt{display:block;width:100%;text-align:right;background:#0c1730;color:inherit;border:1px solid #2a3d6b;border-radius:10px;padding:10px 13px;margin:7px 0;font:inherit;cursor:pointer}
+.opt .l{display:inline-block;width:26px;color:#29e0c2;font-weight:700}
+.opt.on{border-color:#29e0c2;background:#0f2a3f}
+.opt.ok{border-color:#29e0c2;background:#0d3a3a}
+.opt.bad{border-color:#ff5d73;background:#3a1626}
+.fb{margin-top:12px;padding:12px;border-radius:10px;border:1px solid #29e0c2;background:#0b2230}
+.fb.x{border-color:#ffb347;background:#2a2112}
+.fb h3{margin:0 0 6px;font-size:1rem}
+.act{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.fig .sup{fill:#3a4d7a}.fig .sp{fill:none;stroke:#29e0c2;stroke-width:2.2;stroke-linejoin:round}
+.fig .dash{stroke:#ffb347;stroke-dasharray:4 3;stroke-width:1.5}.fig .ld{fill:#17305a;stroke:#29e0c2}
+.fig .rl{fill:#16264a;stroke:#3a5a8c}.fig .tk{stroke:#9fb3d1;stroke-width:1}.fig .gd{stroke:rgba(41,224,194,.4);stroke-dasharray:2 3}
+.fig .bd{fill:#142749;stroke:#29e0c2}.fig .mk{stroke:#e6edf7}.fig .hl{fill:#ffb347}.fig .br{stroke:#ffb347;fill:none;stroke-width:1.5}
+.fig .t{fill:#a9bbd8;font:12px Tahoma,sans-serif}.fig .m{font-family:Consolas,monospace;direction:ltr;unicode-bidi:isolate}.fig .w{fill:#ffb347}
+.ring{display:block;margin:6px auto}
+.sum{display:flex;justify-content:space-between;border-bottom:1px solid #223660;padding:6px 0;font-size:.9rem}
+.modal{display:none;position:fixed;inset:0;background:rgba(3,8,20,.88);z-index:9;overflow:auto;padding:14px}
+.modal .card{max-width:720px;margin:auto}
+.tc{border-bottom:1px solid #223660;padding:8px 0;font-size:.9rem}
+.tc b{color:#29e0c2}
+.shake{animation:sk .3s}@keyframes sk{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+@media(max-width:480px){h1{font-size:1.05rem}.card{padding:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div><h1>مختبر النوابض: مهندس القوة</h1><div class="sub">الصف التاسع · تطبيقات على القوى · ص 57–58</div></div>
+ <div class="ctl"><span class="lcd" id="sc">000/075</span><button class="btn sec sm" id="tb">بطاقة المعلم</button><button class="btn sec sm" id="mt">الصوت: تشغيل</button></div>
+</header>
+<div class="bar"><i id="pb"></i></div>
+<div class="dots"><div id="dots"></div><span id="cnt"></span></div>
+<main class="card" id="stage"></main>
+</div>
+<div class="modal" id="md"><div class="card"><h2 style="color:#29e0c2">بطاقة المعلم</h2><div id="tcb"></div><div class="act"><button class="btn" id="cl">إغلاق</button></div></div></div>
+
+<script>
+var n=function(s){return '<span class="n">'+s+'</span>'};
+var NS='http://www.w3.org/2000/svg';
+function S(w,h,c,l){return '<svg class="fig" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+l+'" xmlns="'+NS+'">'+c+'</svg>'}
+function coil(x,y1,y2){var k=Math.max(5,Math.round((y2-y1)/14)),a=9,d='M'+x+' '+y1+' L'+x+' '+(y1+5),h=(y2-y1-10)/(2*k);
+ for(var i=1;i<=2*k;i++)d+=' L'+(x+(i%2?a:-a))+' '+(y1+5+h*i-h/2);
+ return d+' L'+x+' '+(y2-5)+' L'+x+' '+y2}
+function rig(cx,y0,L,s,load,L0,gx){var y1=y0+L*s,g='<rect x="'+(cx-28)+'" y="'+(y0-7)+'" width="56" height="7" rx="2" class="sup"/><path d="'+coil(cx,y0,y1)+'" class="sp"/>';
+ if(L0!=null&&L!==L0)g+='<line x1="'+(cx-38)+'" x2="'+(cx+38)+'" y1="'+(y0+L0*s)+'" y2="'+(y0+L0*s)+'" class="dash"/>';
+ if(gx)g+='<line x1="'+gx+'" x2="'+(cx-12)+'" y1="'+y1+'" y2="'+y1+'" class="gd"/>';
+ g+='<path d="M'+cx+' '+y1+' v8" class="sp"/>';
+ if(load)g+='<rect x="'+(cx-24)+'" y="'+(y1+8)+'" width="48" height="26" rx="4" class="ld"/><text x="'+cx+'" y="'+(y1+26)+'" class="t m w" text-anchor="middle">'+load+'</text>';
+ return g}
+function ruler(x,y0,mx,s,ev){var g='<rect x="'+x+'" y="'+y0+'" width="26" height="'+(mx*s)+'" class="rl"/>';
+ for(var c=0;c<=mx;c++){var y=y0+c*s,lg=c%ev===0;g+='<line x1="'+(x+26)+'" x2="'+(x+26-(lg?12:6))+'" y1="'+y+'" y2="'+y+'" class="tk"/>';if(lg)g+='<text x="'+(x+9)+'" y="'+(y+4)+'" class="t m" text-anchor="middle">'+c+'</text>'}
+ return g+'<text x="'+(x+13)+'" y="'+(y0-14)+'" class="t m" text-anchor="middle">cm</text>'}
+function lab(x,y,a,b){return '<text x="'+x+'" y="'+y+'" class="t" text-anchor="middle">'+a+'</text><text x="'+x+'" y="'+(y+16)+'" class="t m" text-anchor="middle">'+b+'</text>'}
+function bal(x,y0,s,marks){var h=10*s,g='<circle cx="'+(x+35)+'" cy="'+(y0-24)+'" r="9" class="sp"/><rect x="'+x+'" y="'+(y0-14)+'" width="70" height="'+(h+28)+'" rx="6" class="bd"/><path d="M'+(x-2)+' '+y0+' l-12 -6 v12z" class="hl"/>';
+ marks.forEach(function(m){var y=y0+m[1]*s;g+='<line x1="'+(x+8)+'" x2="'+(x+62)+'" y1="'+y+'" y2="'+y+'" class="mk"/><text x="'+(x+78)+'" y="'+(y+4)+'" class="t m">'+m[0]+' N</text>'});
+ return g+'<path d="M'+(x+35)+' '+(y0+h+14)+' v14 q0 8 -8 8" class="sp"/>'}
+function tbl(h,rows){return '<table><tr>'+h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</table>'}
+function hz(a,b,c,d){return '<table><tr><th>'+a+'</th>'+b.map(function(x){return '<td>'+x+'</td>'}).join('')+'</tr><tr><th>'+c+'</th>'+d.map(function(x){return '<td>'+x+'</td>'}).join('')+'</tr></table>'}
+
+var Q=[
+{tag:'تحليل جدول',ref:'57',t:'ما النمط الذي تكشفه البيانات؟',
+ p:'علّق طالب قوى مختلفة بنابض طوله الأصلي '+n('12.0 cm')+'، وقاس طول النابض عند كل قوة، ثم حسب الاستطالة (الاستطالة = الطول بعد التحميل − الطول الأصلي). لم يتجاوز النابض حد مرونته في هذه القياسات.',
+ fig:function(){return tbl(['القوة (N)','طول النابض (cm)','الاستطالة (cm)'],[[0,'12.0','0'],[1,'13.2','1.2'],[2,'14.4','2.4'],[3,'15.6','3.6'],[4,'16.8','4.8']])+
+  S(260,290,ruler(10,30,19,12,2)+rig(90,30,12,12,null,null,36)+rig(190,30,16.8,12,'4 N',12,36)+lab(90,266,'بلا قوة','L = 12.0 cm')+lab(190,266,'قوة 4 N','L = 16.8 cm'),'نابضان على مسطرة: بلا حمل وبحمل 4 نيوتن')},
+ q:'أيّ العبارات الآتية تصف النمط في الجدول وصفًا صحيحًا؟',
+ o:[['الاستطالة تتناسب طرديًا مع القوة ضمن مجال القوى المختبرة ('+n('0–4 N')+')',1],['طول النابض يتناسب طرديًا مع القوة','الاستطالة ثابتة مهما تغيّرت القوة'.replace(/^/,'')],['الاستطالة تقل كلما زادت القوة']],
+ w:{p:'ما الدليل من الجدول الذي يدعم اختيارك؟',o:[['الاستطالة تتضاعف عند تضاعف القوة ('+n('2.4 cm')+' عند '+n('2 N')+'، و'+n('4.8 cm')+' عند '+n('4 N')+')، فكل '+n('1 N')+' يضيف '+n('1.2 cm'),1],['طول النابض يتضاعف عند تضاعف القوة'],['النابض يعود إلى طوله الأصلي بعد زوال القوة'],['أكبر طول سُجّل عند أكبر قوة']]},
+ fb:'كل زيادة قدرها '+n('1 N')+' تضيف '+n('1.2 cm')+' إلى الاستطالة، فتتضاعف الاستطالة بتضاعف القوة: تناسب طردي بين الاستطالة والقوة ضمن المجال '+n('0–4 N')+'. أمّا طول النابض فلا يتضاعف ('+n('14.4 cm')+' عند '+n('2 N')+' مقابل '+n('13.2 cm')+' عند '+n('1 N')+')، فلا بد من التمييز بين الطول والاستطالة. عبارة «يعود إلى طوله الأصلي» صحيحة علميًا لكنها لا تُستنتج من الجدول، وأكبر طول عند أكبر قوة يدل على الزيادة فقط لا على التناسب.',
+ obj:'تحليل العلاقة بين القوة والاستطالة والتمييز بين الطول والاستطالة.'},
+{tag:'معايرة ميزان زنبركي',ref:'57–58',t:'توقّع قراءة حمل جديد',
+ p:'عُيّر ميزان زنبركي بتعليق قوى معلومة، وسُجّلت استطالة النابض في الجدول، وجميع القياسات ضمن حد المرونة. ثم عُلّق حمل جديد قوته مجهولة فاستطال النابض '+n('4.5 cm')+' (الطول الأصلي '+n('10.0 cm')+').',
+ fig:function(){return hz('القوة (N)',[0,2,4,6],'الاستطالة (cm)',['0','3.0','6.0','9.0'])+
+  S(260,320,ruler(10,30,15,14,5).replace('>cm<','>cm<')+rig(120,30,14.5,14,'? N',10,36)+'<path d="M170 '+(30+10*14)+' h8 v'+(4.5*14)+' h-8" class="br"/><text x="184" y="'+(30+12.25*14+4)+'" class="t m w">x = 4.5 cm</text>'+lab(120,298,'حمل مجهول','L = 14.5 cm'),'نابض بحمل مجهول على مسطرة')},
+ q:'ما قوة الحمل الجديد؟',
+ o:[['2.0 N'],['3.0 N',1],['4.5 N'],['6.0 N']].map(function(a){return [n(a[0]),a[1]]}),
+ fb:'من الجدول: كل '+n('2 N')+' تعطي '+n('3.0 cm')+'، أي '+n('1.5 cm')+' لكل '+n('1 N')+'. الاستطالة '+n('4.5 cm')+' تقع بين '+n('3.0 cm')+' ('+n('2 N')+') و'+n('6.0 cm')+' ('+n('4 N')+')، فالقوة بين '+n('2 N')+' و'+n('4 N')+': '+n('4.5 ÷ 1.5 = 3.0 N')+'. القيمة '+n('4.5 N')+' خلطٌ بين الاستطالة (cm) والقوة (N). هذا التوقع مقبول لأن الاستطالة داخل المجال الذي اختُبر فيه النابض ('+n('0–9 cm')+')، ولا يجوز تمديده إلى قوى أكبر دون بيانات.',
+ obj:'استخدام بيانات المعايرة لتوقع القوة داخل المجال المختبَر.'},
+{tag:'مقارنة نابضين',ref:'57',t:'لماذا اختلفت الاستطالة؟',
+ p:'نابضان A وB لهما الطول الأصلي نفسه '+n('10.0 cm')+'، وأُثّرت في كلٍّ منهما القوة نفسها. القياسات ضمن حد المرونة لكل منهما.',
+ fig:function(){return tbl(['القوة (N)','طول A (cm)','استطالة A (cm)','طول B (cm)','استطالة B (cm)'],[[0,'10.0','0','10.0','0'],[2,'13.0','3.0','11.0','1.0'],[4,'16.0','6.0','12.0','2.0']])+
+  S(260,280,ruler(10,30,14,12,2)+rig(100,30,13,12,'2 N',10,36)+rig(200,30,11,12,'2 N',10,36)+lab(100,262,'النابض A','L = 13.0 cm')+lab(200,262,'النابض B','L = 11.0 cm'),'نابضان بالقوة نفسها واستطالتين مختلفتين')},
+ q:'ما أنسب استنتاج من هذه البيانات؟',
+ o:[['النابضان مختلفان؛ فالقوة نفسها تُحدث استطالة مختلفة في كل منهما، وكلٌّ منهما تتناسب استطالته طرديًا مع القوة',1],['يجب أن تتساوى استطالتا النابضين عند القوة نفسها، فالاختلاف خطأ في القياس'],['القوة المؤثرة في A أكبر من القوة المؤثرة في B'],['النابض A تجاوز حد مرونته لأن استطالته أكبر']],
+ w:{p:'ما الدليل المناسب من الجدول؟',o:[['عند '+n('2 N')+' استطال A '+n('3.0 cm')+' واستطال B '+n('1.0 cm')+'، فالعلاقة بين القوة والاستطالة تختلف من نابض لآخر',1],['الطول الأصلي للنابضين متساوٍ، لذا يجب أن تتساوى استطالتاهما'],['استطالة A تتضاعف بتضاعف القوة أمّا استطالة B فلا'],['استطالة A أكبر لأن القوة المؤثرة فيه أكبر']]},
+ fb:'عند '+n('2 N')+' استطال A بمقدار '+n('3.0 cm')+' (أي '+n('1.5 cm')+' لكل '+n('1 N')+') واستطال B بمقدار '+n('1.0 cm')+' (أي '+n('0.5 cm')+' لكل '+n('1 N')+'). وكلاهما تتضاعف استطالته عند تضاعف القوة ('+n('6.0 cm')+' و'+n('2.0 cm')+' عند '+n('4 N')+')، فلا دليل على تجاوز حد المرونة. القوة واحدة، والطول الأصلي واحد، والفرق في النابضين أنفسهم؛ لذلك لا نفترض أن لكل النوابض العلاقة نفسها بين القوة والاستطالة.',
+ obj:'عدم تعميم العلاقة بين القوة والاستطالة على جميع النوابض.'},
+{tag:'ميزان غير معاير',ref:'58',t:'أين الخطأ في التدريج؟',
+ p:'ميزان زنبركي مدرَّج بالنيوتن مجال قياسه '+n('0–50 N')+'. عُلّقت به قوى معلومة وسُجّلت إزاحة المؤشر عن الصفر في الجدول (ضمن حد المرونة). ثم طُبعت علامات التدريج على الغلاف في المواضع المبيّنة بالمسطرة في الرسم.',
+ fig:function(){var m=[[0,0],[10,2],[20,4],[30,6],[40,9],[50,10]],g='';m.forEach(function(a){g+='<line x1="36" x2="120" y1="'+(44+a[1]*22)+'" y2="'+(44+a[1]*22)+'" class="gd"/>'});
+  return hz('القوة (N)',[0,10,20,30,40,50],'الإزاحة (cm)',['0','2.0','4.0','6.0','8.0','10.0'])+S(270,330,g+ruler(10,44,10,22,2)+bal(120,44,22,m),'ميزان زنبركي بعلامات تدريج على مسطرة')},
+ q:'ما الخطأ في تدريج هذا الميزان؟',
+ o:[['علامة '+n('40 N')+' وُضعت في موضع خاطئ، ومكانها الصحيح عند '+n('8.0 cm'),1],['علامة '+n('10 N')+' يجب أن تكون عند '+n('1.0 cm')],['يجب أن تزداد المسافات بين العلامات كلما زادت القوة'],['علامة الصفر يجب أن تكون عند '+n('2.0 cm')]],
+ fb:'الجدول يبيّن أن كل '+n('10 N')+' تزيد الإزاحة '+n('2.0 cm')+' بانتظام، لأن الاستطالة تتناسب طرديًا مع القوة ضمن حد المرونة؛ فيجب أن تكون علامات التدريج متساوية البعد. وُضعت علامة '+n('40 N')+' عند '+n('9.0 cm')+' بدلًا من '+n('8.0 cm')+'، فصارت المسافة بين '+n('30 N')+' و'+n('40 N')+' تساوي '+n('3.0 cm')+' والمسافة بين '+n('40 N')+' و'+n('50 N')+' تساوي '+n('1.0 cm')+' بدل '+n('2.0 cm')+' لكل منهما. وعلامة الصفر ('+n('0 cm')+') وعلامة '+n('10 N')+' ('+n('2.0 cm')+') صحيحتان.',
+ obj:'استخدام التناسب الطردي ضمن حد المرونة لاكتشاف خطأ في تدريج ميزان.'},
+{tag:'موقف تطبيقي',ref:'57–58',t:'هل عاد النابض إلى شكله؟',
+ p:'تجربة افتراضية (لا تُنفَّذ عمليًا) على نابضين متماثلين طولهما الأصلي '+n('12.0 cm')+': أُثّرت في الأول قوة صغيرة F1، وفي الثاني قوة كبيرة جدًا F2، ثم أُزيلت القوة عن كل منهما وقيس طوله.',
+ fig:function(){function row(a,b,c,x,y,t,fl){var s=6,h=y*s+34+60,g=ruler(4,34,x,s,5);var cs=[100,205,300];
+   g+=rig(cs[0],34,12,s,null,12,32)+rig(cs[1],34,a,s,fl,12,32)+rig(cs[2],34,c,s,null,12,32);
+   var ly=34+x*s+60;g+=lab(cs[0],ly,'قبل التحميل','L = 12.0 cm')+lab(cs[1],ly,'أثناء التحميل','L = '+a.toFixed(1)+' cm')+lab(cs[2],ly,'بعد إزالة القوة','L = '+c.toFixed(1)+' cm');
+   return '<p class="sub" style="text-align:center">'+t+'</p>'+S(350,ly+30,g,t)}
+  return row(18,0,12,18,0,'النابض الأول','F1')+row(30,0,14.5,30,0,'النابض الثاني','F2')},
+ q:'أيّ النابضين تجاوزت القوة المؤثرة فيه حد المرونة؟',
+ o:[['النابض الأول فقط'],['النابض الثاني فقط',1],['النابضان معًا'],['لا أحد منهما']],
+ w:{p:'ما الدليل الذي يحسم الإجابة؟',o:[['النابض الثاني لم يستعد طوله الأصلي بعد زوال القوة (بقي '+n('14.5 cm')+')، أي حدث تغيّر دائم في شكله',1],['النابض الثاني استطال أكثر من الأول، وهذا وحده يكفي للحكم'],['النابض الأول عاد إلى طوله الأصلي، فهو الذي تجاوز حد المرونة'],['النابضان مختلفان في القوة المؤثرة فيهما فقط']]},
+ fb:'النابض الأول عاد إلى '+n('12.0 cm')+' بعد إزالة القوة، فسلوكه مرن. أمّا الثاني فبقي طوله '+n('14.5 cm')+'، أي بقيت استطالة دائمة مقدارها '+n('2.5 cm')+'، وهذا تغيّر دائم في الشكل يدل على أن القوة تجاوزت حد المرونة، وعندها لا تبقى العلاقة بين القوة والاستطالة طردية ولا يستعيد النابض شكله. المعيار هو العودة إلى الشكل الأصلي بعد زوال القوة، وليس كبر الاستطالة وحده.',
+ obj:'التمييز بين السلوك المرن والتغيّر الدائم في الشكل بعد زوال القوة.'},
+{tag:'سؤال تطبيقي',ref:'58',t:'كيف تتحقق من دقة الميزان؟',
+ p:'يُستخدم في المختبر ميزان زنبركي مجال قياسه '+n('0–50 N')+'، ويريد الطالب التحقق من أن قراءاته دقيقة. لديه أحمال قوتها معلومة: '+n('10 N')+' و'+n('20 N')+' و'+n('30 N')+'.',
+ fig:function(){var m=[[0,0],[10,2],[20,4],[30,6],[40,8],[50,10]],g=bal(40,44,14,m)+'<text x="232" y="48" class="t" text-anchor="middle">أحمال قوتها معلومة</text>';
+  ['10 N','20 N','30 N'].forEach(function(v,i){g+='<rect x="200" y="'+(62+i*44)+'" width="64" height="32" rx="4" class="ld"/><text x="232" y="'+(83+i*44)+'" class="t m w" text-anchor="middle">'+v+'</text>'});
+  return S(300,250,g,'ميزان زنبركي وأحمال معلومة')},
+ q:'ما أفضل طريقة للتحقق من دقة الميزان؟',
+ o:[['تعليق أحمال معلومة موزعة ضمن مجال الميزان ومقارنة قراءته بقيمة كل حمل، مع التأكد من أن المؤشر عند الصفر بلا حمل',1],['تعليق الجسم نفسه عدة مرات، فإذا تكررت القراءة نفسها فالميزان دقيق'],['تعليق حمل أكبر كثيرًا من '+n('50 N')+' لاختبار تحمّل النابض'],['قياس طول النابض دون تعليق أي حمل']],
+ fb:'التحقق من الدقة يعني مقارنة قراءة الميزان بقوى معلومة موزعة ضمن مجال قياسه، مع فحص قراءة الصفر؛ فإن طابقت القراءات القيم المعلومة كان التدريج صحيحًا ضمن هذا المجال. تكرار القياس على الجسم نفسه يدل على ثبات النتيجة لا على صحتها. وتحميل الميزان بقوة أكبر من مجاله قد يتجاوز حد مرونة النابض فيتغيّر شكله بصورة دائمة ويتلف الميزان. أمّا قياس الطول دون حمل فلا يختبر العلاقة بين القوة والقراءة.',
+ obj:'اختيار طريقة سليمة للتحقق من دقة ميزان زنبركي دون تجاوز حد المرونة.'}
+];
+Q[0].o=[['الاستطالة تتناسب طرديًا مع القوة ضمن مجال القوى المختبرة ('+n('0–4 N')+')',1],['طول النابض يتناسب طرديًا مع القوة'],['الاستطالة ثابتة مهما تغيّرت القوة'],['الاستطالة تقل كلما زادت القوة']];
+
+var PM=10,PW=5,MAX=Q.length*PM+3*PW,LET=['أ','ب','ج','د'];
+var st={i:0,score:0,res:[],sel:[],ord:[],locked:false,started:false};
+var $=function(i){return document.getElementById(i)};
+var muted=false,ac;
+function tone(f,d,t,v){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain(),w=ac.currentTime;o.type=t||'sine';o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(v||.08,w);g.gain.exponentialRampToValueAtTime(.0001,w+d);o.start(w);o.stop(w+d)}catch(e){}}
+function sfx(k){if(k==='ok'){tone(660,.14);setTimeout(function(){tone(880,.2)},130)}else if(k==='bad'){tone(220,.3,'sawtooth',.05)}else{tone(523,.15);setTimeout(function(){tone(659,.15)},150);setTimeout(function(){tone(784,.3)},300)}}
+function pad(x){return ('000'+x).slice(-3)}
+function shuf(c){var r=[],j,t;for(var z=0;z<c;z++)r.push(z);for(var i=r.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=r[i];r[i]=r[j];r[j]=t}return r}
+function upd(){$('sc').textContent=pad(st.score)+'/'+pad(MAX);var d='';
+ for(var i=0;i<Q.length;i++){var c='d';if(st.res[i])c+=st.res[i].pts===st.res[i].max?' g':(st.res[i].pts>0?' g':' b');else if(i===st.i&&st.started)c+=' cur';d+='<span class="'+c+'"></span>'}
+ $('dots').innerHTML=d;$('pb').style.width=(st.res.length/Q.length*100)+'%';$('cnt').textContent=st.started&&st.i<Q.length?'السؤال '+(st.i+1)+' من '+Q.length:''}
+function grp(g,o){return o.map(function(_,p){var k=st.ord[g][p];return '<button class="opt" data-g="'+g+'" data-k="'+k+'"><span class="l">'+LET[p]+'</span>'+o[k][0]+'</button>'}).join('')}
+function intro(){st={i:0,score:0,res:[],sel:[],ord:[],locked:false,started:false};upd();
+ $('stage').innerHTML='<h2>مهمتك: مهندس القوة</h2><p class="pp">ستحلّل بيانات نوابض وموازين زنبركية في 6 تحديات فردية، بسؤال واحد في كل شاشة. تُعرض التغذية الراجعة بعد أن تُجيب فقط.</p><div class="sum"><span>إجابة صحيحة</span><span class="n">+10</span></div><div class="sum"><span>تفسير صحيح (في الأسئلة 1 و3 و5)</span><span class="n">+5</span></div><div class="sum"><span>النهاية العظمى</span><span class="n">75</span></div><div class="act"><button class="btn" id="go">ابدأ التحدي</button></div>';
+ $('go').onclick=function(){st.started=true;render()}}
+function render(){var q=Q[st.i];st.sel=[];st.locked=false;st.ord=[shuf(q.o.length),q.w?shuf(q.w.o.length):[]];upd();
+ var h='<div class="qh"><span class="tag">'+q.tag+'</span><span class="ref">ص '+q.ref+'</span></div><h2>'+q.t+'</h2><p class="pp">'+q.p+'</p><div class="figbox">'+q.fig()+'</div><p class="qq"><b>'+q.q+'</b></p>'+grp(0,q.o);
+ if(q.w)h+='<p class="qq"><b>'+q.w.p+'</b></p>'+grp(1,q.w.o);
+ h+='<div id="fb"></div><div class="act"><button class="btn" id="chk">تحقّق من الإجابة</button><button class="btn sec" id="nx" style="display:none"></button></div>';
+ $('stage').innerHTML=h;$('chk').onclick=check;window.scrollTo(0,0)}
+function check(){var q=Q[st.i],need=q.w?2:1;
+ if(st.locked)return;
+ if(st.sel.length<need||st.sel[0]===undefined||(q.w&&st.sel[1]===undefined)){$('stage').classList.remove('shake');void $('stage').offsetWidth;$('stage').classList.add('shake');return}
+ st.locked=true;var ok0=!!q.o[st.sel[0]][1],ok1=q.w?!!q.w.o[st.sel[1]][1]:false,pts=(ok0?PM:0)+(ok1?PW:0),mx=PM+(q.w?PW:0);
+ st.score+=pts;st.res[st.i]={pts:pts,max:mx,ok0:ok0,ok1:ok1};
+ [].forEach.call(document.querySelectorAll('.opt'),function(b){var g=+b.dataset.g,k=+b.dataset.k,o=(g?q.w.o:q.o)[k];b.classList.remove('on');if(o[1])b.classList.add('ok');else if(st.sel[g]===k)b.classList.add('bad')});
+ var all=ok0&&(!q.w||ok1);
+ $('fb').innerHTML='<div class="fb'+(all?'':' x')+'"><h3>'+(all?'إجابة صحيحة':(ok0||ok1?'إجابة جزئية':'إجابة غير صحيحة'))+' — '+n('+'+pts)+'</h3>'+(q.w?'<p>الإجابة: '+(ok0?'صحيحة':'خاطئة')+' · التفسير: '+(ok1?'صحيح (+5)':'خاطئ')+'</p>':'')+'<p>'+q.fb+'</p></div>';
+ sfx(all?'ok':'bad');$('chk').style.display='none';var nx=$('nx');nx.style.display='';nx.className='btn';nx.textContent=st.i<Q.length-1?'السؤال التالي':'عرض النتيجة';
+ nx.onclick=function(){if(st.i<Q.length-1){st.i++;render()}else end()};upd();if(nx.scrollIntoView)nx.scrollIntoView({block:'nearest'})}
+function end(){upd();var p=st.score/MAX,C=2*Math.PI*54,t=p>=.9?'مهندس قوة متمكّن':p>=.7?'مهندس واعد':p>=.5?'قيد المعايرة':'أعد المعايرة وحاول مجددًا';
+ var h='<h2 style="text-align:center">النتيجة النهائية</h2><svg class="ring" width="150" height="150" viewBox="0 0 130 130"><circle cx="65" cy="65" r="54" fill="none" stroke="#13264d" stroke-width="10"/><circle cx="65" cy="65" r="54" fill="none" stroke="#29e0c2" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-p))+'" transform="rotate(-90 65 65)"/><text x="65" y="72" text-anchor="middle" fill="#29e0c2" font-family="Consolas,monospace" font-size="24">'+Math.round(p*100)+'%</text></svg><p style="text-align:center"><span class="lcd">'+pad(st.score)+'/'+pad(MAX)+'</span></p><p style="text-align:center"><b>'+t+'</b></p>';
+ Q.forEach(function(q,i){var r=st.res[i];h+='<div class="sum"><span>'+(i+1)+'. '+q.t+'</span><span class="n">'+r.pts+'/'+r.max+'</span></div>'});
+ h+='<div class="act"><button class="btn" id="rs">إعادة اللعب</button></div>';$('stage').innerHTML=h;$('rs').onclick=function(){st.started=true;st.i=0;st.score=0;st.res=[];render()};sfx('done')}
+$('stage').addEventListener('click',function(e){var b=e.target.closest?e.target.closest('.opt'):null;if(!b||st.locked)return;var g=+b.dataset.g;st.sel[g]=+b.dataset.k;[].forEach.call(document.querySelectorAll('.opt[data-g="'+g+'"]'),function(x){x.classList.toggle('on',x===b)});tone(440,.06)});
+$('mt').onclick=function(){muted=!muted;this.textContent='الصوت: '+(muted?'إيقاف':'تشغيل')};
+$('tb').onclick=function(){var h='';Q.forEach(function(q,i){var a=q.o.filter(function(o){return o[1]})[0][0],w=q.w?'<br>التفسير: '+q.w.o.filter(function(o){return o[1]})[0][0]:'';h+='<div class="tc"><b>'+(i+1)+'. '+q.t+'</b> (ص '+q.ref+')<br>الهدف: '+q.obj+'<br>الإجابة الصحيحة: '+a+w+'</div>'});$('tcb').innerHTML=h;$('md').style.display='block'};
+$('cl').onclick=function(){$('md').style.display='none'};
+intro();
+</script>
+</body>
+</html>
