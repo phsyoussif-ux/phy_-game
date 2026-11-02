@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مختبر الشغل | تحدّي الفيزياء - الصف التاسع</title>
+<style>
+:root{--bg:#0a1428;--cd:#0f1d38;--ac:#29e0c2;--ln:#1d3a5a;--tx:#e6f0ff;--bd:#ff6b6b;--wr:#ffb454}
+*{box-sizing:border-box}
+body{margin:0;color:var(--tx);font-family:Tahoma,Arial,sans-serif;background:var(--bg);min-height:100vh;background-image:linear-gradient(rgba(41,224,194,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(41,224,194,.05) 1px,transparent 1px);background-size:32px 32px}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--ln);background:rgba(10,20,40,.9);position:sticky;top:0;z-index:5}
+h1{font-size:17px;margin:0;color:var(--ac)}
+.lcd{font-family:'Courier New',monospace;background:#06101f;border:1px solid var(--ac);color:var(--ac);padding:3px 10px;border-radius:6px;box-shadow:0 0 8px rgba(41,224,194,.35);letter-spacing:2px}
+.hud{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ib{background:#06101f;color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:14px}
+#pg{height:8px;background:#06101f;margin:0}#bar{height:100%;width:0;background:var(--ac);transition:width .5s}
+#dots{display:flex;gap:6px;justify-content:center;padding:8px;font-size:12px;flex-wrap:wrap}
+#dots span{padding:3px 9px;border-radius:12px;border:1px solid var(--ln);opacity:.6}
+#dots span.on{border-color:var(--ac);color:var(--ac);opacity:1}#dots span.dn{background:var(--ac);color:#06101f;opacity:1}
+main{max-width:760px;margin:0 auto;padding:10px 12px 40px}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 0 18px rgba(41,224,194,.08);animation:in .4s}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes sk{25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}
+.sub{color:var(--ac);font-size:13px;margin-bottom:6px}.q{font-size:17px;line-height:1.8;margin:8px 0}.ctx{color:#9fb6d8;line-height:1.8}
+canvas{width:100%;height:auto;background:#07122a;border:1px solid var(--ln);border-radius:10px;display:block}
+button{font-family:inherit}
+.opt,.pri,.sm,.tab{display:block;width:100%;margin:7px 0;padding:11px;border-radius:10px;border:1px solid var(--ln);background:#0b1730;color:var(--tx);font-size:16px;cursor:pointer;transition:.2s}
+.opt:hover:not(:disabled),.tab:hover{border-color:var(--ac)}
+.pri{background:var(--ac);color:#06101f;font-weight:bold;border:0}
+.sm,.tab{display:inline-block;width:auto;padding:7px 14px;font-size:14px}.tab.on{border-color:var(--ac);color:var(--ac)}
+.opt.ok{background:rgba(41,224,194,.2);border-color:var(--ac)}.opt.bad{background:rgba(255,107,107,.2);border-color:var(--bd);animation:sk .3s}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.fb{margin-top:8px;padding:10px;border-radius:10px;line-height:1.8}.fb.ok{background:rgba(41,224,194,.12);border:1px solid var(--ac)}.fb.bad{background:rgba(255,107,107,.12);border:1px solid var(--bd)}.fb.wr{background:rgba(255,180,84,.12);border:1px solid var(--wr)}
+.sol{font-family:'Courier New',monospace;direction:ltr;text-align:center;background:#06101f;border:1px dashed var(--ln);border-radius:10px;padding:8px;margin:8px 0;line-height:1.9;color:var(--ac)}
+.eq{direction:ltr;unicode-bidi:isolate;display:inline-block;font-family:'Courier New',monospace}
+label{display:block;margin:10px 0 2px}input[type=range]{width:100%;accent-color:#29e0c2}
+.hid{display:none}.ring{width:130px;height:130px;border-radius:50%;margin:10px auto;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:26px;color:var(--ac)}
+.ring i{width:100px;height:100px;border-radius:50%;background:var(--cd);display:flex;align-items:center;justify-content:center;font-style:normal}
+.bw{background:#06101f;border-radius:6px;height:10px;margin:4px 0 10px}.bw b{display:block;height:100%;border-radius:6px;background:var(--ac)}
+#tm{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9;padding:14px}
+#tm div{background:var(--cd);border:1px solid var(--ac);border-radius:14px;padding:16px;max-width:560px;max-height:85vh;overflow:auto;line-height:1.9}
+</style></head><body>
+<header><h1>⚡ مختبر الشغل | تحدّي الفيزياء</h1>
+<div class="hud"><span class="lcd" id="lv">مبتدئ</span><span class="lcd" id="sc">000</span>
+<button class="ib" id="tcb" onclick="tm(1)">👩‍🏫 المعلّم</button><button class="ib" id="mu" onclick="mute()">🔊</button><button class="ib" id="rs" onclick="restart()">⟲ إعادة</button></div></header>
+<div id="pg"><div id="bar"></div></div><div id="dots"></div>
+<main id="app"></main>
+<div id="tm"><div><b>بطاقة المعلّم — درس الشغل (ص 66–68)</b><br>
+<b>الأهداف:</b> يستنتج الطالب أن الشغل = القوة × الإزاحة باتجاه القوة (W = F d)، ويقيسه بالجول (J)، ويحدد الحالات التي يكون فيها الشغل صفرًا.<br>
+<b>شرطا حدوث الشغل:</b> (1) قوة مؤثرة في الجسم، (2) إزاحة للجسم باتجاه القوة.<br>
+<b>الشغل = 0 عندما:</b> d = 0، أو كانت القوة عمودية على الإزاحة.<br>
+<b>الإجابات:</b> المرحلة 1: نعم، لا، لا، نعم. المرحلة 2: موجب، صفر، موجب، صفر، صفر، صفر. المرحلة 3: 60 J، 100 J، 0 J، 60 J. المرحلة 4: 300 J، 60 J، 50 m، 400 N. المرحلة 5: 480 J، 50 N، 100 J، 0 J، 580 J.<br>
+<button class="pri" onclick="tm(0)">إغلاق</button></div></div>
+<script>
+var S={score:0,stage:-1,q:0,st:[],list:[],sol:[],snd:true,done:0,max:0},sim=null,cv=null,AC;
+var STG=['اكتشف المفهوم','محكمة الشغل','مختبر الشغل','تحدّي العالم الصغير','المهمة النهائية'];
+var TIP=['شرطا حدوث الشغل: قوة مؤثرة وإزاحة باتجاهها','التمييز بين القوة المدروسة وبقية القوى، والقوة العمودية على الإزاحة','العلاقة W = F × d وأثر d = 0','خطوات الحل: المعطيات، القانون، التعويض، الناتج بالجول','تحليل موقف مركّب وجمع الأشغال'];
+var YN=['نعم، حدث شغل','لا، لم يحدث شغل'],PZ=['شغل موجب','شغل = صفر'];
+function $(i){return document.getElementById(i)}
+function sh(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function mk(o,a,fix){var r=o.map(function(t,i){return{t:t,c:i==a}});return fix?r:sh(r)}
+function eq(t){return /[\u0600-\u06FF]/.test(t)?t:'<span class="eq">'+t+'</span>'}
+var Q0=[
+{sc:{t:'push',F:60,d:5},th:1,tx:'يدفع طالب صندوقًا فيتحرك على الأرض. هل تبذل قوة الدفع شغلًا فيزيائيًا؟',o:YN,a:0,e:'القوة مؤثرة في الصندوق، وقد تحرّك بإزاحة باتجاه القوة، فتحقق الشرطان.'},
+{sc:{t:'wall',F:80},th:1,tx:'يدفع طالب جدارًا ثابتًا بقوة كبيرة ولا يتحرك الجدار. هل تبذل قوة الدفع شغلًا؟',o:YN,a:1,e:'لا توجد إزاحة (d = 0) فلا يحدث شغل مهما كبرت القوة.'},
+{sc:{t:'hold',F:30},th:1,tx:'يقف طالب ساكنًا وهو يحمل حقيبة. هل تبذل قوة الحمل شغلًا؟',o:YN,a:1,e:'الحقيبة لا تتحرك: d = 0، إذن W = 0.'},
+{sc:{t:'lift',F:40,d:1.5},th:1,tx:'يرفع طالب صندوقًا إلى الأعلى. هل تبذل قوة الرفع شغلًا؟',o:YN,a:0,e:'قوة الرفع رأسية إلى الأعلى والإزاحة إلى الأعلى (باتجاه القوة)، فيحدث شغل.'}];
+var Q1=[
+{sc:{t:'push',F:60,d:5},tx:'دفع صندوق وتحريكه أفقيًا. <b>الحكم على: قوة الدفع.</b>',o:PZ,a:0,e:'قوة الدفع أفقية والإزاحة أفقية باتجاهها، فالشغل موجب: W = F × d.'},
+{sc:{t:'bag',F:30,d:6},tx:'حمل حقيبة والمشي أفقيًا. <b>الحكم على: قوة حمل الحقيبة (رأسية إلى الأعلى).</b>',o:PZ,a:1,e:'القوة رأسية والإزاحة أفقية؛ هما متعامدتان، فلا تبذل القوة شغلًا.'},
+{sc:{t:'lift',F:40,d:1.5},tx:'رفع حقيبة إلى الأعلى. <b>الحكم على: قوة الرفع.</b>',o:PZ,a:0,e:'القوة والإزاحة كلتاهما إلى الأعلى: شغل موجب.'},
+{sc:{t:'wall',F:80},tx:'دفع جدار ثابت. <b>الحكم على: قوة الدفع.</b>',o:PZ,a:1,e:'لا إزاحة (d = 0)، إذن W = 0.'},
+{sc:{t:'hold',F:30},tx:'حمل جسم دون تحريكه. <b>الحكم على: قوة الحمل.</b>',o:PZ,a:1,e:'لا إزاحة، إذن W = 0.'},
+{sc:{t:'push',F:60,d:5},tx:'الصندوق نفسه الذي يُدفع أفقيًا. <b>الحكم على: قوة وزن الصندوق (رأسية إلى الأسفل).</b>',o:PZ,a:1,e:'الوزن رأسي والإزاحة أفقية: متعامدان فلا شغل لقوة الوزن. لاحظ: يجب تحديد القوة التي ندرس شغلها؛ فقوة الدفع تبذل شغلًا أما قوة الوزن فلا.'}];
+function prob(k,F,d,W,tx,sc){var g,l,s,r;
+ if(k=='W'){g=['F = '+F+' N , d = '+d+' m','F = '+d+' N , d = '+F+' m','F = '+F+' J , d = '+d+' m'];l=['W = F × d','W = F ÷ d','W = F + d'];s=['W = '+F+' × '+d,'W = '+F+' ÷ '+d,'W = '+F+' + '+d];r=[W+' J',+(F+d).toFixed(2)+' J',W+' N']}
+ if(k=='d'){g=['F = '+F+' N , W = '+W+' J','F = '+W+' N , W = '+F+' J','F = '+F+' J , W = '+W+' N'];l=['d = W ÷ F','d = W × F','d = F ÷ W'];s=['d = '+W+' ÷ '+F,'d = '+W+' × '+F,'d = '+F+' ÷ '+W];r=[d+' m',W*F+' m',d+' J']}
+ if(k=='F'){g=['d = '+d+' m , W = '+W+' J','d = '+W+' m , W = '+d+' J','d = '+d+' J , W = '+W+' m'];l=['F = W ÷ d','F = W × d','F = d ÷ W'];s=['F = '+W+' ÷ '+d,'F = '+W+' × '+d,'F = '+d+' ÷ '+W];r=[F+' N',W*d+' N',F+' J']}
+ var T=['ما المعطيات الصحيحة (مع الوحدات)؟','ما القانون المناسب؟','عوّض في القانون:','ما الناتج بالوحدة الصحيحة؟'],
+ E=['نقرأ القيم من نص المسألة ونكتب وحدة كل كمية: القوة (N)، الإزاحة (m)، الشغل (J).','الشغل W = F × d، ومنه نستخرج المجهول.','نعوّض القيم كما هي دون تغيير الوحدات.','الشغل يُقاس بالجول (J)، والقوة بالنيوتن (N)، والإزاحة بالمتر (m).'],
+ O=[g,l,s,r],L=['المعطيات: '+g[0],'القانون: '+l[0],'التعويض: '+s[0],'الناتج: '+s[0]+' = '+r[0]];
+ return O.map(function(o,i){return{sc:sc,ctx:tx,first:i==0,tx:T[i],o:o,a:0,e:E[i],line:L[i],p:5}})}
+var Q3=[].concat(
+ prob('W',60,5,300,'تؤثر فتاة بقوة أفقية مقدارها 60 N في صندوق فتدفعه مسافة 5 m على سطح أفقي. احسب الشغل الذي بذلته قوة الدفع.',{t:'push',F:60,d:5}),
+ prob('W',40,1.5,60,'يرفع أحمد صندوقًا وزنه 40 N إلى ارتفاع 1.5 m بسرعة ثابتة (قوة الرفع = الوزن لأن السرعة ثابتة). احسب شغل قوة الرفع.',{t:'lift',F:40,d:1.5}),
+ prob('d',6,50,300,'تؤثر قوة مقدارها 6 N في جسم فيتحرك باتجاهها، وتبذل شغلًا مقداره 300 J. احسب الإزاحة.',null),
+ prob('F',400,2,800,'يتحرك جسم باتجاه القوة المؤثرة فيه مسافة 2 m، فتبذل عليه القوة شغلًا مقداره 800 J. احسب مقدار القوة.',null));
+var Q4=[
+{sc:{t:'push',F:80,d:6},ctx:'عامل يدفع صندوقًا بقوة أفقية 80 N مسافة 6 m.',tx:'ما الشغل الذي تبذله قوة الدفع؟',o:['480 J','86 J','14 J','13.3 J'],a:0,e:'W = F × d = 80 × 6 = 480 J'},
+{sc:{t:'lift',F:50,d:2},ctx:'ثم يرفع صندوقًا وزنه 50 N إلى رف ارتفاعه 2 m بسرعة ثابتة.',tx:'ما مقدار قوة الرفع؟',o:['50 N','0 N','25 N','100 N'],a:0,e:'السرعة ثابتة (a = 0) إذن ΣF = 0 وقوة الرفع = الوزن = 50 N.'},
+{sc:{t:'lift',F:50,d:2},ctx:'الصندوق نفسه: قوة الرفع 50 N والارتفاع 2 m.',tx:'ما الشغل الذي تبذله قوة الرفع؟',o:['100 J','25 J','52 J','0 J'],a:0,e:'W = F × d = 50 × 2 = 100 J'},
+{sc:{t:'bag',F:50,d:10},ctx:'ثم يمشي العامل حاملًا الصندوق أفقيًا مسافة 10 m بسرعة ثابتة.',tx:'ما الشغل الذي تبذله قوة حمل الصندوق (رأسية إلى الأعلى)؟',o:['0 J','500 J','50 J','10 J'],a:0,e:'القوة رأسية والإزاحة أفقية (متعامدتان)، إذن W = 0.'},
+{sc:null,ctx:'المراحل الثلاث: دفع (480 J)، رفع (100 J)، مشي أفقي بالصندوق (0 J).',tx:'ما مجموع الشغل الذي بذله العامل بقواه في المراحل الثلاث؟',o:['580 J','1080 J','480 J','100 J'],a:0,e:'480 + 100 + 0 = 580 J'}];
+var CH=[{m:'push',F:20,d:3,o:['60 J','23 J','6.7 J'],e:'W = F × d = 20 × 3 = 60 J'},{m:'push',F:50,d:2,o:['100 J','52 J','25 J'],e:'W = 50 × 2 = 100 J'},{m:'push',F:100,d:0,o:['0 J','100 J','50 J'],e:'الإزاحة صفر (d = 0) فلا يحدث شغل مهما كانت القوة: W = 0 J'},{m:'lift',F:40,d:1.5,o:['60 J','41.5 J','26.7 J'],e:'قوة الرفع = الوزن = 40 N (سرعة ثابتة)، W = 40 × 1.5 = 60 J'}];
+var lab={m:'push',F:20,d:3,c:0,ran:0};
+S.max=Q0.length*10+Q1.length*10+CH.length*10+Q3.length*5+Q4.length*10;
+/* ---------- drawing ---------- */
+function ln(c,a,b,x,y){c.beginPath();c.moveTo(a,b);c.lineTo(x,y);c.stroke()}
+function arrow(c,a,b,x,y,col,lab){c.strokeStyle=col;c.fillStyle=col;c.lineWidth=4;var L=Math.hypot(x-a,y-b);
+ if(L>4){ln(c,a,b,x,y);var t=Math.atan2(y-b,x-a);c.beginPath();c.moveTo(x,y);c.lineTo(x-11*Math.cos(t-.4),y-11*Math.sin(t-.4));c.lineTo(x-11*Math.cos(t+.4),y-11*Math.sin(t+.4));c.fill()}
+ c.font='bold 15px Courier New';c.fillText(lab,x+7,y-4)}
+function person(c,x,hx,hy,sw){c.strokeStyle='#cfe3ff';c.lineWidth=4;c.lineCap='round';c.beginPath();c.arc(x,130,12,0,7);c.stroke();ln(c,x,142,x,175);ln(c,x,175,x-10+sw,200);ln(c,x,175,x+10-sw,200);ln(c,x,150,hx,hy)}
+function box(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h);c.strokeStyle='#7a5418';c.lineWidth=2;c.strokeRect(x,y,w,h)}
+function draw(p){if(!cv||!sim||!cv.getContext)return;var c=cv.getContext('2d');if(!c)return;var s=sim,m=Math.min(1,p/(s.mode=='loop'?.75:1));m=m*m*(3-2*m);
+ c.clearRect(0,0,600,230);c.strokeStyle='#1d3a5a';c.lineWidth=3;ln(c,0,200,600,200);var R='#ff6b6b',D='#29e0c2',t=s.t,sw=0;
+ if(t=='push'){var tr=Math.min(s.d,10)*28,bx=150+tr*m;if(m>0&&m<1&&s.d>0)sw=Math.sin(p*40)*7;box(c,bx,150,50,50,'#e0a43a');person(c,bx-28,bx,172,sw);
+  arrow(c,bx+25,136,bx+25+s.F*.8,136,R,'F');arrow(c,150,216,bx,216,D,'d');if(s.d==0){c.fillStyle=D;c.font='bold 15px Courier New';c.fillText('d = 0',150,214)}}
+ if(t=='wall'){box(c,360,40,34,160,'#6b7a93');person(c,325+(Math.sin(p*60)*1.5),358,165,0);arrow(c,262,100,262+s.F*.8,100,R,'F');c.fillStyle=D;c.font='bold 15px Courier New';c.fillText('d = 0',200,218)}
+ if(t=='bag'||t=='hold'){var x=t=='bag'?100+360*m:250;if(t=='bag'&&m>0&&m<1)sw=Math.sin(p*40)*8;person(c,x,x+18,168,sw);box(c,x+9,168,22,28,'#c0603a');arrow(c,x+46,176,x+46,126,R,'F');
+  if(t=='bag')arrow(c,100,216,x,216,D,'d');else{c.fillStyle=D;c.font='bold 15px Courier New';c.fillText('d = 0',200,218)}}
+ if(t=='lift'){var rise=Math.min(s.d,3)/3*110,by=200-rise*m;box(c,360,200-rise,80,rise,'#3a4d73');box(c,250,by-50,50,50,'#e0a43a');person(c,205,250,by-25,0);
+  arrow(c,275,by-55,275,by-55-Math.min(s.F,100)*.35,R,'F');arrow(c,330,200,330,by,D,'d');if(rise==0){c.fillStyle=D;c.fillText('d = 0',310,190)}}}
+function loop(ts){if(sim&&cv){var p=0;if(sim.mode=='loop')p=((ts-sim.t0)%4200)/4200;else if(sim.mode=='play'){p=Math.min(1,(ts-sim.t0)/2500);if(p>=1)sim.mode='end'}else if(sim.mode=='end')p=1;draw(p)}requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+function setSim(o,mode){sim={t:o.t,F:o.F||0,d:o.d||0,mode:mode,t0:performance.now()};cv=$('cv')}
+function replay(){if(sim){sim.t0=performance.now();sim.mode=sim.mode=='loop'?'loop':'play'}}
+/* ---------- sound / hud ---------- */
+function beep(ok){if(!S.snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=ok?'sine':'sawtooth';o.frequency.value=ok?880:170;g.gain.value=.08;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+(ok?.18:.3))}catch(e){}}
+function mute(){S.snd=!S.snd;$('mu').textContent=S.snd?'🔊':'🔇'}
+function tm(v){$('tm').style.display=v?'flex':'none'}
+function lvl(){var p=S.score/S.max;return p>=.9?'عالِم فيزياء':p>=.7?'مخترع':p>=.4?'مستكشف':'مبتدئ'}
+function hud(f){$('sc').textContent=('000'+S.score).slice(-4);$('lv').textContent=lvl();$('bar').style.width=Math.round(100*Math.max(0,Math.min(1,(S.stage+(f||0))/5)))+'%';
+ $('dots').innerHTML=STG.map(function(n,i){return'<span class="'+(i<S.stage?'dn':i==S.stage?'on':'')+'">'+(i+1)+'. '+n+'</span>'}).join('')}
+function stat(ok){var s=S.st[S.stage]=S.st[S.stage]||{ok:0,n:0};s.n++;if(ok)s.ok++}
+/* ---------- flow ---------- */
+function restart(){S.score=0;S.stage=-1;S.q=0;S.st=[];lab={m:'push',F:20,d:3,c:0,ran:0};sim=null;cv=null;intro()}
+function intro(){hud(0);$('app').innerHTML='<div class="card"><div class="sub">الصف التاسع · الوحدة الأولى · الدرس 1</div><p class="q">⚙️ مختبر الشغل</p><p class="ctx">الشغل الفيزيائي يحدث عندما تؤثر قوة في جسم فيتحرك الجسم بإزاحة باتجاه القوة. القانون: <span class="eq">W = F × d</span> ووحدة الشغل الجول (J). ستمرّ بخمس مراحل: اكتشف، احكم، جرّب، احسب، ثم أنجز المهمة النهائية. لكل إجابة صحيحة من المحاولة الأولى نقاط!</p><button id="go" class="pri" onclick="nextStage()">ابدأ التحدي ◀</button></div>'}
+function nextStage(){S.stage++;S.q=0;if(S.stage>4)return fin();if(S.stage==2){lab.c=0;return renderLab()}S.list=[Q0,Q1,0,Q3,Q4][S.stage];renderQ()}
+function renderQ(){var it=S.list[S.q];if(!it)return nextStage();if(it.first)S.sol=[];S.done=0;hud(S.q/S.list.length);
+ var h='<div class="card"><div class="sub">'+STG[S.stage]+' · سؤال '+(S.q+1)+' من '+S.list.length+'</div>';
+ if(it.sc)h+='<canvas id="cv" width="600" height="230"></canvas><div class="row"><button class="sm" id="rp" onclick="replay()">↻ أعد المحاكاة</button></div>';
+ if(it.ctx)h+='<p class="ctx">'+it.ctx+'</p>';h+='<p class="q">'+it.tx+'</p>';
+ if(it.ctx&&it.line)h+='<div class="sol" id="sol">'+S.sol.join('<br>')+'</div>';
+ if(it.th)h+='<button id="rdy" class="pri" onclick="ready()">شاهد ثم فكّر… أنا جاهز للحكم 🤔</button>';
+ h+='<div id="ops" class="'+(it.th?'hid':'')+'">'+mk(it.o,it.a,it.o.length==2).map(function(o){return'<button class="opt" data-c="'+(o.c?1:0)+'" onclick="pick(this)">'+eq(o.t)+'</button>'}).join('')+'</div><div id="fb"></div><div id="nxw"></div></div>';
+ $('app').innerHTML=h;if(it.sc)setSim(it.sc,'loop');else cv=null}
+function ready(){$('rdy').style.display='none';$('ops').className=''}
+function pick(b){if(S.done)return;S.done=1;var it=S.list[S.q],c=b.getAttribute('data-c')=='1',bs=document.querySelectorAll('.opt');
+ for(var i=0;i<bs.length;i++){bs[i].disabled=true;if(bs[i].getAttribute('data-c')=='1')bs[i].className='opt ok'}
+ if(!c)b.className='opt bad';else S.score+=it.p||10;stat(c);beep(c);hud(S.q/S.list.length);
+ if(it.line){S.sol.push(it.line);var so=$('sol');if(so)so.innerHTML=S.sol.join('<br>')}
+ $('fb').innerHTML='<div class="fb '+(c?'ok':'bad')+'">'+(c?'✔ أحسنت! ':'✖ ليست الإجابة الصحيحة. ')+it.e+'</div>';
+ $('nxw').innerHTML='<button id="nx" class="pri" onclick="nxt()">'+(S.q==S.list.length-1?'إنهاء المرحلة ◀':'التالي ◀')+'</button>'}
+function nxt(){S.q++;renderQ()}
+/* ---------- lab ---------- */
+function renderLab(){var ch=CH[lab.c];if(!ch)return nextStage();S.done=0;hud(lab.c/CH.length);
+ var h='<div class="card"><div class="sub">مختبر الشغل · غيّر القيم وراقب الشغل</div><div class="row"><button class="tab" id="tp" onclick="setM(\'push\')">دفع صندوق</button><button class="tab" id="tl" onclick="setM(\'lift\')">رفع جسم</button></div><canvas id="cv" width="600" height="230"></canvas>'+
+ '<label><span id="fl">القوة F</span>: <b id="fv"></b> N<input type="range" id="fr" min="0" max="100" step="5" oninput="lc()"></label><label>الإزاحة d: <b id="dv"></b> m<input type="range" id="dr" min="0" max="10" step="0.5" oninput="lc()"></label>'+
+ '<div class="sol" id="lsol"></div><div class="row"><button class="pri" id="run" style="flex:1" onclick="runLab()">▶ شغّل</button><button class="sm" id="rl" onclick="resetLab()">↻ أعد المحاكاة</button></div></div>'+
+ '<div class="card"><div class="sub">تحدٍّ '+(lab.c+1)+' من '+CH.length+'</div><p class="q">اضبط (<b>'+(ch.m=='push'?'دفع صندوق':'رفع جسم')+'</b>) على F = '+ch.F+' N و d = '+ch.d+' m، ثم اضغط «شغّل» وأجب: ما الشغل الذي تبذله القوة؟</p><div id="ops">'+mk(ch.o,0).map(function(o){return'<button class="opt" data-c="'+(o.c?1:0)+'" onclick="labAns(this)">'+eq(o.t)+'</button>'}).join('')+'</div><div id="fb"></div><div id="nxw"></div></div>';
+ $('app').innerHTML=h;setSim({t:lab.m,F:lab.F,d:lab.d},'idle');setM(lab.m,1)}
+function setM(m,keep){lab.m=m;$('tp').className='tab'+(m=='push'?' on':'');$('tl').className='tab'+(m=='lift'?' on':'');$('dr').max=m=='lift'?3:10;$('fl').textContent=m=='lift'?'قوة الرفع F':'قوة الدفع F';if(lab.d>+$('dr').max)lab.d=+$('dr').max;$('fr').value=lab.F;$('dr').value=lab.d;lc(keep)}
+function lc(keep){lab.F=+$('fr').value;lab.d=+$('dr').value;lab.ran=0;setSim({t:lab.m,F:lab.F,d:lab.d},'idle');$('fv').textContent=lab.F;$('dv').textContent=lab.d;var W=+(lab.F*lab.d).toFixed(2);
+ $('lsol').innerHTML='المعطيات: F = '+lab.F+' N , d = '+lab.d+' m'+(lab.m=='lift'?'<br>(قوة الرفع = الوزن لأن السرعة ثابتة)':'')+'<br>W = F × d = '+lab.F+' × '+lab.d+' = '+W+' J'+(lab.d==0?'<br>لا توجد إزاحة ⇒ W = 0':'')+(lab.F==0?'<br>لا توجد قوة ⇒ W = 0':'')}
+function runLab(){lab.ran=1;setSim({t:lab.m,F:lab.F,d:lab.d},'play')}
+function resetLab(){lab.ran=0;setSim({t:lab.m,F:lab.F,d:lab.d},'idle')}
+function labAns(b){if(S.done)return;var ch=CH[lab.c];
+ if(!(lab.ran&&lab.m==ch.m&&lab.F==ch.F&&lab.d==ch.d)){$('fb').innerHTML='<div class="fb wr">⚠ اضبط المشهد والمنزلقين على القيم المطلوبة ثم اضغط «شغّل» قبل الإجابة.</div>';return}
+ S.done=1;var c=b.getAttribute('data-c')=='1',bs=document.querySelectorAll('#ops .opt');
+ for(var i=0;i<bs.length;i++){bs[i].disabled=true;if(bs[i].getAttribute('data-c')=='1')bs[i].className='opt ok'}
+ if(!c)b.className='opt bad';else S.score+=10;stat(c);beep(c);hud((lab.c+1)/CH.length);
+ $('fb').innerHTML='<div class="fb '+(c?'ok':'bad')+'">'+(c?'✔ أحسنت! ':'✖ ليست الإجابة الصحيحة. ')+ch.e+'</div>';
+ $('nxw').innerHTML='<button id="nx" class="pri" onclick="lab.c++;renderLab()">'+(lab.c==CH.length-1?'إنهاء المرحلة ◀':'التحدي التالي ◀')+'</button>'}
+/* ---------- final ---------- */
+function fin(){S.stage=5;hud(0);cv=null;sim=null;var p=Math.round(100*S.score/S.max),good=[],bad=[],bars='';
+ STG.forEach(function(n,i){var s=S.st[i]||{ok:0,n:1},q=Math.round(100*s.ok/s.n);(q>=80?good:bad).push(i);bars+='<div>'+n+' — '+s.ok+' / '+s.n+'<div class="bw"><b style="width:'+q+'%"></b></div></div>'});
+ $('app').innerHTML='<div class="card"><div class="sub">اللوحة النهائية</div><div class="ring" style="background:conic-gradient(#29e0c2 '+p+'%,#06101f 0)"><i>'+p+'%</i></div><p class="q" style="text-align:center">النقاط: <span class="lcd">'+S.score+' / '+S.max+'</span><br>المستوى: <b>'+lvl()+'</b></p>'+bars+
+ '<div class="fb ok"><b>نقاط القوة:</b> '+(good.length?good.map(function(i){return STG[i]}).join('، '):'تابع التدريب لتظهر نقاط قوتك')+'</div><div class="fb wr"><b>يحتاج إلى مراجعة:</b> '+(bad.length?bad.map(function(i){return STG[i]+' ('+TIP[i]+')'}).join('<br>'):'لا شيء — أداء ممتاز! 🌟')+'</div>'+
+ '<button class="pri" id="again" onclick="restart()">↻ إعادة المحاولة</button></div>'}
+intro();
+</script></body></html>
