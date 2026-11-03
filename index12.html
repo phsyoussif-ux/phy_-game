@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تحدي الشغل الفيزيائي</title>
+<style>
+:root{--ink:#17324d;--mut:#5b7186;--bg:#eef3f7;--card:#fff;--line:#d5e0ea;--blue:#1d6fb8;--teal:#0e9f8e;--amber:#d98a0b;--red:#c8423b;--green:#1f9d62;--tint:#e6f1fa}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Noto Sans Arabic","Noto Naskh Arabic",Tahoma,Arial,sans-serif;line-height:1.75;font-size:18px;
+background-image:linear-gradient(#e2eaf1 1px,transparent 1px),linear-gradient(90deg,#e2eaf1 1px,transparent 1px);background-size:28px 28px}
+.wrap{max-width:860px;margin:0 auto;padding:18px 14px 60px}
+header{background:var(--ink);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:14px}
+header h1{margin:0;font-size:clamp(24px,5vw,34px);letter-spacing:0}
+header p{margin:4px 0 0;color:#bcd3e6;font-size:16px}
+header small{display:block;margin-top:10px;color:#8fb0cc;font-size:14px}
+.steps{display:flex;gap:6px;margin:0 0 14px}
+.steps i{flex:1;height:8px;border-radius:4px;background:#cfdbe6;transition:background .3s}
+.steps i.on{background:var(--blue)}.steps i.ok{background:var(--green)}.steps i.part{background:var(--amber)}.steps i.no{background:var(--red)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 2px 0 #dbe5ee;animation:in .45s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:var(--mut);font-size:15px}
+.lvl{background:var(--tint);color:var(--blue);padding:2px 12px;border-radius:20px;font-weight:600}
+h2{font-size:20px;margin:10px 0 6px}
+.q{font-size:20px;margin:6px 0 14px}
+.q ol{margin:8px 0 0;padding-inline-start:26px}
+.given{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.given b{display:block;font-size:14px;color:var(--mut);width:100%}
+.chip{background:var(--tint);border:1px solid #bcd7ee;border-radius:10px;padding:2px 12px;direction:ltr;font-weight:600}
+.chip.ask{background:#fff6e5;border-color:#efd39a;color:#8a5a00}
+.fig{border:1px solid var(--line);border-radius:12px;background:#fafcfe;margin-bottom:16px;padding:6px}
+.fig svg{width:100%;height:auto;max-height:240px;display:block}
+.fig figcaption{font-size:15px;color:var(--mut);text-align:center;padding:2px 8px 6px}
+.paper-h{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;margin-bottom:4px}
+.paper-h span{font-weight:400;color:var(--mut);font-size:14px}
+textarea.sol{width:100%;min-height:270px;border:2px solid #bcd0e0;border-radius:12px;padding:6px 58px 0 14px;font:inherit;font-size:19px;color:var(--ink);resize:vertical;line-height:36px;background-color:#fff;
+background-image:linear-gradient(to left,transparent 44px,#e9a3a0 44px,#e9a3a0 46px,transparent 46px),repeating-linear-gradient(transparent 0 35px,#cfe0ee 35px 36px);background-attachment:local}
+textarea.sol.big{min-height:400px}
+textarea.sol:focus{outline:3px solid #9cc8ee;border-color:var(--blue)}
+.pick{margin:22px 0 10px;font-size:20px;font-weight:700;color:var(--blue)}
+.pick span{font-weight:400;color:var(--mut);font-size:15px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:start;font:inherit;font-size:19px;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--tint)}
+.opt:active:not(:disabled){transform:scale(.98)}
+.opt:focus-visible{outline:3px solid #9cc8ee}
+.opt:disabled{cursor:default}
+.bub{flex:none;width:40px;height:40px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-weight:700;direction:ltr;transition:all .25s}
+.opt.right{border-color:var(--green);background:#eaf8f0}.opt.right .bub{background:var(--green);border-color:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:#fdeeed}.opt.wrong .bub{background:var(--red);border-color:var(--red);color:#fff}
+.opt.dim{opacity:.55}
+.otxt{direction:ltr;unicode-bidi:plaintext;flex:1}
+.otxt.l3{display:grid;gap:0;line-height:1.5;font-size:17px}
+.fb{margin-top:16px;border-radius:12px;padding:14px 16px;border:1px solid;animation:in .35s ease}
+.fb.ok{background:#eaf8f0;border-color:#a8dcc0}.fb.no{background:#fdeeed;border-color:#f0b8b4}.fb.part{background:#fff6e5;border-color:#efd39a}
+.fb h3{margin:0 0 4px;font-size:19px}
+.fb p{margin:4px 0}
+.eq{direction:ltr;unicode-bidi:isolate;display:inline-block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:0 10px;margin:2px 0}
+.nav{display:flex;justify-content:flex-end;margin-top:16px}
+button.main{font:inherit;font-weight:700;font-size:18px;background:var(--blue);color:#fff;border:0;border-radius:12px;padding:10px 26px;cursor:pointer;transition:transform .15s,background .2s}
+button.main:hover{background:#155a98}button.main:active{transform:scale(.97)}
+.res{text-align:center}
+.ring{width:170px;height:170px;margin:6px auto}
+.ring text{font-family:inherit}
+.list{text-align:start;margin:18px 0;display:grid;gap:8px}
+.row{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.row em{font-style:normal;font-size:14px;padding:1px 10px;border-radius:20px;color:#fff;margin-inline-start:auto;white-space:nowrap}
+.row .ok{background:var(--green)}.row .part{background:var(--amber)}.row .no{background:var(--red)}
+@media(max-width:600px){.opts{grid-template-columns:1fr}body{font-size:17px}.card{padding:16px}}
+@media print{.nav,.steps{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<marker id="h-b" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#1d6fb8"/></marker>
+<marker id="h-g" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#0e9f8e"/></marker>
+<marker id="h-r" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#c8423b"/></marker>
+</defs></svg>
+<div class="wrap">
+<header>
+<h1>تحدي الشغل الفيزيائي</h1>
+<p>من الحركة إلى القوة… ومن القوة إلى الشغل</p>
+<small>الفيزياء — الصف التاسع | حلّ في دفترك أولًا، ثم اختر الإجابة الصحيحة | الزمن المقترح: <span id="tot"></span> دقيقة تقريبًا</small>
+</header>
+<div class="steps" id="steps"></div>
+<main id="app"></main>
+</div>
+<script>
+var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function AR(x1,y1,x2,y2,c){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+({b:'#1d6fb8',g:'#0e9f8e',r:'#c8423b'})[c]+'" stroke-width="3.5" marker-end="url(#h-'+c+')"/>';}
+function TX(x,y,s,c,a){return '<text x="'+x+'" y="'+y+'" font-size="15" font-weight="700" fill="'+(c||'#17324d')+'" text-anchor="'+(a||'middle')+'">'+s+'</text>';}
+var GR='<line x1="10" y1="122" x2="430" y2="122" stroke="#9fb3c4" stroke-width="3"/>';
+function mv(inner,vals,dur){return '<g><animateTransform attributeName="transform" type="translate" values="'+vals+'" keyTimes="0;.7;.95;1" dur="'+dur+'" repeatCount="indefinite"/>'+inner+'</g>';}
+var BOX='<rect x="60" y="82" width="56" height="40" rx="4" fill="#e3b46c" stroke="#9a6a22" stroke-width="2"/>';
+var STU='<circle cx="22" cy="62" r="11" fill="#f2c9a0" stroke="#17324d" stroke-width="2"/><path d="M22 73L28 100M28 100L18 122M28 100L38 122M26 82L60 98" stroke="#17324d" stroke-width="3" fill="none"/>';
+function pushL(fl,dl,stu,two){
+ var a=two?AR(60,72,116,72,'b')+TX(88,62,fl,'#1d6fb8')+AR(60,44,116,44,'r')+TX(88,34,two,'#c8423b'):AR(60,68,116,68,'b')+TX(88,58,fl,'#1d6fb8');
+ return '<svg viewBox="0 0 440 160" dir="ltr">'+GR+mv((stu?STU:'')+BOX+a,'0 0;230 0;230 0;0 0','4.5s')+AR(60,142,290,142,'g')+TX(175,136,dl,'#0e9f8e')+'</svg>';}
+function push(f,d,stu){return pushL('F = '+f,'d = '+d,stu);}
+function walk(){
+ return '<svg viewBox="0 0 440 160" dir="ltr">'+GR+mv('<circle cx="80" cy="40" r="11" fill="#f2c9a0" stroke="#17324d" stroke-width="2"/><path d="M80 51L80 92M80 92L70 122M80 92L92 122M80 60L102 80" stroke="#17324d" stroke-width="3" fill="none"/><rect x="92" y="80" width="22" height="26" rx="3" fill="#d98a0b"/>'+AR(103,78,103,26,'b')+TX(112,32,'F = 30 N','#1d6fb8','start'),'0 0;230 0;230 0;0 0','4.5s')+AR(70,142,300,142,'g')+TX(185,136,'d = 10 m','#0e9f8e')+'</svg>';}
+function wall(){
+ return '<svg viewBox="0 0 440 160" dir="ltr">'+GR+'<rect x="330" y="20" width="26" height="102" fill="#8fa3b5" stroke="#5b7186" stroke-width="2"/><g><animate attributeName="opacity" values="1;.45;1" dur="1.6s" repeatCount="indefinite"/>'+AR(190,66,326,66,'b')+TX(258,56,'F = 50 N','#1d6fb8')+'</g><circle cx="150" cy="44" r="11" fill="#f2c9a0" stroke="#17324d" stroke-width="2"/><path d="M150 55L158 96M158 96L146 122M158 96L172 122M154 68L190 66" stroke="#17324d" stroke-width="3" fill="none"/>'+TX(220,148,'d = 0','#c8423b')+'</svg>';}
+function lift(){
+ return '<svg viewBox="0 0 440 220" dir="ltr"><line x1="10" y1="200" x2="430" y2="200" stroke="#9fb3c4" stroke-width="3"/>'+'<g><animateTransform attributeName="transform" type="translate" values="0 0;0 -90;0 -90;0 0" keyTimes="0;.7;.95;1" dur="4.5s" repeatCount="indefinite"/><rect x="200" y="160" width="50" height="40" rx="4" fill="#e3b46c" stroke="#9a6a22" stroke-width="2"/>'+AR(225,154,225,110,'b')+TX(236,126,'F = 80 N','#1d6fb8','start')+'</g>'+AR(320,200,320,112,'g')+TX(330,160,'h = 2 m','#0e9f8e','start')+'</svg>';}
+function comp(){
+ return '<svg viewBox="0 0 440 200" dir="ltr"><line x1="10" y1="130" x2="430" y2="130" stroke="#9fb3c4" stroke-width="3"/>'+TX(30,26,'t = <tspan id="q7t">0.0</tspan> s','#17324d','start')+TX(30,52,'v = <tspan id="q7v">0.0</tspan> m/s','#d98a0b','start')+
+ '<g id="q7b"><rect x="30" y="90" width="56" height="40" rx="4" fill="#e3b46c" stroke="#9a6a22" stroke-width="2"/><g id="q7f" opacity="0">'+AR(30,78,100,78,'b')+TX(65,68,'ΣF','#1d6fb8')+'</g></g><g id="q7d" opacity="0">'+AR(30,164,310,164,'g')+TX(170,157,'d','#0e9f8e')+'</g></svg>';}
+var raf;
+function anim7(){
+ var b=document.getElementById('q7b');if(!b)return;
+ var s=performance.now();
+ function fr(n){
+  var c=((n-s)/1000)%9,t=RM?4:Math.min(c/6*4,4);
+  b.setAttribute('transform','translate('+(280*t*t/16)+' 0)');
+  document.getElementById('q7t').textContent=t.toFixed(1);
+  document.getElementById('q7v').textContent=(2*t).toFixed(1);
+  var e=t>=4?1:0;
+  document.getElementById('q7f').setAttribute('opacity',e);
+  document.getElementById('q7d').setAttribute('opacity',e);
+  if(!RM)raf=requestAnimationFrame(fr);
+ }
+ raf=requestAnimationFrame(fr);
+}
+function eq(s){return '<span class="eq">'+s+'</span>';}
+var Q=[
+{lvl:'المستوى الأول: تطبيق مباشر',t:'أثّرت قوة مقدارها 20 N في جسم، فتحرك مسافة 5 m باتجاه القوة. احسب الشغل المبذول.',g:[['F','20 N'],['d','5 m']],ask:'W = ؟',fig:push('20 N','5 m'),cap:'القوة والإزاحة في الاتجاه نفسه',
+ o:['4 J','100 J','25 J','15 J'],c:1,
+ why:'القوة باتجاه الإزاحة، إذن: '+eq('W = F × d = 20 × 5 = 100 J')+' ووحدة الشغل الجول (J).'},
+{lvl:'المستوى الأول: تطبيق مباشر',t:'دفع طالب صندوقًا بقوة مقدارها 40 N، فتحرك مسافة 3 m في اتجاه القوة. ما مقدار الشغل المبذول؟',g:[['F','40 N'],['d','3 m']],ask:'W = ؟',fig:push('40 N','3 m',1),cap:'طالب يدفع صندوقًا فيتحرك باتجاه القوة',
+ o:['13 J','43 J','120 J','13.3 J'],c:2,
+ why:'الشغل = القوة × الإزاحة: '+eq('W = 40 × 3 = 120 J')+' ولا يصح جمع القوة والإزاحة أو قسمتهما.'},
+{lvl:'المستوى الثاني: فهم المفهوم وتطبيقه',t:'حمل طالب حقيبة وزنها 30 N ومشى بها أفقيًا مسافة 10 m. ما مقدار الشغل الذي تبذله قوة حمل الحقيبة؟',g:[['وزن الحقيبة','30 N'],['الإزاحة الأفقية','10 m']],ask:'W = ؟',fig:walk(),cap:'قوة الحمل رأسية إلى الأعلى والإزاحة أفقية',
+ o:['0 J','300 J','30 J','3 J'],c:0,
+ why:'قوة الحمل رأسية والإزاحة أفقية، أي أن القوة عمودية على الإزاحة، فلا تبذل شغلًا: '+eq('W = 0 J')+' أما 300 J فناتج ضرب خاطئ لا ينطبق هنا.'},
+{lvl:'المستوى الثاني: فهم المفهوم وتطبيقه',t:'أثّرت قوة مقدارها 50 N في جدار ثابت، ولم يتحرك الجدار. ما مقدار الشغل المبذول بواسطة هذه القوة؟',g:[['F','50 N'],['الإزاحة','لا توجد']],ask:'W = ؟',fig:wall(),cap:'قوة تؤثر في جدار ثابت',
+ o:['50 J','5 J','لا يمكن حسابه','0 J'],c:3,
+ why:'لم تحدث إزاحة (d = 0) إذن: '+eq('W = 50 × 0 = 0 J')+' فلا يُبذل شغل مهما كانت القوة كبيرة.'},
+{lvl:'المستوى الثالث: مسائل حسابية تحتاج إلى انتباه',t:'رفع عامل جسمًا وزنه 80 N رأسيًا إلى ارتفاع 2 m. احسب الشغل المبذول بواسطة قوة الرفع، بافتراض أن القوة تساوي الوزن وأن الرفع منتظم.',g:[['F = الوزن','80 N'],['الارتفاع (الإزاحة)','2 m']],ask:'W = ؟',fig:lift(),cap:'قوة الرفع إلى الأعلى والجسم يرتفع إلى الأعلى',
+ o:['160 J','40 J','82 J','78 J'],c:0,
+ why:'قوة الرفع باتجاه الإزاحة (للأعلى): '+eq('W = 80 × 2 = 160 J')+''},
+{lvl:'المستوى الثالث: مسائل حسابية تحتاج إلى انتباه',t:'أثّرت قوة مقدارها 60 N في جسم، فأنجزت شغلًا مقداره 300 J. احسب الإزاحة التي قطعها الجسم إذا كانت القوة باتجاه الحركة.',g:[['F','60 N'],['W','300 J']],ask:'d = ؟',fig:push('60 N','؟'),cap:'القوة باتجاه الحركة والإزاحة مجهولة',
+ o:['0.2 m','5 m','18000 m','360 m'],c:1,
+ why:'من W = F × d نحصل على: '+eq('d = W ÷ F = 300 ÷ 60 = 5 m')},
+{lvl:'المستوى الرابع: التحدي المركب — من التسارع إلى الشغل',comp:1,
+ t:'بدأ صندوق كتلته 5 kg حركته من السكون، وأصبحت سرعته 8 m/s بعد مرور 4 s، نتيجة تأثير قوة محصلة ثابتة باتجاه الحركة. أجب عن المطلوب:<ol style="list-style:none;padding:0"><li>أ. احسب تسارع الصندوق.</li><li>ب. احسب مقدار القوة المحصلة المؤثرة فيه.</li><li>ج. إذا تحرك الصندوق مسافة 16 m تحت تأثير هذه القوة، احسب الشغل المبذول بواسطة القوة المحصلة.</li></ol>',
+ g:[['m','5 kg'],['v₁','0 m/s'],['v₂','8 m/s'],['t','4 s'],['d','16 m']],ask:'a ، ΣF ، W = ؟',fig:comp(),cap:'حركة الصندوق من السكون: السرعة والزمن، ثم القوة المحصلة والإزاحة',
+ o:[['0.5 m/s²','2.5 N','40 J'],['2 m/s²','10 N','40 J'],['2 m/s²','10 N','160 J'],['2 m/s²','40 N','640 J']],c:2,ok:[[0,0,0],[1,1,0],[1,1,1],[1,0,0]],
+ why:'<p>أ) '+eq('a = (v₂ − v₁) ÷ t = (8 − 0) ÷ 4 = 2 m/s²')+'</p><p>ب) '+eq('ΣF = m × a = 5 × 2 = 10 N')+'</p><p>ج) '+eq('W = ΣF × d = 10 × 16 = 160 J')+'</p>'},
+{lvl:'المستوى الخامس: تحدي التفكير',t:'تؤثر قوة في جسم وتجعله يتحرك أفقيًا. في أي الحالات التالية يكون الشغل الذي تبذله هذه القوة مساويًا للصفر؟',g:[],ask:'اختر الإجابة الأكمل',fig:'',
+ o:['القوة باتجاه الإزاحة.','عدم حدوث إزاحة فقط.','القوة عمودية على الإزاحة فقط.','عدم حدوث إزاحة، وكذلك عندما تكون القوة عمودية على الإزاحة.'],c:3,
+ why:'الشغل صفر في حالتين: عندما لا تحدث إزاحة (d = 0)، وعندما تكون القوة عمودية على الإزاحة. أما إذا كانت القوة باتجاه الإزاحة فيكون '+eq('W = F × d')+' أي لا يساوي صفرًا.'},
+{lvl:'أسئلة إضافية: القوة المجهولة',t:'أثّرت قوة في جسم باتجاه حركته، فتحرك مسافة 8 m وأنجزت شغلًا مقداره 240 J. احسب مقدار القوة.',g:[['d','8 m'],['W','240 J']],ask:'F = ؟',fig:push('؟','8 m'),cap:'القوة باتجاه الحركة والقوة مجهولة',
+ o:['248 N','1920 N','30 N','232 N'],c:2,
+ why:'من W = F × d نحصل على: '+eq('F = W ÷ d = 240 ÷ 8 = 30 N')},
+{lvl:'أسئلة إضافية: القوة المحصلة والشغل',t:'دفع شخصان صندوقًا في الاتجاه نفسه، الأول بقوة 30 N والثاني بقوة 20 N، فتحرك الصندوق مسافة 4 m باتجاه القوتين. احسب الشغل المبذول بواسطة القوة المحصلة.',g:[['F₁','30 N'],['F₂','20 N'],['d','4 m']],ask:'W للقوة المحصلة = ؟',fig:pushL('F₁ = 30 N','d = 4 m',0,'F₂ = 20 N'),cap:'قوتان في الاتجاه نفسه: القوة المحصلة هي مجموعهما',
+ o:['200 J','120 J','80 J','600 J'],c:0,
+ why:'القوتان في الاتجاه نفسه، فالقوة المحصلة تساوي مجموعهما: '+eq('ΣF = 30 + 20 = 50 N')+' ثم '+eq('W = 50 × 4 = 200 J')+' أما 120 J و80 J فهما شغل كل قوة على حدة، لا شغل القوة المحصلة.'},
+{lvl:'أسئلة إضافية: من التسارع إلى الشغل',comp:1,nm:['القوة المحصلة','الشغل'],
+ t:'جسم كتلته 4 kg يتحرك على سطح أملس بتسارع ثابت مقداره 3 m/s² بتأثير قوة محصلة ثابتة باتجاه الحركة، فقطع مسافة 10 m. أجب عن المطلوب:<ol style="list-style:none;padding:0"><li>أ. احسب مقدار القوة المحصلة المؤثرة في الجسم.</li><li>ب. احسب الشغل المبذول بواسطة القوة المحصلة خلال هذه المسافة.</li></ol>',
+ g:[['m','4 kg'],['a','3 m/s²'],['d','10 m']],ask:'ΣF ، W = ؟',fig:pushL('ΣF','d = 10 m'),cap:'جسم يتسارع تحت تأثير قوة محصلة باتجاه الحركة',
+ o:[['1.33 N','13.3 J'],['12 N','120 J'],['12 N','1.2 J'],['7 N','70 J']],c:1,ok:[[0,0],[1,1],[1,0],[0,0]],
+ why:'<p>أ) '+eq('ΣF = m × a = 4 × 3 = 12 N')+'</p><p>ب) '+eq('W = ΣF × d = 12 × 10 = 120 J')+'</p><p>هكذا يرتبط الشغل بالتسارع عن طريق القوة المحصلة.</p>'}
+];
+var TM=[2,2,2,2,2,3,6,2,2,3,5];
+var cur=0,res=[],L='ABCD';
+function stepsBar(){
+ document.getElementById('steps').innerHTML=Q.map(function(_,i){var r=res[i];return '<i class="'+(r===undefined?(i===cur?'on':''):(r===1?'ok':r===0?'no':'part'))+'"></i>';}).join('');
+}
+function show(){
+ cancelAnimationFrame(raf);
+ var q=Q[cur],n=cur+1;stepsBar();
+ var h='<section class="card"><div class="meta"><span class="lvl">'+q.lvl+'</span><span>السؤال '+n+' من '+Q.length+' | العلامة: 1'+(q.comp?' (1/'+q.o[0].length+' لكل فرع)':'')+' | الزمن المقترح: '+TM[cur]+' د'+'</span></div>';
+ h+='<h2>السؤال '+n+'</h2><div class="q">'+q.t+'</div>';
+ if(q.g.length){h+='<div class="given"><b>المعطيات</b>'+q.g.map(function(x){return '<span class="chip">'+x[0]+' = '+x[1]+'</span>';}).join('')+'<span class="chip ask">المطلوب: '+q.ask+'</span></div>';}
+ if(q.fig)h+='<figure class="fig" style="margin:0 0 16px">'+q.fig+'<figcaption>'+q.cap+'</figcaption></figure>';
+ h+='<div class="paper-h">مساحة الحل<span>اكتب القانون، ثم التعويض، ثم الناتج مع الوحدة</span></div><textarea class="sol'+(q.comp?' big':'')+'" aria-label="مساحة الحل" placeholder="القانون:&#10;التعويض:&#10;الناتج:"></textarea>';
+ h+='<div class="pick">اختر الإجابة الصحيحة <span>ضع دائرة حول رمز الإجابة</span></div><div class="opts">';
+ q.o.forEach(function(o,i){
+  var t=q.comp?'<span class="otxt l3">'+o.map(function(x,k){return '<span>'+['أ','ب','ج'][k]+') '+x+'</span>';}).join('')+'</span>':'<span class="otxt">'+o+'</span>';
+  h+='<button class="opt" data-i="'+i+'"><span class="bub">'+L[i]+'</span>'+t+'</button>';});
+ h+='</div><div id="fb"></div><div class="nav" id="nav"></div></section>';
+ document.getElementById('app').innerHTML=h;
+ Array.prototype.forEach.call(document.querySelectorAll('.opt'),function(b){b.onclick=function(){pick(+b.getAttribute('data-i'));};});
+ if(q.comp)anim7();
+ else if(RM){var s=document.querySelector('.fig svg');if(s&&s.pauseAnimations)s.pauseAnimations();}
+ window.scrollTo(0,0);
+}
+function pick(i){
+ if(res[cur]!==undefined)return;
+ var q=Q[cur],m,info='';
+ if(q.comp){var f=q.ok[i],n=f.length,sm=f.reduce(function(a,b){return a+b;},0);m=sm/n;
+  var nm=q.nm||['التسارع','القوة المحصلة','الشغل'];
+  info='<p>'+nm.map(function(x,k){return (f[k]?'✓ ':'✗ ')+x;}).join(' &nbsp;|&nbsp; ')+'</p>';
+  if(m>0&&m<1)info+='<p>أصبتَ في '+sm+' من '+n+' فروع، فتُمنح علامة جزئية بحسب صحة الخطوات.</p>';
+  if(m===0)info+='<p>راجع قانون التسارع ثم القوة المحصلة قبل حساب الشغل.</p>';
+ }else m=(i===q.c)?1:0;
+ res[cur]=m;
+ Array.prototype.forEach.call(document.querySelectorAll('.opt'),function(b,k){
+  b.disabled=true;
+  if(k===q.c)b.classList.add('right');else if(k===i)b.classList.add('wrong');else b.classList.add('dim');});
+ var cl=m===1?'ok':m===0?'no':'part';
+ var hd=m===1?'إجابة صحيحة ✓':(m===0?'إجابة غير صحيحة — الإجابة الصحيحة: '+L[q.c]:'إجابة صحيحة جزئيًا — الإجابة الصحيحة: '+L[q.c]);
+ document.getElementById('fb').innerHTML='<div class="fb '+cl+'"><h3>'+hd+'</h3>'+info+'<p><b>التفسير العلمي:</b></p>'+q.why+'</div>';
+ document.getElementById('nav').innerHTML='<button class="main" id="nx">'+(cur<Q.length-1?'السؤال التالي':'عرض النتيجة')+'</button>';
+ document.getElementById('nx').onclick=function(){if(cur<Q.length-1){cur++;show();}else done();};
+ document.getElementById('nx').focus();stepsBar();
+}
+function done(){
+ cancelAnimationFrame(raf);cur=-1;stepsBar();
+ var s=res.reduce(function(a,b){return a+b;},0),p=Math.round(s/Q.length*100),C=2*Math.PI*70;
+ var sc=(Math.round(s*100)/100).toString();
+ var col=p>=80?'#1f9d62':p>=50?'#d98a0b':'#c8423b';
+ var msg=p>=80?'أداء ممتاز، فهمت مفهوم الشغل جيدًا.':p>=50?'أداء جيد، راجع الأسئلة المميزة أدناه.':'تحتاج إلى مراجعة مفهوم الشغل وقانونه.';
+ var h='<section class="card res"><h2>النتيجة النهائية</h2><svg class="ring" viewBox="0 0 170 170"><circle cx="85" cy="85" r="70" fill="none" stroke="#e1eaf2" stroke-width="14"/><circle cx="85" cy="85" r="70" fill="none" stroke="'+col+'" stroke-width="14" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+C*(1-s/Q.length)+'" transform="rotate(-90 85 85)" style="transition:stroke-dashoffset 1s"/><text x="85" y="88" text-anchor="middle" font-size="34" font-weight="700" fill="'+col+'">'+p+'%</text><text x="85" y="114" text-anchor="middle" font-size="15" fill="#5b7186">نسبة الإنجاز</text></svg>';
+ h+='<p style="font-size:22px;margin:4px 0"><b>'+sc+' من '+Q.length+'</b></p><p>'+msg+'</p><div class="list">';
+ Q.forEach(function(q,i){var r=res[i],c=r===1?'ok':r===0?'no':'part',l=r===1?'صحيح':r===0?'يحتاج إلى مراجعة':'جزئي ('+(Math.round(r*q.o[0].length))+'/'+q.o[0].length+')';
+  h+='<div class="row"><b>س'+(i+1)+'</b><span>'+q.lvl.split(':')[0]+'</span><em class="'+c+'">'+l+'</em></div>';});
+ h+='</div><button class="main" id="rt">إعادة المحاولة</button></section>';
+ document.getElementById('app').innerHTML=h;
+ document.getElementById('rt').onclick=function(){cur=0;res=[];show();};
+ window.scrollTo(0,0);
+}
+document.getElementById('tot').textContent=TM.reduce(function(a,b){return a+b;},0);
+show();
+</script>
+</body>
+</html>
