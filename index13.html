@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تحدي القدرة | فيزياء التاسع</title>
+<style>
+:root{--bg:#0a1228;--card:#111c3a;--ln:#24365f;--ac:#29e0c2;--tx:#e8eefc;--mu:#93a4c8;--ok:#3ddc84;--bad:#ff5d6c;--wa:#ffc857;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.8;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:32px 32px;min-height:100vh}
+.mono,.lcd{font-family:"Courier New",Consolas,monospace;direction:ltr;unicode-bidi:isolate}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--ln);background:#0a1228ee;position:sticky;top:0;z-index:5}
+h1{font-size:1.15rem;margin:0;color:var(--ac)}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lcd{background:#06101f;border:1px solid var(--ac);color:var(--ac);padding:2px 12px;border-radius:8px;font-size:1.1rem;text-shadow:0 0 8px var(--ac)}
+button{font:inherit;cursor:pointer;border:1px solid var(--ac);background:transparent;color:var(--ac);padding:7px 16px;border-radius:10px;transition:.2s}
+button:hover:not(:disabled){background:var(--ac);color:#04121a}
+button:disabled{opacity:.35;cursor:not-allowed}
+.bar{height:6px;background:var(--ln)}.bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .5s;box-shadow:0 0 10px var(--ac)}
+.dots{display:flex;justify-content:center;gap:8px;padding:10px;flex-wrap:wrap}
+.dots b{font-size:.75rem;padding:2px 10px;border-radius:20px;border:1px solid var(--ln);color:var(--mu);font-weight:400}
+.dots b.on{border-color:var(--ac);color:var(--ac);box-shadow:0 0 8px #29e0c255}.dots b.dn{background:#29e0c222;color:var(--tx)}
+main{max-width:900px;margin:auto;padding:8px 14px 60px}
+.st{display:none;animation:in .5s}.st.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 0 22px #29e0c20f}
+h2{margin:.2em 0 .4em;font-size:1.25rem}h2 span{color:var(--ac)}
+.opts{display:grid;gap:10px;margin-top:10px}
+.opt{text-align:right;color:var(--tx);border-color:var(--ln);background:#0c1630}
+.opt:hover:not(:disabled){background:#1a2a52;color:var(--tx);border-color:var(--ac)}
+.opt.ok{background:#3ddc8433;border-color:var(--ok);color:var(--tx)}.opt.no{background:#ff5d6c33;border-color:var(--bad);color:var(--tx)}
+.fb{margin-top:12px;padding:12px;border-radius:10px;display:none;border-right:4px solid var(--ac);background:#0c1630}
+.fb.ok{border-color:var(--ok)}.fb.no{border-color:var(--bad)}
+.shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.cranes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.crane{position:relative;height:250px;border:1px solid var(--ln);border-radius:12px;background:linear-gradient(#0c1a38,#0a1228);overflow:hidden}
+.crane .rail{position:absolute;right:50%;top:8px;bottom:8px;width:3px;background:#3a4d7d}
+.crane .hook{position:absolute;right:calc(50% - 22px);bottom:8px;width:47px;transition-property:bottom;transition-timing-function:linear;text-align:center}
+.crane .hook i{display:block;height:var(--rope,0);width:2px;margin:auto;background:var(--mu)}
+.crane .box{height:32px;background:var(--ac);border-radius:4px;color:#04121a;font-size:.7rem;line-height:32px;font-weight:700}
+.crane .lbl{position:absolute;top:6px;right:8px;font-size:.85rem;color:var(--mu)}
+.crane .tm{position:absolute;bottom:6px;left:8px;font-size:.95rem}
+.fm{font-size:1.6rem;text-align:center;direction:ltr;margin:6px 0;color:var(--ac)}
+.chip{cursor:pointer;border-bottom:2px dashed var(--ac);padding:0 6px;border-radius:4px}.chip:hover{background:#29e0c230}
+.rng{width:100%;accent-color:var(--ac)}
+.pbar{height:26px;background:#06101f;border:1px solid var(--ln);border-radius:8px;overflow:hidden;direction:ltr}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,#1aa58d,var(--ac));transition:width .3s}
+table{width:100%;border-collapse:collapse;text-align:center;margin-top:8px}td,th{border:1px solid var(--ln);padding:4px}th{color:var(--ac);font-weight:400}
+textarea,input[type=number]{width:100%;background:#06101f;border:1px dashed var(--ln);color:var(--tx);border-radius:10px;padding:10px;font:inherit}
+textarea{min-height:80px}input[type=number]{max-width:170px;direction:ltr}
+.step{border-right:3px solid var(--ac);padding:6px 12px;margin:8px 0;background:#0c1630;border-radius:8px}
+.cap{color:var(--mu);font-size:.85rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+#modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+#modal .card{max-width:620px;max-height:85vh;overflow:auto;margin:0}
+.big{font-size:3rem;text-align:center;color:var(--ac)}
+@media(max-width:560px){.cranes{gap:6px}h1{font-size:1rem}.fm{font-size:1.3rem}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+<h1>⚡ تحدي القدرة <span class="cap">| الفيزياء – الصف التاسع</span></h1>
+<div class="tools"><span class="cap">النقاط</span><span class="lcd" id="pts">000</span>
+<button id="mt" title="الصوت">🔊</button><button id="tc">بطاقة المعلم</button><button id="rs">إعادة</button></div>
+</header>
+<div class="bar"><i id="pg"></i></div>
+<div class="dots" id="dots"></div>
+<main>
+
+<!-- المرحلة 1 -->
+<section class="st" id="s0">
+<div class="card"><h2><span>١</span> توقّع</h2>
+<p>رافعتان (أ) و(ب) ترفعان الجسم نفسه (كتلته 120 kg) إلى الارتفاع نفسه (15 m) بسرعة ثابتة. الرافعة (أ) تحتاج إلى <b class="mono">30 s</b> والرافعة (ب) تحتاج إلى <b class="mono">9 s</b>.</p>
+<p><b>أيّ الرافعتين قدرتها أكبر؟</b> اختر توقّعك قبل رؤية النتيجة.</p>
+<div class="opts" id="o0"></div>
+<div class="fb" id="f0"></div></div>
+<div class="cranes" id="cr" style="display:none">
+<div class="crane"><span class="lbl">الرافعة (أ)</span><div class="rail"></div><div class="hook" id="hA"><i></i><div class="box">120 kg</div></div><span class="tm lcd" id="tA">0.0 s</span></div>
+<div class="crane"><span class="lbl">الرافعة (ب)</span><div class="rail"></div><div class="hook" id="hB"><i></i><div class="box">120 kg</div></div><span class="tm lcd" id="tB">0.0 s</span></div>
+</div>
+<p class="cap" id="crn" style="display:none">العرض مُسرَّع ×3 لتسهيل المشاهدة. الشغل المبذول واحد في الحالتين، لكن الزمن مختلف.</p>
+</section>
+
+<!-- المرحلة 2 -->
+<section class="st" id="s1">
+<div class="card"><h2><span>٢</span> ما القدرة؟</h2>
+<p>اضغط على كل جزء لتكتشف معناه:</p>
+<div class="fm"><span class="chip" data-i="0">P</span> = <span class="chip" data-i="1">W<sub>F</sub></span> / <span class="chip" data-i="2">Δt</span></div>
+<div class="fb" id="fm" style="display:block">القدرة (Power) هي <b>المعدل الزمني لبذل الشغل</b>. اضغط على أحد الرموز أعلاه.</div>
+<p class="cap" id="chc">اكتشف الرموز الثلاثة (0/3)</p>
+<div id="un" style="display:none">
+<div class="fm">1 W = 1 J / 1 s</div>
+<p>تُقاس القدرة بوحدة <b>J/s</b> وتُسمّى <b>الواط (Watt)</b> ويُرمز إليها بـ <b class="mono">W</b>. فإذا بذلت آلة شغلًا مقداره 500 J كل ثانية، فما قدرتها؟</p>
+<div class="opts" id="o1"></div><div class="fb" id="f1"></div></div></div>
+<div class="card"><b>الفكرة:</b> كلما زاد الشغل الذي تبذله الآلة خلال زمن معيّن، أو بذلت الشغل نفسه في زمن أقل، زادت قدرتها.</div>
+</section>
+
+<!-- المرحلة 3 -->
+<section class="st" id="s2">
+<div class="card"><h2><span>٣</span> المختبر: الشغل ثابت والزمن يتغيّر</h2>
+<p>الشغل اللازم لرفع الجسم ثابت: <b class="mono">W = 18000 J</b>. حرّك المؤشر لتغيير الزمن وسجّل 3 قراءات مختلفة على الأقل.</p>
+<div class="row"><span>Δt =</span><span class="lcd" id="dtv">30 s</span></div>
+<input class="rng" type="range" id="rg" min="3" max="60" value="30">
+<div class="step mono" id="lst" style="direction:ltr;text-align:left"></div>
+<div class="pbar"><i id="pb"></i></div><div class="cap">مقياس القدرة (أقصى قراءة 6000 W)</div>
+<div class="row"><button id="rec">سجّل القراءة</button><button id="hf">نصّف الزمن</button><span class="cap" id="hm"></span></div>
+<table><thead><tr><th>Δt (s)</th><th>W (J)</th><th>P (W)</th></tr></thead><tbody id="tb"></tbody></table></div>
+<div class="card" id="dq" style="display:none"><b>تحقّق:</b> كيف تتغيّر القدرة عند بذل الشغل نفسه في زمن أقل؟
+<div class="opts" id="o2"></div><div class="fb" id="f2"></div></div>
+</section>
+
+<!-- المرحلة 4 -->
+<section class="st" id="s3">
+<div class="card"><h2><span>٤</span> مثال الكتاب (ص 70)</h2>
+<p>رافعتان استُخدمتا في رفع جسم كتلته (120 kg) إلى ارتفاع (15 m) بسرعة ثابتة، والزمن اللازم للرافعة الأولى (30 s) وللثانية (9 s). إذا علمت أن g = 10 m/s²، احسب قدرة كل رافعة.</p>
+<div class="step mono" style="direction:ltr;text-align:left">m = 120 kg , d = 15 m , Δt₁ = 30 s , Δt₂ = 9 s , g = 10 m/s²</div>
+<div id="ex"></div></div>
+</section>
+
+<!-- المرحلة 5 -->
+<section class="st" id="s4"><div id="q4"></div></section>
+<!-- المرحلة 6 -->
+<section class="st" id="s5"><div id="q5"></div>
+<div class="card" id="end" style="display:none;text-align:center"><div class="big mono" id="sc"></div><h2 id="rt"></h2><p id="rm"></p><button id="rs2">أعد التحدي</button></div></section>
+
+<div class="row" style="justify-content:space-between"><button id="pv">السابق</button><button id="nx">التالي</button></div>
+</main>
+
+<div id="modal"><div class="card"><h2>بطاقة المعلم</h2>
+<b>الأهداف:</b> المعدل الزمني لبذل الشغل · P = W/Δt · الواط = J/s · حساب القدرة · العلاقة العكسية بين القدرة والزمن عند ثبات الشغل.
+<hr style="border-color:var(--ln)"><b>الإجابات:</b>
+<ol><li>التوقّع: الرافعة (ب).</li><li>500 J كل ثانية = 500 W.</li><li>المختبر: تزداد.</li><li>المثال: P₁ = 600 W ، P₂ = 2000 W.</li>
+<li>الأسئلة: 300 W ، 50 W (تمرين ص 70: W = 3000 J ، Δt = 60 s) ، 600 W ، 150 W.</li>
+<li>التحدي: الآلة (أ) وبمقدار 3 أضعاف ، الآلة الأكبر شغلًا ، تتضاعف.</li></ol>
+<button id="cm">إغلاق</button></div></div>
+
+<script>
+var S={st:0,pts:0,ok:[0,0,0,0,0,0],mute:false,pred:false,rec:[],ac:null};
+var NAMES=["توقّع","التعريف","المختبر","مثال الكتاب","أسئلة","التحدي"];
+function $(i){return document.getElementById(i)}
+function snd(f,d){if(S.mute)return;try{S.ac=S.ac||new(window.AudioContext||window.webkitAudioContext)();var o=S.ac.createOscillator(),g=S.ac.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(S.ac.destination);o.start();o.stop(S.ac.currentTime+d)}catch(e){}}
+function good(){snd(660,.12);setTimeout(function(){snd(880,.18)},120)}function bad(){snd(180,.3)}
+function addPts(){S.pts+=10;$("pts").textContent=("000"+S.pts).slice(-3)}
+function show(n){S.st=n;for(var i=0;i<6;i++)$("s"+i).className="st"+(i==n?" on":"");
+ $("dots").innerHTML=NAMES.map(function(t,i){return "<b class='"+(i==n?"on ":"")+(S.ok[i]?"dn":"")+"'>"+(S.ok[i]?"✓ ":"")+t+"</b>"}).join("");
+ $("pg").style.width=(S.ok.filter(Boolean).length/6*100)+"%";$("pv").disabled=n==0;$("nx").disabled=n==5||!S.ok[n];window.scrollTo(0,0)}
+function done(n){S.ok[n]=1;show(S.st)}
+function fx(el,c){el.className="fb "+c;el.style.display="block"}
+/* generic MCQ: opts container, feedback box, options, answer index, explanation, callback */
+function mcq(oc,fb,opts,a,exp,cb){var first=true,el=$(oc),f=$(fb);el.innerHTML="";
+ opts.forEach(function(t,i){var b=document.createElement("button");b.className="opt";b.innerHTML=t;
+  b.onclick=function(){if(i==a){b.className="opt ok";[].forEach.call(el.children,function(x){x.disabled=true});
+    if(first)addPts();good();fx(f,"ok");f.innerHTML="<b>"+(first?"أحسنت! +10 نقاط. ":"إجابة صحيحة. ")+"</b>"+exp;cb&&cb()}
+   else{first=false;b.className="opt no";b.disabled=true;bad();fx(f,"no");f.innerHTML="ليست الإجابة الصحيحة. أعد التفكير ثم جرّب مرة أخرى."}};
+  el.appendChild(b)})}
+/* stage 1 */
+mcq("o0","f0",["الرافعة (أ)","الرافعة (ب)","قدرتاهما متساويتان"],1,"",null);
+(function(){var o=$("o0").children,f=$("f0");for(var i=0;i<3;i++)(function(i){o[i].onclick=function(){if(S.pred)return;S.pred=true;
+ [].forEach.call(o,function(x){x.disabled=true});o[1].className="opt ok";if(i!=1)o[i].className="opt no";
+ if(i==1){addPts();good()}else bad();
+ fx(f,i==1?"ok":"no");f.innerHTML=(i==1?"<b>توقّع صحيح! +10 نقاط.</b> ":"<b>توقّعك مختلف.</b> ")+"الرافعتان تبذلان الشغل نفسه، لكن (ب) أنجزته في زمن أقل (9 s مقابل 30 s) فمعدل بذلها للشغل أكبر، أي أن قدرتها أكبر. شاهد العرض:";
+ $("cr").style.display="grid";$("crn").style.display="block";run("hA","tA",30);run("hB","tB",9);done(0)}})(i)})();
+function run(h,t,T){var H=$(h),T3=T/3;H.style.transitionDuration="0s";H.style.bottom="8px";H.offsetWidth;
+ H.style.transitionDuration=T3+"s";H.style.bottom="calc(100% - 50px)";var s=Date.now(),iv=setInterval(function(){var e=Math.min(T,(Date.now()-s)/1000*3);$(t).textContent=e.toFixed(1)+" s";if(e>=T)clearInterval(iv)},100)}
+/* stage 2 */
+var CH=["<b>P</b>: القدرة، كمية قياسية تُقاس بوحدة الواط (W).","<b>W<sub>F</sub></b>: الشغل المبذول بواسطة القوة F، ويُقاس بالجول (J).","<b>Δt</b>: الزمن اللازم لبذل هذا الشغل، ويُقاس بالثانية (s)."],seen={};
+[].forEach.call(document.querySelectorAll(".chip"),function(c){c.onclick=function(){var i=c.dataset.i;seen[i]=1;snd(520,.1);$("fm").innerHTML=CH[i];var n=Object.keys(seen).length;$("chc").textContent="اكتشف الرموز الثلاثة ("+n+"/3)";if(n==3)$("un").style.display="block"}});
+mcq("o1","f1",["500 J","500 W","500 s","500 N"],1,"القدرة = 500 J ÷ 1 s = 500 J/s = 500 W، فالواط يساوي جولًا واحدًا في كل ثانية.",function(){done(1)});
+/* stage 3 lab */
+function lab(){var t=+$("rg").value,p=18000/t;$("dtv").textContent=t+" s";
+ $("lst").innerHTML="W = 18000 J , Δt = "+t+" s<br>P = W / Δt<br>P = 18000 / "+t+" = <b style='color:var(--ac)'>"+(Math.round(p*10)/10)+" W</b>";
+ $("pb").style.width=Math.min(100,p/60)+"%"}
+$("rg").oninput=lab;lab();
+$("rec").onclick=function(){var t=+$("rg").value;if(S.rec.indexOf(t)>=0){$("hm").textContent="هذه القراءة مسجّلة، غيّر الزمن.";bad();return}
+ S.rec.push(t);snd(600,.1);var r=document.createElement("tr");r.innerHTML="<td class=mono>"+t+"</td><td class=mono>18000</td><td class=mono>"+Math.round(18000/t*10)/10+"</td>";$("tb").appendChild(r);
+ if(S.rec.length>=3&&!$("dq").dataset.on){$("dq").dataset.on=1;$("dq").style.display="block";
+  mcq("o2","f2",["تزداد","تقل","لا تتغيّر"],0,"عند ثبات الشغل تزداد القدرة كلما قلّ الزمن؛ فنصف الزمن يضاعف القدرة، لأن P = W/Δt. لذلك الرافعة ذات الزمن الأقل أفضل.",function(){done(2)})}};
+$("hf").onclick=function(){var v=+$("rg").value,n=Math.max(3,Math.round(v/2));if(n==v)return;$("rg").value=n;lab();snd(700,.1);
+ $("hm").textContent="الزمن "+v+" s ← "+n+" s ، فأصبحت القدرة ×"+(Math.round(v/n*100)/100)+" من قيمتها السابقة"};
+/* stage 4 worked example */
+var EX=[["احسب وزن الجسم F<sub>g</sub> = mg بوحدة N","1200","F<sub>g</sub> = mg = 120 × 10 = <b>1200 N</b>، وهي القوة اللازمة لرفعه بسرعة ثابتة."],
+["احسب الشغل المبذول W<sub>F</sub> = F·d بوحدة J","18000","W<sub>F</sub> = F d = 1200 × 15 = <b>18000 J</b>. الرافعتان تبذلان الشغل نفسه."],
+["احسب قدرة الرافعة الأولى P₁ بوحدة W","600","P₁ = W / Δt₁ = 18000 / 30 = <b>600 W</b>"],
+["احسب قدرة الرافعة الثانية P₂ بوحدة W","2000","P₂ = W / Δt₂ = 18000 / 9 = <b>2000 W</b>"]],ei=0;
+function exStep(){var d=$("ex");if(ei>=4){d.insertAdjacentHTML("beforeend","<div class='fb ok' style='display:block'><b>الاستنتاج:</b> قدرة الرافعة الثانية أكبر من قدرة الأولى، لذا فاستخدام الثانية أفضل لأنها تنجز الشغل نفسه في زمن أقل.</div>");done(3);return}
+ var s=EX[ei],id="x"+ei;d.insertAdjacentHTML("beforeend","<div class='step' id='"+id+"'>"+s[0]+"<div class='row'><input type='number' id='i"+id+"' placeholder='ناتجك'><button id='b"+id+"'>تحقّق</button><button id='h"+id+"'>أظهر الحل</button></div><div class='fb' id='f"+id+"'></div></div>");
+ var k=ei;function fin(){fx($("f"+id),"ok");$("f"+id).innerHTML=s[2];$("b"+id).disabled=$("h"+id).disabled=true;$("i"+id).disabled=true;ei++;setTimeout(exStep,500)}
+ $("b"+id).onclick=function(){if(+$("i"+id).value==+s[1]){good();fin()}else{bad();$(id).className="step shake";setTimeout(function(){$(id).className="step"},400);fx($("f"+id),"no");$("f"+id).textContent="راجع العلاقة والمعطيات ثم أعد الحساب."}};
+ $("h"+id).onclick=fin}
+exStep();
+/* quizzes */
+var Q4=[
+{t:"آلة تبذل شغلًا مقداره 3000 J خلال 10 s. احسب قدرتها.",o:["300 W","30 W","3000 W","30000 W"],a:0,e:"P = W/Δt = 3000 ÷ 10 = 300 W."},
+{t:"تمرين الكتاب (ص 70): ترفع رافعة جسمًا وزنه 600 N إلى ارتفاع 5 m، فيستغرق ذلك 1 min. ما قدرة الرافعة؟ (انتبه لوحدة الزمن)",o:["3000 W","500 W","50 W","5 W"],a:2,e:"الشغل W = F·d = 600 × 5 = 3000 J، والزمن 1 min = 60 s، فتكون P = 3000 ÷ 60 = 50 W."},
+{t:"ترفع رافعة جسمًا وزنه 800 N إلى ارتفاع 3 m خلال 4 s بسرعة ثابتة. ما قدرتها؟",o:["200 W","600 W","2400 W","9600 W"],a:1,e:"W = F·d = 800 × 3 = 2400 J، ثم P = 2400 ÷ 4 = 600 W. الخيار 2400 هو الشغل وليس القدرة."},
+{t:"ترفع آلة جسمًا كتلته 50 kg إلى ارتفاع 6 m خلال 20 s بسرعة ثابتة (g = 10 m/s²). ما قدرتها؟",o:["15 W","300 W","3000 W","150 W"],a:3,e:"F = mg = 50 × 10 = 500 N ، W = 500 × 6 = 3000 J ، P = 3000 ÷ 20 = 150 W."}];
+var Q5=[
+{t:"آلتان (أ) و(ب) تبذلان الشغل نفسه؛ (أ) تنجزه في 4 s و(ب) في 12 s. أيّهما قدرتها أكبر، وكم مرة؟",o:["(ب) وبمقدار 3 أضعاف","(أ) وبمقدار 3 أضعاف","(أ) وبمقدار 8 أضعاف","متساويتان"],a:1,e:"الشغل ثابت، فالقدرة تتناسب عكسيًا مع الزمن: 12 ÷ 4 = 3، فقدرة (أ) ثلاثة أضعاف قدرة (ب)."},
+{t:"آلتان تعملان خلال الزمن نفسه، الأولى تبذل شغلًا أكبر من الثانية. ماذا نستنتج؟",o:["قدرة الثانية أكبر","قدرتاهما متساويتان","قدرة الأولى أكبر","لا يمكن الحكم"],a:2,e:"عند ثبات الزمن تزداد القدرة بزيادة الشغل، لأن P = W/Δt."},
+{t:"آلة تبذل شغلًا معيّنًا، ثم أصبحت تبذل الشغل نفسه في نصف الزمن. ماذا يحدث لقدرتها؟",o:["تتضاعف","تصبح النصف","لا تتغيّر","تزداد 4 أضعاف"],a:0,e:"P = W/Δt؛ إذا أصبح المقام نصف قيمته مع بقاء W ثابتًا تضاعفت القدرة. مثال: 18000 ÷ 30 = 600 W ثم 18000 ÷ 15 = 1200 W."}];
+function quiz(box,Q,n,sol,after){var qi=0,h=$(box);function go(){if(qi>=Q.length){done(n);after&&after();return}
+ var q=Q[qi],p="p"+box+qi;h.insertAdjacentHTML("beforeend","<div class='card'><span class='cap'>السؤال "+(qi+1)+" من "+Q.length+"</span><p><b>"+q.t+"</b></p>"+(sol?"<div class='cap'>مساحة الحل:</div><textarea placeholder='اكتب خطوات الحل هنا: المعطيات، القانون، التعويض، الناتج'></textarea>":"")+"<div class='opts' id='o"+p+"'></div><div class='fb' id='f"+p+"'></div></div>");
+ mcq("o"+p,"f"+p,q.o,q.a,q.e,function(){qi++;setTimeout(go,700)})}go()}
+quiz("q4",Q4,4,true);
+quiz("q5",Q5,5,false,function(){var m=S.pts;$("end").style.display="block";$("sc").textContent=m+" / 100";
+ $("rt").textContent=m>=90?"مهندس القدرة 🏆":m>=70?"أداء متقدّم":m>=50?"أداء جيد، راجع القانون":"حاول مرة أخرى";
+ $("rm").textContent="القدرة هي المعدل الزمني لبذل الشغل: P = W/Δt، ووحدتها الواط (J/s). عند ثبات الشغل تزداد القدرة كلما قلّ الزمن."});
+/* controls */
+$("nx").onclick=function(){if(S.ok[S.st])show(S.st+1)};$("pv").onclick=function(){show(S.st-1)};
+$("mt").onclick=function(){S.mute=!S.mute;$("mt").textContent=S.mute?"🔇":"🔊"};
+$("tc").onclick=function(){$("modal").style.display="flex"};$("cm").onclick=function(){$("modal").style.display="none"};
+$("rs").onclick=$("rs2").onclick=function(){location.reload()};
+show(0);
+</script>
+</body>
+</html>
