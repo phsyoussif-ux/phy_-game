@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مختبر الطاقة الحركية</title><style>
+*{box-sizing:border-box}:root{--bg:#0a1428;--pn:#0f1d3a;--ln:#1e3560;--ac:#29e0c2;--tx:#e6f1ff;--mu:#8aa3c4;--wr:#ffb454;--rd:#ff6b7a}
+body{margin:0;background-color:var(--bg);background-image:linear-gradient(rgba(41,224,194,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(41,224,194,.045) 1px,transparent 1px);background-size:32px 32px;color:var(--tx);font:16px/1.6 Tahoma,'Segoe UI',Arial,sans-serif}
+body.big{font-size:20px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(10,20,40,.95);border-bottom:1px solid var(--ln);position:sticky;top:0;z-index:5}
+h1{margin:0;font-size:1.25em;color:var(--ac)}h1 small{color:var(--mu);font-size:.65em;font-weight:400;margin-right:8px}
+.btn{background:#16294d;border:1px solid var(--ln);color:var(--tx);border-radius:8px;padding:.5em 1em;min-height:44px;cursor:pointer;font:inherit}
+.btn:hover{border-color:var(--ac)}.btn.pri,.btn.on{background:var(--ac);color:#04221d;border-color:var(--ac);font-weight:700}.btn:disabled{opacity:.4;cursor:default}
+#nv{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;max-width:1100px;margin:auto}#nv .btn{flex:1;min-width:92px;font-size:.85em;padding:.3em .5em}
+main{max-width:1100px;margin:auto;padding:0 16px 30px}h2{margin:.3em 0;font-size:1.3em}.mu{color:var(--mu);margin:.2em 0 .6em}
+canvas{width:100%;height:auto;background:#081022;border:1px solid var(--ln);border-radius:12px;display:block}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:12px 0}.sl{display:flex;flex-direction:column;min-width:210px;flex:1;color:var(--mu);font-size:.9em}.sl output{color:var(--ac);font-family:Consolas,monospace;font-size:1.1em}.sl input{accent-color:var(--ac);height:34px;width:100%}
+.rd{display:flex;flex-wrap:wrap;gap:10px}.lcd{flex:1;min-width:150px;background:#06101f;border:1px solid var(--ln);border-radius:10px;padding:6px 12px;text-align:center}.lcd small{display:block;color:var(--mu);font-size:.75em}.lcd b{font:700 1.3em Consolas,Menlo,monospace;color:var(--ac);direction:ltr;display:block}
+.fb{margin:12px 0;padding:10px 14px;background:var(--pn);border-right:4px solid var(--ln);border-radius:8px;min-height:3.2em}.fb.ok{border-color:var(--ac)}
+.tn{display:none;margin:10px 0;padding:10px 14px;border:1px dashed var(--wr);border-radius:8px;color:#ffe2b0;background:rgba(255,180,84,.07)}body.tm .tn{display:block}
+.stp{display:flex;gap:10px;align-items:center;background:var(--pn);border:1px solid var(--ln);border-radius:10px;padding:8px 12px;margin:6px 0;animation:in .4s}.stp i{background:var(--ac);color:#04221d;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-style:normal;font-weight:700;flex:none}.stp span{color:var(--mu);min-width:130px}code{font:700 1.15em Consolas,monospace;color:var(--tx);direction:ltr;unicode-bidi:isolate}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+table.lg{width:100%;border-collapse:collapse;margin:8px 0;font-size:.9em}.lg th,.lg td{border:1px solid var(--ln);padding:5px;text-align:center;font-family:Consolas,monospace}.lg th{background:var(--pn);color:var(--mu);font-family:inherit}
+.pn{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:var(--mu)}
+</style></head><body>
+<header><h1>⚡ مختبر الطاقة الحركية<small>الصف التاسع · كتاب الفيزياء ص 71–74</small></h1>
+<div><button class="btn" id="tmb">👨‍🏫 وضع المعلم</button> <button class="btn" id="bgb">🔍 خط كبير</button> <button class="btn" id="slb">🐢 حركة بطيئة</button></div></header>
+<div id="nv"></div>
+<main><h2 id="ttl"></h2><p class="mu" id="goal"></p><canvas id="cv"></canvas><div class="ctl" id="ctl"></div><div class="rd" id="rd"></div><div class="fb" id="fb"></div><div id="ex"></div><div class="tn" id="tn"></div>
+<div class="pn"><button class="btn" id="pv">▶ السابق</button><span id="pg"></span><button class="btn pri" id="nx">التالي ◀</button></div></main>
+<script>
+var $=function(i){return document.getElementById(i)},cv=$('cv'),c=cv.getContext('2d');cv.width=1600;cv.height=640;c.scale(2,2);
+var W=800,cur=0,S={},last=0,slow=0,F='Tahoma,Arial,sans-serif',M='Consolas,Menlo,monospace',rdc='';
+function n(x){return(Math.round(x*100)/100).toString()}
+function sg(x){return(x<-.005?'−':'')+n(Math.abs(x))+' J'}
+function R(x,y,w,h,f,r){c.fillStyle=f;c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r==null?6:r);else c.rect(x,y,w,h);c.fill()}
+function T(s,x,y,z,col,al,fn){c.font=(z||14)+'px '+(fn||F);c.fillStyle=col||'#e6f1ff';c.textAlign=al||'center';c.fillText(s,x,y)}
+function L(a,b,x,y,col,w){c.strokeStyle=col;c.lineWidth=w||2;c.beginPath();c.moveTo(a,b);c.lineTo(x,y);c.stroke()}
+function A(a,b,x,y,col,w){L(a,b,x,y,col,w||3);var t=Math.atan2(y-b,x-a);c.fillStyle=col;c.beginPath();c.moveTo(x,y);c.lineTo(x-11*Math.cos(t-.4),y-11*Math.sin(t-.4));c.lineTo(x-11*Math.cos(t+.4),y-11*Math.sin(t+.4));c.fill()}
+function C(x,y,r,f){c.fillStyle=f;c.beginPath();c.arc(x,y,r,0,7);c.fill()}
+function BAR(x,y,w,h,v,mx,col,lab,val){R(x,y,w,h,'#16294d');if(v>0)R(x,y,Math.max(3,w*Math.min(1,v/mx)),h,col);T(lab,x+w,y-6,13,'#8aa3c4','right');T(val,x,y+h+16,13,col,'left',M)}
+function fl(){R(0,250,W,70,'#0f2142',0);L(0,250,W,250,'#29e0c2',2)}
+function sl(lab,mn,mx,st,v,u,cb){var d=document.createElement('label'),o=document.createElement('output'),i=document.createElement('input');d.className='sl';i.type='range';i.min=mn;i.max=mx;i.step=st;i.value=v;function s(){o.textContent=n(+i.value)+' '+u}i.oninput=function(){s();cb(+i.value)};i.set=function(x){i.value=x;s()};s();d.append(lab+' ',o,i);$('ctl').append(d);return i}
+function bt(lab,cb,cls){var b=document.createElement('button');b.textContent=lab;b.className='btn '+(cls||'');b.onclick=cb;$('ctl').append(b);return b}
+function rd(a){var h=a.map(function(x){return'<div class="lcd"><small>'+x[0]+'</small><b'+(x[2]?' style="color:'+x[2]+'"':'')+'>'+x[1]+'</b></div>'}).join('');if(h!=rdc){rdc=h;$('rd').innerHTML=h}}
+function fb(h,k){$('fb').className='fb '+(k||'');$('fb').innerHTML=h}
+function stp(a,k){return'<div class="stp"><i>'+k+'</i><span>'+a[0]+'</span><code>'+a[1]+'</code></div>'}
+
+var ST=[
+{n:'اكتشف',t:'1 · اكتشف الطاقة الحركية',p:'ص 71',g:'أطلق الكرة في الحالتين وراقب الصندوق: ماذا تلاحظ؟',
+tn:'اسأل قبل الضغط: ماذا سيحدث للصندوق في كل حالة؟ ولماذا؟<br>المتوقع: الساكنة لا تؤثر، والمتحركة تحرّك الصندوق ← الجسم المتحرك يمتلك طاقة (طاقة حركية).',
+init:function(){S={run:0,t:0,mv:0,seen:{}};
+ function go(m){S.run=1;S.mv=m;S.t=0;S.seen[m]=1;fb('راقب الصندوق...')}
+ bt('أطلق الكرة الساكنة',function(){go(0)});bt('أطلق الكرة المتحركة',function(){go(1)},'pri');bt('إعادة',function(){S.run=0;S.t=0;fb('جرّب الحالتين ثم قارن بينهما.')});
+ rd([['سرعة الكرة','v = 0'],['حالة الصندوق','ساكن']]);fb('جرّب الحالتين ثم قارن بينهما.')},
+draw:function(dt){var x=90,bx=480,ke=0,t1=368/220,u=0;
+ if(S.run){S.t+=dt;var t=S.t;
+  if(S.mv){if(t<t1){x=90+220*t;ke=1}else{x=458;u=Math.min(1,(t-t1)/1.1);bx=480+140*(1-(1-u)*(1-u));if(u>=1&&S.run==1)d()}}
+  else if(t>2&&S.run==1)d()}
+ function d(){S.run=2;var both=S.seen[0]&&S.seen[1];
+  fb(S.mv?'الكرة المتحركة حرّكت الصندوق، أي أنها بذلت شغلًا، فهي تمتلك طاقة. <b>الجسم المتحرك يمتلك طاقة حركية (Kinetic Energy)</b>.'+(both?'<br>بينما الكرة الساكنة لم تحرّكه.':''):'الكرة الساكنة لم تحرّك الصندوق. جرّب الآن الكرة المتحركة.',S.mv?'ok':'')}
+ fl();R(bx,198,70,52,'#c98d3a');if(ke)C(x,228,34,'rgba(41,224,194,.2)');C(x,228,22,S.mv?'#29e0c2':'#6b7f9c');
+ if(S.mv&&S.run)T(ke?'KE':'KE → شغل',x,180,15,'#29e0c2',0,M);
+ T(S.mv?'كرة متحركة':'كرة ساكنة',90,300,13,'#8aa3c4');
+ rd([['سرعة الكرة',ke?'v > 0':(S.mv&&S.run==2?'v ≈ 0':(S.mv?'v > 0':'v = 0'))],['حالة الصندوق',u>0&&u<1?'يتحرك':(u>=1?'تحرّك':'ساكن'),u>0?'#ffb454':'']])}},
+
+{n:'الكتلة',t:'2 · مختبر الكتلة',p:'ص 71',g:'السرعة ثابتة (4 m/s). غيّر الكتلة وراقب الطاقة الحركية.',
+tn:'اسأل: ماذا يحدث للطاقة الحركية إذا ضاعفنا الكتلة؟ جرّب 2 ← 4 ← 8.<br>المتوقع: تتضاعف في كل مرة (تناسب طردي مع الكتلة).',
+init:function(){S={m:2,x:0};
+ var i=sl('الكتلة m',1,8,1,2,'kg',function(v){S.m=v;u()});
+ bt('ضاعف الكتلة ×2',function(){S.m=Math.min(8,S.m*2);i.set(S.m);u()},'pri');bt('رجوع إلى 2 kg',function(){S.m=2;i.set(2);u()});
+ function u(){var ke=8*S.m,k=S.m/2;rd([['الكتلة m',S.m+' kg'],['السرعة v (ثابتة)','4 m/s'],['KE = ½ m v²',n(ke)+' J','#29e0c2']]);
+  fb(k==1?'الحالة المرجعية: KE = ½ × 2 × 4² = <b>16 J</b>. غيّر الكتلة وقارن.':'KE = ½ × '+S.m+' × 4² = <b>'+n(ke)+' J</b><br>الكتلة ×'+n(k)+' ⟵ الطاقة الحركية ×'+n(k)+' (تناسب طردي مع الكتلة)','ok')}u()},
+draw:function(dt){S.x=(S.x+160*dt)%900;var w=28+S.m*7,h=w*.75,x=S.x-100,ke=8*S.m;fl();
+ R(x,250-h,w,h,'#c98d3a');T(S.m+' kg',x+w/2,250-h/2+5,13,'#1a1200');A(x+w+4,250-h-14,x+w+64,250-h-14,'#29e0c2');T('v = 4 m/s',x+w+34,250-h-22,12);
+ BAR(40,35,360,16,16,64,'#8aa3c4','مرجع: m = 2 kg','16 J');BAR(40,90,360,16,ke,64,'#29e0c2','الحالة الحالية: m = '+S.m+' kg',n(ke)+' J')}},
+
+{n:'السرعة',t:'3 · مختبر السرعة',p:'ص 71',g:'الكتلة ثابتة (2 kg). غيّر السرعة وقارن بين تغيّر السرعة وتغيّر الطاقة.',
+tn:'اسأل: إذا ضاعفنا السرعة، هل تتضاعف الطاقة؟ ثم جرّب v = 4 (ضعف المرجع).<br>المتوقع: تتضاعف أربع مرات؛ الطاقة تتناسب مع مربع السرعة.',
+init:function(){S={v:2,x:0};
+ var i=sl('السرعة v',1,10,1,2,'m/s',function(v){S.v=v;u()});
+ bt('ضاعف السرعة ×2',function(){S.v=Math.min(10,S.v*2);i.set(S.v);u()},'pri');bt('رجوع إلى 2 m/s',function(){S.v=2;i.set(2);u()});
+ function u(){var k=S.v/2;rd([['الكتلة m (ثابتة)','2 kg'],['السرعة v',S.v+' m/s'],['KE = ½ m v²',n(S.v*S.v)+' J','#ffb454']]);
+  fb(k==1?'الحالة المرجعية: KE = ½ × 2 × 2² = <b>4 J</b>. غيّر السرعة وقارن.':'KE = ½ × 2 × '+S.v+'² = <b>'+n(S.v*S.v)+' J</b><br>السرعة ×'+n(k)+' لكن الطاقة الحركية ×<b>'+n(k*k)+'</b> (مربع '+n(k)+')','ok')}u()},
+draw:function(dt){S.x=(S.x+S.v*30*dt)%900;var x=S.x-100,k=S.v/2;fl();R(x,206,76,44,'#c98d3a');T('2 kg',x+38,234,13,'#1a1200');A(x+80,190,x+80+S.v*6,190,'#29e0c2');T('v = '+S.v+' m/s',x+80+S.v*3,180,12);
+ BAR(40,35,360,16,k,5,'#8aa3c4','السرعة ×'+n(k),'v = '+S.v+' m/s');BAR(40,90,360,16,k*k,25,'#ffb454','الطاقة الحركية ×'+n(k*k)+'  (مربع '+n(k)+')',n(S.v*S.v)+' J')}},
+
+{n:'مثال الكتاب',t:'4 · مثال الكتاب: الفتاة الراكضة',p:'ص 72 · المثال 4',g:'تركض فتاة كتلتها 60 kg بسرعة 5 m/s، احسب طاقتها الحركية. اضغط «الخطوة التالية».',
+tn:'اطلب من الطلاب توقّع كل خطوة قبل ظهورها. ثم غيّر m أو v لتجربة قيم أخرى.<br>الناتج في الكتاب: 750 J.',
+init:function(){S={m:60,v:5,s:0,x:0};var nb;
+ sl('الكتلة m',10,100,5,60,'kg',function(v){S.m=v;S.s=0;sh()});sl('السرعة v',1,10,1,5,'m/s',function(v){S.v=v;S.s=0;sh()});
+ nb=bt('الخطوة التالية ◀',function(){if(S.s<6){S.s++;sh()}},'pri');bt('إعادة العرض',function(){S.s=0;sh()});
+ function sh(){var m=S.m,v=S.v,q=v*v,h=m/2,ke=h*q,Z=[['المعطيات والمطلوب','m = '+m+' kg , v = '+v+' m/s , KE = ?'],['نكتب القانون','KE = ½ m v²'],['نعوّض','KE = ½ × '+m+' × ('+v+')²'],['نحسب مربع السرعة','('+v+')² = '+q+' ⟶ KE = ½ × '+m+' × '+q],['نحسب النصف','½ × '+m+' = '+n(h)+' ⟶ KE = '+n(h)+' × '+q],['الناتج','KE = '+n(ke)+' J']];
+  $('ex').innerHTML=Z.slice(0,S.s).map(function(a,k){return stp(a,k+1)}).join('');nb.disabled=S.s>=6;
+  rd([['m',m+' kg'],['v',v+' m/s'],['KE',S.s>=6?n(ke)+' J':'؟','#29e0c2']]);
+  fb(S.s>=6?'الطاقة الحركية = <b>'+n(ke)+' J</b>'+(m==60&&v==5?' ✔ وهو ناتج الكتاب (750 J).':'.'):'الخطوة '+S.s+' من 6'+(S.s?'':' — اضغط «الخطوة التالية».'),S.s>=6?'ok':'')}sh()},
+draw:function(dt){S.x=(S.x+S.v*25*dt)%900;var x=S.x-60,a=Math.sin(S.x/14);fl();
+ L(x,200,x+32*a,246,'#e6f1ff',5);L(x,200,x-32*a,246,'#e6f1ff',5);L(x,200,x+6,160,'#29e0c2',6);L(x+6,168,x-22*a,194,'#e6f1ff',4);L(x+6,168,x+22*a,194,'#e6f1ff',4);C(x+10,148,13,'#ffd9b0');
+ for(var i=1;i<4;i++)L(x-40-i*14,170+i*14,x-70-i*14-S.v*3,170+i*14,'rgba(138,163,196,.5)',2);
+ A(x+30,126,x+30+S.v*8,126,'#29e0c2');T('v = '+S.v+' m/s',x+30+S.v*4,114,13);T('m = '+S.m+' kg',x+10,290,14,'#ffb454')}},
+
+{n:'الشغل والطاقة',t:'5 · مختبر الشغل والطاقة',p:'ص 72–73',g:'صندوق ساكن على سطح أفقي أملس. اختر القوة F والإزاحة d ثم اضغط «طبّق القوة».',
+tn:'جرّب F = 5 N ثم F = 10 N مع d = 2 m (كما في الشكل 4). اسأل: ماذا حدث للشغل وللتغير في الطاقة الحركية؟<br>المتوقع: W = F·d يتضاعف، والتغير في الطاقة الحركية يتضاعف بنفس المقدار (ΔKE = W).',
+init:function(){S={F:5,d:2,run:0,t:0,log:[]};
+ var a=sl('القوة F',1,20,1,5,'N',function(v){S.F=v;S.run=0;rs()});sl('الإزاحة d',1,5,.5,2,'m',function(v){S.d=v;S.run=0;rs()});
+ bt('طبّق القوة ▶',function(){S.run=1;S.t=0;fb('...')},'pri');bt('ضاعف القوة ×2 وطبّق',function(){S.F=Math.min(20,S.F*2);a.set(S.F);S.run=1;S.t=0;fb('...')});bt('مسح السجل',function(){S.log=[];tb()});
+ function rs(){fb('اضغط «طبّق القوة» وراقب الشغل والطاقة الحركية.')}rs();tb()},
+draw:function(dt){var F=S.F,d=S.d,sx=100,px=70,p=0;
+ if(S.run){S.t+=dt;p=Math.min(1,S.t/1.8);if(p>=1&&S.run==1)fin();if(S.run==2)p=1}
+ function fin(){S.run=2;S.log.push({F:F,d:d});var o=S.log[S.log.length-2],h='W = F × d = '+F+' × '+d+' = <b>'+n(F*d)+' J</b> ⟵ ΔKE = W = <b>'+n(F*d)+' J</b>';
+  if(o&&o.d==d&&o.F!=F)h+='<br>القوة ×'+n(F/o.F)+' مع ثبات الإزاحة ⟵ الشغل ×'+n(F/o.F)+' ⟵ التغير في الطاقة الحركية ×'+n(F/o.F);fb(h,'ok');tb()}
+ var q=p*p,bx=sx+d*px*q,w=F*d*q;fl();T('سطح أفقي أملس (لا احتكاك)',690,300,12,'#8aa3c4');
+ R(sx,198,70,52,'rgba(201,141,58,.22)');R(bx,198,70,52,'#c98d3a');var len=Math.min(110,F*5);A(bx-6-len,224,bx-6,224,'#ff9b54',4);T('F = '+F+' N',bx-6-len/2,212,13,'#ff9b54');
+ if(q>.01){A(sx+35,276,bx+35,276,'#29e0c2');T('d = '+n(d*q)+' m',(sx+bx)/2+35,294,13,'#29e0c2')}
+ BAR(40,30,360,16,w,100,'#29e0c2','ΔKE: الطاقة الحركية المكتسبة',n(w)+' J');BAR(40,84,360,16,F*d,100,'#ffb454','W = F × d: الشغل المبذول',n(F*d)+' J');
+ rd([['القوة F',F+' N'],['الإزاحة d',d+' m'],['W = F × d',n(F*d)+' J','#ffb454'],['ΔKE الآن',n(w)+' J','#29e0c2']])}},
+
+{n:'الشغل السالب',t:'6 · الشغل السالب',p:'ص 73',g:'كرة تتحرك على سطح. قارن بين السطح الخشن والأملس، وراقب الطاقة الحركية.',
+tn:'اسأل: لماذا تتوقف كرة القدم بعد مسافة؟ ما اتجاه قوة الاحتكاك بالنسبة للحركة؟<br>المتوقع: عكس الحركة ← شغل سالب ← تنقص الطاقة الحركية وتتحول إلى طاقة حرارية. ثم جرّب السطح الأملس.',
+init:function(){S={v:6,r:1,run:0,t:0};var b1,b2;
+ sl('السرعة الابتدائية',2,10,1,6,'m/s',function(v){S.v=v;S.run=0;S.t=0;rs()});
+ function sr(r){S.r=r;b1.className='btn'+(r?' pri':'');b2.className='btn'+(r?'':' pri');S.run=0;S.t=0;rs()}
+ b1=bt('سطح خشن',function(){sr(1)},'pri');b2=bt('سطح أملس',function(){sr(0)});bt('أطلق الكرة ▶',function(){S.run=1;S.t=0;fb('...')},'pri');
+ function rs(){fb(S.r?'سطح خشن: اضغط «أطلق الكرة» وراقب قوة الاحتكاك والطاقة الحركية.':'سطح أملس: لا توجد قوة احتكاك. توقّع ما سيحدث ثم أطلق الكرة.')}rs()},
+draw:function(dt){var v0=S.v,a=5,px=55,sx=70,ts=0,v=v0,x=0,tm=v0/a;
+ if(S.run){S.t+=dt;ts=S.t*.6}
+ if(S.r){var t2=Math.min(ts,tm);v=v0-a*t2;x=v0*t2-.5*a*t2*t2;if(ts>=tm&&S.run==1)fin()}
+ else{x=v0*ts;if(sx+x*px>740){x=(740-sx)/px;if(S.run==1)fin()}}
+ function fin(){S.run=2;fb(S.r?'الاحتكاك عكس اتجاه الحركة، فبذل شغلًا <b>سالبًا</b> ⟵ نقصت الطاقة الحركية من '+n(.2*v0*v0)+' J إلى 0 ⟵ تحوّلت إلى طاقة حرارية.':'لا احتكاك ⟵ لا شغل ⟵ الطاقة الحركية ثابتة (ΔKE = 0) والكرة تواصل حركتها بالسرعة نفسها.','ok')}
+ var ke=.2*v*v,k0=.2*v0*v0,dk=ke-k0,bx=sx+x*px;fl();
+ if(S.r)for(var i=0;i<W;i+=14)L(i,250,i+7,258,'#5a6f93',1.5);
+ C(bx,228,22,'#e6f1ff');var g=x*px/22;L(bx,228,bx+22*Math.cos(g),228+22*Math.sin(g),'#0a1428',3);L(bx,228,bx-22*Math.cos(g),228-22*Math.sin(g),'#0a1428',3);
+ if(v>.05){A(bx,186,bx+24+v*6,186,'#29e0c2');T('اتجاه الحركة',bx+12+v*3,174,12,'#29e0c2')}
+ if(S.r&&v>.05){A(bx+12,268,bx-48,268,'#ff6b7a',4);T('قوة الاحتكاك',bx-18,288,12,'#ff6b7a')}
+ BAR(40,30,360,16,ke,20,'#29e0c2','الطاقة الحركية KE',n(ke)+' J');BAR(40,84,360,16,k0-ke,20,'#ff9b54','طاقة حرارية ناتجة عن الاحتكاك',n(k0-ke)+' J');
+ rd([['كتلة الكرة','0.4 kg'],['KE الآن',n(ke)+' J','#29e0c2'],['ΔKE = KE₂ − KE₁',sg(dk),dk<-.005?'#ff6b7a':''],['شغل الاحتكاك',S.r?sg(dk):'0 J',S.r&&dk<-.005?'#ff6b7a':'']])}},
+
+{n:'البندول',t:'7 · تجربة البندول',p:'ص 74 · التجربة 1',g:'ارفع الكرة إلى ارتفاع h ثم اتركها. غيّر الارتفاع والكتلة وسجّل مسافة حركة الصندوق.',
+tn:'اتبع خطوات الكتاب: كرّر بارتفاعات مختلفة ثم بكتلة مختلفة. السجل يجمع النتائج.<br>أسئلة: ماذا تختزن الكرة عند رفعها؟ ماذا يحدث لهذه الطاقة عند الإفلات؟ ما أثر زيادة الارتفاع؟ وما أثر زيادة الكتلة؟ (المحاكاة مثالية بإهمال الفقد.)',
+init:function(){S={h:30,m:.2,run:0,t:0,log:[]};
+ sl('ارتفاع الكرة h',5,40,5,30,'cm',function(v){S.h=v;S.run=0;S.t=0;rs()});sl('كتلة الكرة',.1,.5,.1,.2,'kg',function(v){S.m=v;S.run=0;S.t=0;rs()});
+ bt('اترك الكرة ▶',function(){S.run=1;S.t=0;fb('...')},'pri');bt('إعادة الوضع',function(){S.run=0;S.t=0;rs()});bt('مسح السجل',function(){S.log=[];tb()});
+ function rs(){fb('ارفع الكرة ثم اضغط «اترك الكرة» وراقب انتقال الطاقة.')}rs();tb()},
+draw:function(dt){var Lp=170,p0=250,y0=60,E=S.m*S.h,th=Math.PI/2/2.2,t=S.t,ph=0,u=0,ang=-Math.acos(1-S.h/50),ke,pe,wk;
+ if(S.run){S.t+=dt;t=S.t}
+ if(S.run){if(t<th){ang=-Math.acos(1-S.h/50)*Math.cos(2.2*t);ph=1}else{ang=0;u=Math.min(1,(t-th)/1.3);ph=(t-th<.25)?2:3;if(u>=1&&S.run==1)fin()}}
+ function fin(){S.run=2;var d=E*10,o=S.log[S.log.length-1],h='الكرة المرفوعة اختزنت طاقة وضع ⟵ عند إفلاتها تحوّلت إلى طاقة حركية ⟵ اصطدمت بالصندوق وبذلت عليه شغلًا ⟵ تحرّك الصندوق <b>'+n(d)+' cm</b>.';
+  if(o&&o.m==S.m&&S.h>o.h)h+='<br>رفعتَ الكرة أعلى ⟵ طاقة أكبر ⟵ شغل أكبر ⟵ مسافة أكبر.';if(o&&o.h==S.h&&S.m>o.m)h+='<br>كتلة أكبر ⟵ طاقة أكبر ⟵ شغل أكبر ⟵ مسافة أكبر.';S.log.push({h:S.h,m:S.m,d:d});fb(h,'ok');tb()}
+ if(S.run==2)ph=3,u=1;
+ var hc=50*(1-Math.cos(ang)),eu=1-(1-u)*(1-u);
+ if(ph<2){pe=S.m*hc;ke=E-pe;wk=0}else{pe=0;ke=E*(1-u)*(1-u);wk=E*eu}
+ var bx=p0+Lp*Math.sin(ang),by=y0+Lp*Math.cos(ang);fl();R(150,36,200,7,'#3b5a8f');
+ R(264+20*E*eu,210,60,40,'#c98d3a');L(p0,y0,bx,by,'#8aa3c4',2);C(p0,y0,4,'#8aa3c4');C(bx,by,14,'#cfe3ff');T('h = '+n(hc)+' cm',bx-(ang<0?44:0),by-24,12,'#ffb454');
+ BAR(440,30,320,14,pe,20,'#ffb454','طاقة الوضع (الجاذبية)',n(pe));BAR(440,78,320,14,ke,20,'#29e0c2','الطاقة الحركية',n(ke));BAR(440,126,320,14,wk,20,'#ff9b54','شغل بُذل على الصندوق',n(wk));
+ ['① طاقة وضع','② تتحول إلى حركية','③ اصطدام: شغل على الصندوق','④ الصندوق يتحرك'].forEach(function(s,i){var on=i==ph;R(20+i*195,274,185,30,on?'#29e0c2':'#16294d');T(s,112+i*195,294,12,on?'#04221d':'#8aa3c4')});
+ rd([['ارتفاع الكرة h',S.h+' cm'],['كتلة الكرة',S.m+' kg'],['المسافة المتوقعة للصندوق',n(E*10)+' cm','#ffb454']])}}
+];
+function tb(){var l=S.log||[],ex=$('ex');if(cur==4)ex.innerHTML=l.length?'<table class="lg"><tr><th>المحاولة<th>F (N)<th>d (m)<th>W = F × d (J)<th>ΔKE (J)</tr>'+l.slice(-5).map(function(r,i){return'<tr><td>'+(l.length-Math.min(5,l.length)+i+1)+'<td>'+r.F+'<td>'+r.d+'<td>'+n(r.F*r.d)+'<td>'+n(r.F*r.d)+'</tr>'}).join('')+'</table>':'';
+ if(cur==6)ex.innerHTML=l.length?'<table class="lg"><tr><th>المحاولة<th>h (cm)<th>كتلة الكرة (kg)<th>مسافة الصندوق (cm)</tr>'+l.slice(-5).map(function(r,i){return'<tr><td>'+(l.length-Math.min(5,l.length)+i+1)+'<td>'+r.h+'<td>'+r.m+'<td>'+n(r.d)+'</tr>'}).join('')+'</table>':''}
+function go(i){cur=Math.max(0,Math.min(ST.length-1,i));var s=ST[cur];S={};rdc='';$('ctl').innerHTML='';$('ex').innerHTML='';$('rd').innerHTML='';
+ $('ttl').textContent=s.t;$('goal').textContent=s.g;$('pg').textContent=s.p+' · '+(cur+1)+' / '+ST.length;$('tn').innerHTML='<b>ملاحظات المعلم:</b><br>'+s.tn;
+ Array.prototype.forEach.call($('nv').children,function(b,k){b.className='btn'+(k==cur?' on':'')});$('pv').disabled=!cur;$('nx').disabled=cur==ST.length-1;s.init()}
+ST.forEach(function(s,i){var b=document.createElement('button');b.textContent=(i+1)+' · '+s.n;b.onclick=function(){go(i)};$('nv').append(b)});
+$('pv').onclick=function(){go(cur-1)};$('nx').onclick=function(){go(cur+1)};
+$('tmb').onclick=function(){document.body.classList.toggle('tm')};$('bgb').onclick=function(){document.body.classList.toggle('big')};$('slb').onclick=function(){slow=!slow;this.className='btn'+(slow?' on':'')};
+document.onkeydown=function(e){if(e.target.tagName=='INPUT')return;if(e.key=='ArrowLeft')go(cur+1);if(e.key=='ArrowRight')go(cur-1)};
+requestAnimationFrame(function f(ts){var dt=Math.min(.05,(ts-last)/1000||0)*(slow?.4:1);last=ts;c.clearRect(0,0,W,320);ST[cur].draw(dt);requestAnimationFrame(f)});
+go(0);
+</script></body></html>
